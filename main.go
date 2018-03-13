@@ -12,8 +12,6 @@ import (
 	"strings"
 )
 
-var jiraClient *jira.Client
-
 func main() {
 	log.SetLevel(log.DebugLevel)
 	log.Debug("Run Jira Stats ...")
@@ -30,9 +28,9 @@ func main() {
 	fmt.Println("")
 
 	// init Jira client
-	initJiraClient(username, password)
-	//jiraExampleTicket()
-	jiraExampleSearch()
+	jiraClient := initJiraClient(username, password)
+	//jiraExampleTicket(jiraClient)
+	jiraExampleSearch(jiraClient)
 	log.Debug("Stopping Jira Stats ... Goodbye!")
 }
 
@@ -58,8 +56,8 @@ func jiraExampleProjects() {
 	}
 }
 
-func jiraExampleTicket() {
-	issue, response, err := jiraClient.Issue.Get("CORE-1674", nil)
+func jiraExampleTicket(client *jira.Client) {
+	issue, response, err := client.Issue.Get("CORE-1674", nil)
 
 	if err != nil {
 		log.Errorf("Error: %s", err.Error())
@@ -74,25 +72,26 @@ func jiraExampleTicket() {
 	log.Debugf("Priority: %s\n", issue.Fields.Priority.Name)
 }
 
-func initJiraClient(username string, password string) {
+func initJiraClient(username string, password string) *jira.Client {
 	username = strings.TrimSpace(username)
 	password = strings.TrimSpace(password)
 
-	jiraClient, _ = jira.NewClient(nil, "https://jira.home24.de")
+	jiraClient, _ := jira.NewClient(nil, "https://jira.home24.de")
 	jiraClient.Authentication.SetBasicAuth(username, password)
+	return jiraClient
 }
 
-func jiraExampleSearch() {
-	search := JiraSearchRequest{
+func jiraExampleSearch(client *jira.Client) {
+	search := SearchRequest{
 		Jql: "project = CORE",
 		StartAt: 0,
 		MaxResults: 1,
 	}
 
-	result := new(JiraSearchResponse)
+	result := new(SearchResponse)
 
-	req, _ := jiraClient.NewRequest("POST", "/rest/api/2/search", search)
-	_, err := jiraClient.Do(req, result)
+	req, _ := client.NewRequest("POST", "/rest/api/2/search", search)
+	_, err := client.Do(req, result)
 	if err != nil {
 		log.Error(err)
 		return
@@ -105,13 +104,13 @@ func jiraExampleSearch() {
 	//printBody(response.Body)
 }
 
-type JiraSearchRequest struct {
+type SearchRequest struct {
 	Jql string `json:"jql"`
 	StartAt int `json:"startAt"`
 	MaxResults int `json:"maxResults"`
 }
 
-type JiraSearchResponse struct {
+type SearchResponse struct {
 	Total int `json:"total"`
 	Issues []jira.Issue `json:"issues"`
 }
