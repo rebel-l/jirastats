@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/andygrunwald/go-jira"
+	"github.com/rebel-l/jirastats/server/jira/search"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"os"
@@ -82,35 +83,23 @@ func initJiraClient(username string, password string) *jira.Client {
 }
 
 func jiraExampleSearch(client *jira.Client) {
-	search := SearchRequest{
+	searchRequest := search.Request{
 		Jql: "project = CORE",
 		StartAt: 0,
 		MaxResults: 1,
 	}
 
-	result := new(SearchResponse)
+	searchResponse := new(search.Response)
 
-	req, _ := client.NewRequest("POST", "/rest/api/2/search", search)
-	_, err := client.Do(req, result)
+	req, _ := client.NewRequest("POST", "/rest/api/2/search", searchRequest)
+	_, err := client.Do(req, searchResponse)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	log.Debugf("Total: %d", result.Total)
-	for _,v := range result.Issues {
+	log.Debugf("Total: %d", searchResponse.Total)
+	for _,v := range searchResponse.Issues {
 		log.Debugf("Issue: %s", v.Key)
 	}
-	//printBody(response.Body)
-}
-
-type SearchRequest struct {
-	Jql string `json:"jql"`
-	StartAt int `json:"startAt"`
-	MaxResults int `json:"maxResults"`
-}
-
-type SearchResponse struct {
-	Total int `json:"total"`
-	Issues []jira.Issue `json:"issues"`
 }
