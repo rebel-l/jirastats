@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/andygrunwald/go-jira"
+	jiraSearch "github.com/rebel-l/jirastats/server/jira"
 	"github.com/rebel-l/jirastats/server/jira/search"
 	log "github.com/sirupsen/logrus"
 	"io"
@@ -31,7 +32,9 @@ func main() {
 	// init Jira client
 	jiraClient := initJiraClient(username, password)
 	//jiraExampleTicket(jiraClient)
-	jiraExampleSearch(jiraClient)
+	//jiraExampleSearch(jiraClient)
+	jiraSearch := jiraSearch.NewSearch(jiraClient)
+	jiraSearch.Do()
 	log.Debug("Stopping Jira Stats ... Goodbye!")
 }
 
@@ -80,26 +83,4 @@ func initJiraClient(username string, password string) *jira.Client {
 	jiraClient, _ := jira.NewClient(nil, "https://jira.home24.de")
 	jiraClient.Authentication.SetBasicAuth(username, password)
 	return jiraClient
-}
-
-func jiraExampleSearch(client *jira.Client) {
-	searchRequest := search.Request{
-		Jql: "project = CORE",
-		StartAt: 0,
-		MaxResults: 1,
-	}
-
-	searchResponse := new(search.Response)
-
-	req, _ := client.NewRequest("POST", "/rest/api/2/search", searchRequest)
-	_, err := client.Do(req, searchResponse)
-	if err != nil {
-		log.Error(err)
-		return
-	}
-
-	log.Debugf("Total: %d", searchResponse.Total)
-	for _,v := range searchResponse.Issues {
-		log.Debugf("Issue: %s", v.Key)
-	}
 }
