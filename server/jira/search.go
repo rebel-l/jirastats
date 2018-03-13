@@ -16,12 +16,8 @@ func NewSearch(client *jira.Client) *Search {
 	return search
 }
 
-func (s *Search) Do() {
-	searchRequest := search.Request{
-		Jql: "project = CORE",
-		StartAt: 0,
-		MaxResults: 1,
-	}
+func (s *Search) Do(jql string) {
+	searchRequest := search.NewRequest(jql)
 
 	searchResponse := new(search.Response)
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/andygrunwald/go-jira"
 	jiraSearch "github.com/rebel-l/jirastats/server/jira"
-	"github.com/rebel-l/jirastats/server/jira/search"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"os"
@@ -34,7 +33,7 @@ func main() {
 	//jiraExampleTicket(jiraClient)
 	//jiraExampleSearch(jiraClient)
 	jiraSearch := jiraSearch.NewSearch(jiraClient)
-	jiraSearch.Do()
+	jiraSearch.Do("project = CORE")
 	log.Debug("Stopping Jira Stats ... Goodbye!")
 }
 
