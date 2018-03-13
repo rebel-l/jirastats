@@ -1,0 +1,8 @@
+package: github.com/rebel-l/jirastats
+import:
+- package: github.com/andygrunwald/go-jira
+  version: ^1.0.0
+- package: github.com/fatih/structs
+  version: ^1.0.0
+- package: github.com/sirupsen/logrus
+  version: ^1.0.5

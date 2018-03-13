@@ -1,0 +1,19 @@
+hash: 3dc79ead2ccd723a638d07f9f27a6d734218ec7c372f02b60448049e26483cf9
+updated: 2018-03-13T16:00:34.186473473+01:00
+imports:
+- name: github.com/andygrunwald/go-jira
+  version: acbc88d59582a4885dbd82fd775caa7c15245171
+- name: github.com/fatih/structs
+  version: a720dfa8df582c51dee1b36feabb906bde1588bd
+- name: github.com/google/go-querystring
+  version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
+  subpackages:
+  - query
+- name: github.com/sirupsen/logrus
+  version: c155da19408a8799da419ed3eeb0cb5db0ad5dbc
+- name: github.com/trivago/tgo
+  version: e4d1ddd28c17dd89ed26327cf69fded22060671b
+  subpackages:
+  - tcontainer
+  - treflect
+testImports: []
