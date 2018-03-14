@@ -1,5 +1,5 @@
-hash: 3dc79ead2ccd723a638d07f9f27a6d734218ec7c372f02b60448049e26483cf9
-updated: 2018-03-13T16:00:34.186473473+01:00
+hash: b4a74cd0e5fb3ca40ccb21d88b4d3f5d8d6feff2af3b31ead22b0ff3c0ccb53d
+updated: 2018-03-14T18:11:54.461891266+01:00
 imports:
 - name: github.com/andygrunwald/go-jira
   version: acbc88d59582a4885dbd82fd775caa7c15245171
@@ -9,6 +9,8 @@ imports:
   version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
   subpackages:
   - query
+- name: github.com/mattn/go-sqlite3
+  version: 6c771bb9887719704b210e87e934f08be014bdb1
 - name: github.com/sirupsen/logrus
   version: c155da19408a8799da419ed3eeb0cb5db0ad5dbc
 - name: github.com/trivago/tgo
@@ -16,4 +18,13 @@ imports:
   subpackages:
   - tcontainer
   - treflect
+- name: golang.org/x/crypto
+  version: c4a91bd4f524f10d064139674cf55852e055ad01
+  subpackages:
+  - ssh/terminal
+- name: golang.org/x/sys
+  version: 932fb2287bee613f2a65e71685c9d9c0020da979
+  subpackages:
+  - unix
+  - windows
 testImports: []
