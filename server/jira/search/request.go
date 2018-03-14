@@ -11,7 +11,7 @@ func NewRequest(jql string) *Request {
 	req := new(Request)
 	req.Jql = jql
 	req.StartAt = 0
-	req.MaxResults = 1
+	req.MaxResults = 10
 
 	fields := make([]string, 2)
 	fields[0] = "summary"

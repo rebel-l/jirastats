@@ -16,13 +16,13 @@ func NewSearch(client *jira.Client) *Search {
 	return search
 }
 
-func (s *Search) Do(jql string) {
+func (s *Search) Do(jql string) (result []jira.Issue, err error) {
 	searchRequest := search.NewRequest(jql)
 
 	searchResponse := new(search.Response)
 
 	req, _ := s.client.NewRequest("POST", "/rest/api/2/search", searchRequest)
-	_, err := s.client.Do(req, searchResponse)
+	_, err = s.client.Do(req, searchResponse)
 	if err != nil {
 		log.Error(err)
 		return
@@ -32,4 +32,7 @@ func (s *Search) Do(jql string) {
 	for _,v := range searchResponse.Issues {
 		log.Debugf("Issue: %s", v.Key)
 	}
+
+	result = searchResponse.Issues
+	return
 }

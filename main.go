@@ -1,39 +1,39 @@
 package main
 
 import (
-	"bufio"
+	//"bufio"
 	"fmt"
 	"github.com/andygrunwald/go-jira"
-	jiraSearch "github.com/rebel-l/jirastats/server/jira"
+	//jiraSearch "github.com/rebel-l/jirastats/server/jira"
 	log "github.com/sirupsen/logrus"
 	"io"
-	"os"
-	"golang.org/x/crypto/ssh/terminal"
-	"syscall"
+	//"os"
+	//"golang.org/x/crypto/ssh/terminal"
+	//"syscall"
 	"strings"
 )
 
 func main() {
 	log.SetLevel(log.DebugLevel)
-	log.Debug("Run Jira Stats ...")
-
-	// get credentials
-	r := bufio.NewReader(os.Stdin)
-	fmt.Println("")
-	fmt.Print("Jira Username: ")
-	username, _ := r.ReadString('\n')
-	fmt.Print("Jira Password: ")
-	bytePassword, _ := terminal.ReadPassword(int(syscall.Stdin))
-	password := string(bytePassword)
-	fmt.Println("")
-	fmt.Println("")
+	//log.Debug("Run Jira Stats ...")
+	//
+	//// get credentials
+	//r := bufio.NewReader(os.Stdin)
+	//fmt.Println("")
+	//fmt.Print("Jira Username: ")
+	//username, _ := r.ReadString('\n')
+	//fmt.Print("Jira Password: ")
+	//bytePassword, _ := terminal.ReadPassword(int(syscall.Stdin))
+	//password := string(bytePassword)
+	//fmt.Println("")
+	//fmt.Println("")
 
 	// init Jira client
-	jiraClient := initJiraClient(username, password)
+	//jiraClient := initJiraClient(username, password)
 	//jiraExampleTicket(jiraClient)
 	//jiraExampleSearch(jiraClient)
-	jiraSearch := jiraSearch.NewSearch(jiraClient)
-	jiraSearch.Do("project = CORE")
+	//jiraSearch := jiraSearch.NewSearch(jiraClient)
+	//jiraSearch.Do("project = CORE")
 	log.Debug("Stopping Jira Stats ... Goodbye!")
 }
 
