@@ -2,7 +2,7 @@
 CURRENT_PATH=`pwd`
 
 install(){
-    TOOL_PATH=$CURRENT_PATH/jirastats-$1
+    TOOL_PATH=$CURRENT_PATH/tools/jirastats-$1
 
     echo "Build $1 ... path: $TOOL_PATH"
     cd $TOOL_PATH
@@ -18,8 +18,8 @@ echo "Actual path: $CURRENT_PATH"
 echo
 
 install collector
-install setup
 install server
+install setup
 
 cd $CURRENT_PATH
 echo
