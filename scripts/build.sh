@@ -26,5 +26,3 @@ echo
 echo -en "\033[40;32m\033[1mJira Stats build successful :-)\033[0m"
 echo
 echo
-
-
