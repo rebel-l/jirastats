@@ -3,9 +3,13 @@ package main
 import (
 	_ "github.com/mattn/go-sqlite3"
 	"database/sql"
+	"github.com/gorilla/mux"
 	"github.com/rebel-l/jirastats/packages/database"
 	"github.com/rebel-l/jirastats/packages/utils"
+	"github.com/rebel-l/jirastats/tools/jirastats-setup/endpoints"
 	log "github.com/sirupsen/logrus"
+	"net/http"
+	"strconv"
 )
 
 const PORT = 3000
@@ -14,17 +18,18 @@ func main() {
 	log.SetLevel(log.DebugLevel)
 	log.Infof("Run server on Port %d ...", PORT)
 
+	// Init database
 	db, err := sql.Open(database.DefaultDriver, database.DefaultFile)
 	defer db.Close()
 	utils.HandleUnrecoverableError(err)
 
-	tm := database.NewTicketMapper(db)
-	tickets, err := tm.Load()
+	// Init router
+	router := mux.NewRouter()
+
+	// Init Endpoints
+	_ = endpoints.NewDataTickets(db, router)
+
+	// start server
+	err = http.ListenAndServe(":" + strconv.Itoa(PORT), router)
 	utils.HandleUnrecoverableError(err)
-	log.Debugf("Number of results: %d", len(tickets))
-	for _, v := range tickets {
-		log.Infof("TicketId: %d with Key: %s", v.Id, v.Key)
-	}
 }
-
-
