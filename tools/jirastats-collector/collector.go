@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/andygrunwald/go-jira"
-	jiraSearch "github.com/rebel-l/jirastats/server/jira"
+	jiraSearch "github.com/rebel-l/jirastats/packages/jira"
 	"os"
 	"fmt"
 	"golang.org/x/crypto/ssh/terminal"

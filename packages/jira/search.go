@@ -2,7 +2,7 @@ package jira
 
 import (
 	"github.com/andygrunwald/go-jira"
-	"github.com/rebel-l/jirastats/server/jira/search"
+	"github.com/rebel-l/jirastats/packages/jira/search"
 	log "github.com/sirupsen/logrus"
 )
 

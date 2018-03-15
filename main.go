@@ -4,7 +4,7 @@ import (
 	//"bufio"
 	"fmt"
 	"github.com/andygrunwald/go-jira"
-	//jiraSearch "github.com/rebel-l/jirastats/server/jira"
+	//jiraSearch "github.com/rebel-l/jirastats/packages/jira"
 	log "github.com/sirupsen/logrus"
 	"io"
 	//"os"
