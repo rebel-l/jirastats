@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/rebel-l/jirastats/packages/utils"
 	"io/ioutil"
 	log "github.com/sirupsen/logrus"
 	"os"
@@ -21,33 +22,26 @@ func main() {
 	log.Info("Setup finished successful ... Goodbye!")
 }
 
-func handleUnrecoverableError(err error) {
-	if err != nil {
-		log.Errorf("Unrecoverable error appeard: %s", err.Error())
-		log.Panic("Setup failed ... Goodbye!")
-	}
-}
-
 func createDatabaseFile() {
 	_, err := os.Stat(DEFAULT_DB_PATH)
 	if err != nil {
 		log.Warnf("Database file '%s' does not exist and will be created", DEFAULT_DB_PATH)
 		_, err = os.Create(DEFAULT_DB_PATH)
-		handleUnrecoverableError(err)
+		utils.HandleUnrecoverableError(err)
 	}
 }
 
 func createDatabaseStructure() {
 	statements, err := ioutil.ReadFile(SQL_SETUP_SCRIPT)
-	handleUnrecoverableError(err)
+	utils.HandleUnrecoverableError(err)
 
 	db, err := sql.Open("sqlite3", "./storage/jirastats.db")
 	defer db.Close()
-	handleUnrecoverableError(err)
+	utils.HandleUnrecoverableError(err)
 
 	stmt, err := db.Prepare(string(statements))
-	handleUnrecoverableError(err)
+	utils.HandleUnrecoverableError(err)
 
 	_, err = stmt.Exec()
-	handleUnrecoverableError(err)
+	utils.HandleUnrecoverableError(err)
 }
