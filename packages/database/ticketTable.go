@@ -5,9 +5,9 @@ import (
 	"fmt"
 )
 
-const SelectAllStatement = "SELECT * FROM %s"
 const TicketTableName = "ticket"
 
+// TicektTable represents the database table for tickets
 type TicketTable struct {
 	db *sql.DB
 }
@@ -34,4 +34,13 @@ func (t *TicketTable) getStatement(statement string) string {
 
 func (t *TicketTable) getSelectAllStatement() string {
 	return t.getStatement(SelectAllStatement)
+}
+
+func (t *TicketTable) Truncate() (err error) {
+	stmt, err := t.db.Prepare(t.getStatement(TruncateTable))
+	if err != nil {
+		return
+	}
+	_, err = stmt.Exec()
+	return
 }

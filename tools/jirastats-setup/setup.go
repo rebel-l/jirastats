@@ -1,11 +1,13 @@
 package main
 
 import (
+	"flag"
 	"github.com/rebel-l/jirastats/packages/database"
 	"github.com/rebel-l/jirastats/packages/utils"
 	"io/ioutil"
 	log "github.com/sirupsen/logrus"
 	"os"
+	"github.com/rebel-l/jirastats/tools/jirastats-setup/commands"
 )
 
 const DEFAULT_DB_PATH = "./storage/jirastats.db"
@@ -15,10 +17,29 @@ func main() {
 	log.SetLevel(log.DebugLevel)
 	log.Info("Run setup ...")
 
-	createDatabaseFile()
-	createDatabaseStructure()
+	resetStats := flag.Bool("resetstats", false, "To reset all stats. !Be careful, there is no recovery!")
+	flag.Parse()
+
+	if *resetStats == true {
+		doResetStats()
+	} else {
+		createDatabaseFile()
+		createDatabaseStructure()
+	}
 
 	log.Info("Setup finished successful ... Goodbye!")
+}
+
+func doResetStats() {
+	db, err := database.GetDbConnection()
+	defer db.Close()
+	utils.HandleUnrecoverableError(err)
+
+	rsc := commands.NewResetStats(db)
+	err = rsc.Execute()
+	if err != nil {
+		log.Errorf("Stats couldn't be resetted: %s", err.Error())
+	}
 }
 
 func createDatabaseFile() {
