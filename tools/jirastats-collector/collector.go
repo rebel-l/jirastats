@@ -2,16 +2,16 @@ package main
 
 import (
 	"bufio"
-	"database/sql"
-	log "github.com/sirupsen/logrus"
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/andygrunwald/go-jira"
-	jiraSearch "github.com/rebel-l/jirastats/packages/jira"
-	"os"
 	"fmt"
+	"github.com/andygrunwald/go-jira"
+	"github.com/rebel-l/jirastats/packages/database"
+	jiraSearch "github.com/rebel-l/jirastats/packages/jira"
 	"golang.org/x/crypto/ssh/terminal"
+	log "github.com/sirupsen/logrus"
+	"os"
 	"syscall"
 	"strings"
+	"database/sql"
 )
 
 const StatementInsertTicket = "INSERT INTO ticket(`key`) values(?)"
@@ -21,7 +21,7 @@ func main() {
 	log.SetLevel(log.DebugLevel)
 	log.Info("Run collector ...")
 
-	db, err := sql.Open("sqlite3", "./storage/jirastats.db")
+	db, err := database.GetDbConnection()
 	defer db.Close()
 	handleUnrecoverableError(err)
 

@@ -1,8 +1,7 @@
 package main
 
 import (
-	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/rebel-l/jirastats/packages/database"
 	"github.com/rebel-l/jirastats/packages/utils"
 	"io/ioutil"
 	log "github.com/sirupsen/logrus"
@@ -35,7 +34,7 @@ func createDatabaseStructure() {
 	statements, err := ioutil.ReadFile(SQL_SETUP_SCRIPT)
 	utils.HandleUnrecoverableError(err)
 
-	db, err := sql.Open("sqlite3", "./storage/jirastats.db")
+	db, err := database.GetDbConnection()
 	defer db.Close()
 	utils.HandleUnrecoverableError(err)
 

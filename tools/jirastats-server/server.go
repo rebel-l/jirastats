@@ -1,8 +1,6 @@
 package main
 
 import (
-	_ "github.com/mattn/go-sqlite3"
-	"database/sql"
 	"github.com/gorilla/mux"
 	"github.com/rebel-l/jirastats/packages/database"
 	"github.com/rebel-l/jirastats/packages/utils"
@@ -19,7 +17,7 @@ func main() {
 	log.Infof("Run server on Port %d ...", PORT)
 
 	// Init database
-	db, err := sql.Open(database.DefaultDriver, database.DefaultFile)
+	db, err := database.GetDbConnection()
 	defer db.Close()
 	utils.HandleUnrecoverableError(err)
 
