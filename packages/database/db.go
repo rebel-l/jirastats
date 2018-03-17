@@ -7,6 +7,6 @@ import (
 
 // GetDbConncection returns a db connection
 func GetDbConnection() (db *sql.DB, err error) {
-	db, err = sql.Open(DefaultDriver, DefaultFile)
+	db, err = sql.Open(DefaultDriver, DefaultStorageFile)
 	return
 }

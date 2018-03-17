@@ -1,6 +1,7 @@
 package database
 
-const DefaultFile  = "./storage/jirastats.db"
+const DefaultStoragePath = "./storage"
+const DefaultStorageFile = DefaultStoragePath + "/jirastats.db"
 const DefaultDriver = "sqlite3"
 
 // SQL statements
