@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 )
 
+const SQL_SETUP_SCRIPT = "./setup/setup.sql"
+
 type DatabaseStructure struct {
 	db *sql.DB
 }
