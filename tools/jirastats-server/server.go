@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rebel-l/jirastats/packages/database"
 	"github.com/rebel-l/jirastats/packages/utils"
-	"github.com/rebel-l/jirastats/tools/jirastats-setup/endpoints"
+	"github.com/rebel-l/jirastats/tools/jirastats-server/endpoints"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
