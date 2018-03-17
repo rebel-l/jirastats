@@ -2,34 +2,30 @@ package commands
 
 import (
 	"database/sql"
-	"io/ioutil"
+	"github.com/rebel-l/jirastats/packages/database"
 )
 
-const SQL_SETUP_SCRIPT = "./setup/setup.sql"
-
 type DatabaseStructure struct {
-	db *sql.DB
+	tables []database.Table
 }
 
 // NewDatabaseStructure returns a new DatabaseStructure struct
 func NewDatabaseStructure(db *sql.DB) *DatabaseStructure {
 	dbs := new(DatabaseStructure)
-	dbs.db = db
+	dbs.tables = append(dbs.tables, database.NewConfigGroupTable(db))
+	dbs.tables = append(dbs.tables, database.NewConfigTable(db)) // TODO: is not created :-(
+	dbs.tables = append(dbs.tables, database.NewProjectTable(db))
+	dbs.tables = append(dbs.tables, database.NewTicketTable(db))
 	return dbs
 }
 
 // Execute creates the database structure
 func (dbs *DatabaseStructure) Execute () (err error) {
-	statements, err := ioutil.ReadFile(SQL_SETUP_SCRIPT)
-	if err != nil {
-		return
+	for _, v := range dbs.tables {
+		err = v.CreateStructure()
+		if err != nil {
+			break
+		}
 	}
-
-	stmt, err := dbs.db.Prepare(string(statements))
-	if err != nil {
-		return
-	}
-
-	_, err = stmt.Exec()
 	return
 }

@@ -47,6 +47,7 @@ func createDatabaseStructure() {
 	db, err := database.GetDbConnection()
 	defer db.Close()
 	utils.HandleUnrecoverableError(err)
+
 	dbs := commands.NewDatabaseStructure(db)
 	err = dbs.Execute()
 	utils.HandleUnrecoverableError(err)
