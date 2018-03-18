@@ -39,7 +39,7 @@ func doResetStats() {
 
 func createDatabaseFile() {
 	log.Info("Create database storage")
-	dbs := commands.DatabaseStorage{}
+	dbs := commands.CreateDatabaseStorage{}
 	err := dbs.Execute()
 	utils.HandleUnrecoverableError(err)
 }
@@ -50,7 +50,7 @@ func createDatabaseStructure() {
 	defer db.Close()
 	utils.HandleUnrecoverableError(err)
 
-	dbs := commands.NewDatabaseStructure(db)
+	dbs := commands.NewCreateDatabaseStructure(db)
 	err = dbs.Execute()
 	utils.HandleUnrecoverableError(err)
 }

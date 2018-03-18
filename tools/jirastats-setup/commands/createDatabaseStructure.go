@@ -5,13 +5,13 @@ import (
 	"github.com/rebel-l/jirastats/packages/database"
 )
 
-type DatabaseStructure struct {
+type CreateDatabaseStructure struct {
 	tables []database.Table
 }
 
-// NewDatabaseStructure returns a new DatabaseStructure struct
-func NewDatabaseStructure(db *sql.DB) *DatabaseStructure {
-	dbs := new(DatabaseStructure)
+// NewCreateDatabaseStructure returns a new CreateDatabaseStructure struct
+func NewCreateDatabaseStructure(db *sql.DB) *CreateDatabaseStructure {
+	dbs := new(CreateDatabaseStructure)
 	dbs.tables = append(dbs.tables, database.NewConfigGroupTable(db))
 	dbs.tables = append(dbs.tables, database.NewConfigTable(db))
 	dbs.tables = append(dbs.tables, database.NewProjectTable(db))
@@ -22,7 +22,7 @@ func NewDatabaseStructure(db *sql.DB) *DatabaseStructure {
 }
 
 // Execute creates the database structure
-func (dbs *DatabaseStructure) Execute () (err error) {
+func (dbs *CreateDatabaseStructure) Execute () (err error) {
 	for _, v := range dbs.tables {
 		err = v.CreateStructure()
 		if err != nil {

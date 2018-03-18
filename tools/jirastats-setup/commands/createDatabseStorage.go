@@ -5,10 +5,10 @@ import (
 	"github.com/rebel-l/jirastats/packages/database"
 )
 
-type DatabaseStorage struct {}
+type CreateDatabaseStorage struct {}
 
 //Execute creates the path and file for database storage
-func (dbs *DatabaseStorage) Execute() (err error) {
+func (dbs *CreateDatabaseStorage) Execute() (err error) {
 	err = utils.CreateDirectoryIfNotExists(database.DefaultStoragePath)
 	if err != nil {
 		return
