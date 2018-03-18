@@ -6,6 +6,7 @@ import (
 	"github.com/rebel-l/jirastats/packages/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/rebel-l/jirastats/tools/jirastats-setup/commands"
+	"database/sql"
 )
 
 func main() {
@@ -19,7 +20,13 @@ func main() {
 		doResetStats()
 	} else {
 		createDatabaseFile()
-		createDatabaseStructure()
+
+		db, err := database.GetDbConnection()
+		defer db.Close()
+		utils.HandleUnrecoverableError(err)
+
+		createDatabaseStructure(db)
+		configureApplication(db)
 	}
 
 	log.Info("Setup finished successful ... Goodbye!")
@@ -44,13 +51,16 @@ func createDatabaseFile() {
 	utils.HandleUnrecoverableError(err)
 }
 
-func createDatabaseStructure() {
+func createDatabaseStructure(db *sql.DB) {
 	log.Info("Create database structure")
-	db, err := database.GetDbConnection()
-	defer db.Close()
-	utils.HandleUnrecoverableError(err)
-
 	dbs := commands.NewCreateDatabaseStructure(db)
-	err = dbs.Execute()
+	err := dbs.Execute()
+	utils.HandleUnrecoverableError(err)
+}
+
+func configureApplication(db *sql.DB) {
+	log.Info("Configure Application")
+	ca := commands.NewConfigureApplication(db)
+	err := ca.Execute()
 	utils.HandleUnrecoverableError(err)
 }

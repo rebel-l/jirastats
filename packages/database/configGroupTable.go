@@ -12,6 +12,7 @@ const ConfigGroupTableStructure =
 		"`name` CHAR(50) NOT NULL" +
 	");"
 const ConfigGroupTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS config_group_name_idx ON %s (`name`);"
+const ConfigGroupInsert = "INSERT INTO %s(`name`) values(?)"
 
 type ConfigGroupTable struct {
 	db *sql.DB
@@ -47,4 +48,40 @@ func (cg *ConfigGroupTable) getCreateIndexStatement() string {
 func (cg *ConfigGroupTable) Truncate() error {
 	truncateNotImplemented(ConfigGroupTableName)
 	return nil
+}
+
+func (cg *ConfigGroupTable) Select(where string, args interface{}) (rows *sql.Rows, err error){
+	statement := cg.getSelectAllStatement()
+	if where != "" {
+		statement += " WHERE " + where
+	}
+
+	stmt, err := cg.db.Prepare(statement)
+	if err != nil {
+		return
+	}
+
+	rows, err = stmt.Query(args)
+	return
+}
+
+func (cg *ConfigGroupTable) Insert(name string) (id int, err error) {
+	stmt, err := cg.db.Prepare(createDatabseStatement(ConfigGroupInsert, ConfigGroupTableName))
+	if err != nil {
+		return
+	}
+
+	res, err := stmt.Exec(name)
+	if err != nil {
+		return
+	}
+
+	id64, err := res.LastInsertId()
+	id = int(id64)
+
+	return
+}
+
+func (cg *ConfigGroupTable) getSelectAllStatement() string {
+	return createDatabseStatement(SelectAllStatement, ConfigGroupTableName)
 }
