@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	log "github.com/sirupsen/logrus"
 )
 
 const ConfigTableName = "config"
@@ -31,6 +32,7 @@ func (c *ConfigTable) Truncate() error {
 }
 
 func (c *ConfigTable) CreateStructure() (err error) {
+	log.Debugf("Create structure for %s", ConfigTableName)
 	// create table
 	err = executeStatement(c.db, c.getCreateTableStatement())
 	if err != nil {
@@ -43,9 +45,9 @@ func (c *ConfigTable) CreateStructure() (err error) {
 }
 
 func (c *ConfigTable) getCreateTableStatement() string {
-	return createDatabseStatement(ConfigTableStructure, ConfigGroupTableName)
+	return createDatabseStatement(ConfigTableStructure, ConfigTableName)
 }
 
 func (c *ConfigTable) getCreateIndexStatement() string {
-	return createDatabseStatement(ConfigTableIndex, ConfigGroupTableName)
+	return createDatabseStatement(ConfigTableIndex, ConfigTableName)
 }

@@ -29,7 +29,11 @@ func (rs *ResetStats) Execute() (err error) {
 	}
 
 	err = rs.resetTicketTable()
+	if err != nil {
+		return
+	}
 
+	err = rs.resetStatsTable()
 
 	log.Info("Stats data deleted ...")
 	return
@@ -39,6 +43,12 @@ func (rs *ResetStats) Execute() (err error) {
 func (rs *ResetStats) resetTicketTable() error {
 	tt := database.NewTicketTable(rs.db)
 	return tt.Truncate()
+}
+
+// resetStatsTable deletes all data in table stats
+func (rs *ResetStats) resetStatsTable() error {
+	s := database.NewSatsTable(rs.db)
+	return s.Truncate()
 }
 
 // getConfirmation asks user for confirmation of the command and returns the answer

@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	log "github.com/sirupsen/logrus"
 )
 
 const ConfigGroupTableName = "config_group"
@@ -23,6 +24,7 @@ func NewConfigGroupTable(db *sql.DB) *ConfigGroupTable {
 }
 
 func (cg *ConfigGroupTable) CreateStructure() (err error) {
+	log.Debugf("Create structure for %s", ConfigGroupTableName)
 	// create table
 	err = executeStatement(cg.db, cg.getCreateTableStatement())
 	if err != nil {

@@ -33,17 +33,19 @@ func doResetStats() {
 	rsc := commands.NewResetStats(db)
 	err = rsc.Execute()
 	if err != nil {
-		log.Errorf("Stats couldn't be resetted: %s", err.Error())
+		log.Errorf("Stats couldn't be reseted: %s", err.Error())
 	}
 }
 
 func createDatabaseFile() {
+	log.Info("Create database storage")
 	dbs := commands.DatabaseStorage{}
 	err := dbs.Execute()
 	utils.HandleUnrecoverableError(err)
 }
 
 func createDatabaseStructure() {
+	log.Info("Create database structure")
 	db, err := database.GetDbConnection()
 	defer db.Close()
 	utils.HandleUnrecoverableError(err)

@@ -13,9 +13,11 @@ type DatabaseStructure struct {
 func NewDatabaseStructure(db *sql.DB) *DatabaseStructure {
 	dbs := new(DatabaseStructure)
 	dbs.tables = append(dbs.tables, database.NewConfigGroupTable(db))
-	dbs.tables = append(dbs.tables, database.NewConfigTable(db)) // TODO: is not created :-(
+	dbs.tables = append(dbs.tables, database.NewConfigTable(db))
 	dbs.tables = append(dbs.tables, database.NewProjectTable(db))
 	dbs.tables = append(dbs.tables, database.NewTicketTable(db))
+	dbs.tables = append(dbs.tables, database.NewSatsStatusTable(db))
+	dbs.tables = append(dbs.tables, database.NewSatsTable(db))
 	return dbs
 }
 

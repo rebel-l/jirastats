@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	log "github.com/sirupsen/logrus"
 )
 
 type ProjectTable struct {
@@ -9,13 +10,15 @@ type ProjectTable struct {
 }
 
 const ProjectTableName  = "project"
-const ProjectTableStructure = "CREATE TABLE IF NOT EXISTS `%s` (" +
+const ProjectTableStructure =
+	"CREATE TABLE IF NOT EXISTS `%s` (" +
 		"`id` INTEGER PRIMARY KEY AUTOINCREMENT," +
 		"`name` CHAR(50) NOT NULL," +
 		"`jql` VARCHAR(2000) NOT NULL," +
 		"`keys` VARCHAR(255) NULL," +
 		"`map_open_status` VARCHAR(2000) NOT NULL," +
-		"`map_closed_status` VARCHAR(2000) NOT NULL" +
+		"`map_closed_status` VARCHAR(2000) NOT NULL," +
+		"`known_speed` REAL NOT NULL" +
 ");"
 const ProjectTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS project_name_idx ON %s (`name`);"
 
@@ -31,6 +34,7 @@ func (p *ProjectTable) Truncate() error {
 }
 
 func (p *ProjectTable) CreateStructure() (err error) {
+	log.Debugf("Create structure for %s", ProjectTableName)
 	// create table
 	err = executeStatement(p.db, p.getCreateTableStatement())
 	if err != nil {

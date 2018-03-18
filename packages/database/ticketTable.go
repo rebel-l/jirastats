@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	log "github.com/sirupsen/logrus"
 )
 
 const TicketTableName = "ticket"
@@ -65,6 +66,7 @@ func (t *TicketTable) Truncate() (err error) {
 }
 
 func (t *TicketTable) CreateStructure() (err error) {
+	log.Debugf("Create structure for %s", TicketTableName)
 	// create table
 	err = executeStatement(t.db, t.getCreateTableStatement())
 	if err != nil {
