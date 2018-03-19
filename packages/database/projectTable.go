@@ -9,8 +9,8 @@ type ProjectTable struct {
 	db *sql.DB
 }
 
-const ProjectTableName  = "project"
-const ProjectTableStructure =
+const projectTableName = "project"
+const projectTableStructure =
 	"CREATE TABLE IF NOT EXISTS `%s` (" +
 		"`id` INTEGER PRIMARY KEY AUTOINCREMENT," +
 		"`name` CHAR(50) NOT NULL," +
@@ -20,7 +20,7 @@ const ProjectTableStructure =
 		"`map_closed_status` VARCHAR(2000) NOT NULL," +
 		"`known_speed` REAL NOT NULL" +
 ");"
-const ProjectTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS project_name_idx ON %s (`name`);"
+const projectTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS project_name_idx ON %s (`name`);"
 
 func NewProjectTable(db *sql.DB) *ProjectTable {
 	p := new(ProjectTable)
@@ -29,12 +29,12 @@ func NewProjectTable(db *sql.DB) *ProjectTable {
 }
 
 func (p *ProjectTable) Truncate() error {
-	truncateNotImplemented(ProjectTableName)
+	truncateNotImplemented(projectTableName)
 	return nil
 }
 
 func (p *ProjectTable) CreateStructure() (err error) {
-	log.Debugf("Create structure for %s", ProjectTableName)
+	log.Debugf("Create structure for %s", projectTableName)
 	// create table
 	err = executeStatement(p.db, p.getCreateTableStatement())
 	if err != nil {
@@ -47,9 +47,9 @@ func (p *ProjectTable) CreateStructure() (err error) {
 }
 
 func (p *ProjectTable) getCreateTableStatement() string {
-	return createDatabseStatement(ProjectTableStructure, ProjectTableName)
+	return createDatabseStatement(projectTableStructure, projectTableName)
 }
 
 func (p *ProjectTable) getCreateIndexStatement() string {
-	return createDatabseStatement(ProjectTableIndex, ProjectTableName)
+	return createDatabseStatement(projectTableIndex, projectTableName)
 }

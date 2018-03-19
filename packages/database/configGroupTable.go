@@ -5,14 +5,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const ConfigGroupTableName = "config_group"
-const ConfigGroupTableStructure =
+const configGroupTableName = "config_group"
+const configGroupTableStructure =
 	"CREATE TABLE IF NOT EXISTS `%s` (" +
 		"`id` INTEGER PRIMARY KEY AUTOINCREMENT," +
 		"`name` CHAR(50) NOT NULL" +
 	");"
-const ConfigGroupTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS config_group_name_idx ON %s (`name`);"
-const ConfigGroupInsert = "INSERT INTO %s(`name`) values(?)"
+const configGroupTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS config_group_name_idx ON %s (`name`);"
+const configGroupInsert = "INSERT INTO %s(`name`) values(?)"
 
 type ConfigGroupTable struct {
 	db *sql.DB
@@ -25,7 +25,7 @@ func NewConfigGroupTable(db *sql.DB) *ConfigGroupTable {
 }
 
 func (cg *ConfigGroupTable) CreateStructure() (err error) {
-	log.Debugf("Create structure for %s", ConfigGroupTableName)
+	log.Debugf("Create structure for %s", configGroupTableName)
 	// create table
 	err = executeStatement(cg.db, cg.getCreateTableStatement())
 	if err != nil {
@@ -38,15 +38,15 @@ func (cg *ConfigGroupTable) CreateStructure() (err error) {
 }
 
 func (cg *ConfigGroupTable) getCreateTableStatement() string {
-	return createDatabseStatement(ConfigGroupTableStructure, ConfigGroupTableName)
+	return createDatabseStatement(configGroupTableStructure, configGroupTableName)
 }
 
 func (cg *ConfigGroupTable) getCreateIndexStatement() string {
-	return createDatabseStatement(ConfigGroupTableIndex, ConfigGroupTableName)
+	return createDatabseStatement(configGroupTableIndex, configGroupTableName)
 }
 
 func (cg *ConfigGroupTable) Truncate() error {
-	truncateNotImplemented(ConfigGroupTableName)
+	truncateNotImplemented(configGroupTableName)
 	return nil
 }
 
@@ -66,7 +66,7 @@ func (cg *ConfigGroupTable) Select(where string, args interface{}) (rows *sql.Ro
 }
 
 func (cg *ConfigGroupTable) Insert(name string) (id int, err error) {
-	stmt, err := cg.db.Prepare(createDatabseStatement(ConfigGroupInsert, ConfigGroupTableName))
+	stmt, err := cg.db.Prepare(createDatabseStatement(configGroupInsert, configGroupTableName))
 	if err != nil {
 		return
 	}
@@ -83,5 +83,5 @@ func (cg *ConfigGroupTable) Insert(name string) (id int, err error) {
 }
 
 func (cg *ConfigGroupTable) getSelectAllStatement() string {
-	return createDatabseStatement(SelectAllStatement, ConfigGroupTableName)
+	return createDatabseStatement(SelectAllStatement, configGroupTableName)
 }

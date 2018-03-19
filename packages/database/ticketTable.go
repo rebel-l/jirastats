@@ -5,8 +5,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const TicketTableName = "ticket"
-const TicketTableStructure =
+const ticketTableName = "ticket"
+const ticketTableStructure =
 	"CREATE TABLE IF NOT EXISTS `%s` (" +
 		"`id` INTEGER PRIMARY KEY AUTOINCREMENT," +
 		"`key` CHAR(50) NOT NULL," +
@@ -24,7 +24,7 @@ const TicketTableStructure =
 		"`expired` DATETIME NULL," +
 		"FOREIGN KEY (project_id) REFERENCES project(`id`)" +
 ");"
-const TicketTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS ticket_key_idx ON %s (`key`);"
+const ticketTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS ticket_key_idx ON %s (`key`);"
 
 
 // TicektTable represents the database table for tickets
@@ -49,11 +49,11 @@ func (t *TicketTable) Load() (rows *sql.Rows, err error){
 }
 
 func (t *TicketTable) getSelectAllStatement() string {
-	return createDatabseStatement(SelectAllStatement, TicketTableName)
+	return createDatabseStatement(SelectAllStatement, ticketTableName)
 }
 
 func (t *TicketTable) getTruncateStatement() string {
-	return createDatabseStatement(TruncateTable, TicketTableName)
+	return createDatabseStatement(TruncateTable, ticketTableName)
 }
 
 func (t *TicketTable) Truncate() (err error) {
@@ -66,7 +66,7 @@ func (t *TicketTable) Truncate() (err error) {
 }
 
 func (t *TicketTable) CreateStructure() (err error) {
-	log.Debugf("Create structure for %s", TicketTableName)
+	log.Debugf("Create structure for %s", ticketTableName)
 	// create table
 	err = executeStatement(t.db, t.getCreateTableStatement())
 	if err != nil {
@@ -79,9 +79,9 @@ func (t *TicketTable) CreateStructure() (err error) {
 }
 
 func (t *TicketTable) getCreateTableStatement() string {
-	return createDatabseStatement(TicketTableStructure, TicketTableName)
+	return createDatabseStatement(ticketTableStructure, ticketTableName)
 }
 
 func (t *TicketTable) getCreateIndexStatement() string {
-	return createDatabseStatement(TicketTableIndex, TicketTableName)
+	return createDatabseStatement(ticketTableIndex, ticketTableName)
 }

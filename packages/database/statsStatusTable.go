@@ -9,13 +9,13 @@ type StatsStatusTable struct {
 	db *sql.DB
 }
 
-const StatsStatusTableName  = "stats_status"
-const StatsStatusTableStructure =
+const statsStatusTableName = "stats_status"
+const statsStatusTableStructure =
 	"CREATE TABLE IF NOT EXISTS `%s` (" +
 		"`id` INTEGER PRIMARY KEY," +
 		"`status` CHAR(50)" +
 	");"
-const StatsStatusTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS statsstatus_status_idx ON %s (`status`);"
+const statsStatusTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS statsstatus_status_idx ON %s (`status`);"
 
 func NewSatsStatusTable(db *sql.DB) *StatsStatusTable {
 	ss := new(StatsStatusTable)
@@ -24,12 +24,12 @@ func NewSatsStatusTable(db *sql.DB) *StatsStatusTable {
 }
 
 func (ss *StatsStatusTable) Truncate() error {
-	truncateNotImplemented(StatsStatusTableName)
+	truncateNotImplemented(statsStatusTableName)
 	return nil
 }
 
 func (ss *StatsStatusTable) CreateStructure() (err error) {
-	log.Debugf("Create structure for %s", StatsStatusTableName)
+	log.Debugf("Create structure for %s", statsStatusTableName)
 	// create table
 	err = executeStatement(ss.db, ss.getCreateTableStatement())
 	if err != nil {
@@ -42,9 +42,9 @@ func (ss *StatsStatusTable) CreateStructure() (err error) {
 }
 
 func (ss *StatsStatusTable) getCreateTableStatement() string {
-	return createDatabseStatement(StatsStatusTableStructure, StatsStatusTableName)
+	return createDatabseStatement(statsStatusTableStructure, statsStatusTableName)
 }
 
 func (ss *StatsStatusTable) getCreateIndexStatement() string {
-	return createDatabseStatement(StatsStatusTableIndex, StatsStatusTableName)
+	return createDatabseStatement(statsStatusTableIndex, statsStatusTableName)
 }
