@@ -21,6 +21,7 @@ func NewConfig(db *sql.DB) *Config {
 	c := new(Config)
 	c.cgm = database.NewConfigGroupMapper(db)
 	c.configGroup = models.NewConfigGroup()
+	c.configGroup.Name = ConfigGroupName
 	err := c.load()
 	if err != nil {
 		log.Errorf("Wasn't able to load Jira config: %s", err.Error())
@@ -65,7 +66,9 @@ func (c *Config) setConfig(name string, value string) {
 	v, ok := c.configGroup.Configs[name]
 	if ok == false {
 		config := new(models.Config)
+		config.Name = name
 		config.Value = value
+		config.GroupdId = c.configGroup.Id
 		c.configGroup.Configs[name] = config
 		return
 	}

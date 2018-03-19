@@ -29,7 +29,7 @@ func (ca *ConfigureApplication) Execute() (err error) {
 
 	// host
 	if ca.jiraConfig.GetHost() != "" {
-		fmt.Printf("Enter host to jira, actual is: %s. Press enter to keep it.", ca.jiraConfig.GetHost())
+		fmt.Printf("Enter host to jira, actual is: %s. Press enter to keep it.\n", ca.jiraConfig.GetHost())
 	} else {
 		fmt.Println("Enter host to jira, e.g. https.//example.jira.com")
 	}
@@ -41,7 +41,7 @@ func (ca *ConfigureApplication) Execute() (err error) {
 
 	// username
 	if ca.jiraConfig.GetUsername() != "" {
-		fmt.Printf("Enter username for jira, actual is: %s. Press enter to keep it.", ca.jiraConfig.GetUsername())
+		fmt.Printf("Enter username for jira, actual is: %s. Press enter to keep it.\n", ca.jiraConfig.GetUsername())
 	} else {
 		fmt.Println("Enter username for jira")
 	}
