@@ -10,14 +10,30 @@ import (
 )
 
 func main() {
-	log.SetLevel(log.DebugLevel)
-	log.Info("Run setup ...")
-
-	resetStats := flag.Bool("resetstats", false, "To reset all stats. !Be careful, there is no recovery!")
+	// init flags
+	verbose := flag.Bool("v", false, "Show more information on run")
+	resetStats := flag.Bool("r", false, "To reset all stats. !Be careful, there is no recovery!")
+	confProject := flag.Bool("p", false, "Creates a new project only")
 	flag.Parse()
+
+	// init log level
+	if *verbose {
+		log.SetLevel(log.DebugLevel)
+	} else {
+		log.SetLevel(log.InfoLevel)
+	}
+
+	// start setup
+	log.Info("Run setup ...")
 
 	if *resetStats == true {
 		doResetStats()
+	} else if *confProject == true {
+		db, err := database.GetDbConnection()
+		defer db.Close()
+		utils.HandleUnrecoverableError(err)
+
+		configureProjects(db)
 	} else {
 		createDatabaseFile()
 
@@ -27,6 +43,8 @@ func main() {
 
 		createDatabaseStructure(db)
 		configureApplication(db)
+		configureProjects(db)
+		// TODO status setup: new, open, closed ==> remove table and use as constants
 	}
 
 	log.Info("Setup finished successful ... Goodbye!")
@@ -62,5 +80,12 @@ func configureApplication(db *sql.DB) {
 	log.Info("Configure Application")
 	ca := commands.NewConfigureApplication(db)
 	err := ca.Execute()
+	utils.HandleUnrecoverableError(err)
+}
+
+func configureProjects(db *sql.DB) {
+	log.Info("Configure Projects")
+	cp := commands.NewConfigureProjects(db)
+	err := cp.Execute()
 	utils.HandleUnrecoverableError(err)
 }

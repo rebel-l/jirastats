@@ -15,7 +15,7 @@ const configTableStructure =
 		"FOREIGN KEY(config_group_id) REFERENCES config_group(`id`)" +
 ");"
 const configTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS config_name_idx ON %s (`name`);"
-const configInsert = "INSERT INTO %s(`name`, `value`, `config_group_id`) values(?, ?, ?)"
+const configInsert = "INSERT INTO %s(`name`, `value`, `config_group_id`) VALUES (?, ?, ?)"
 const configUpdate = "UPDATE %s SET `name`=?, `value`=? where id=?"
 
 type ConfigTable struct {

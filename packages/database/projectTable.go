@@ -21,11 +21,33 @@ const projectTableStructure =
 		"`known_speed` REAL NOT NULL" +
 ");"
 const projectTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS project_name_idx ON %s (`name`);"
+const projectTableInsert =
+	"INSERT INTO %s (" +
+		"`name`, `jql`, `keys`, `map_open_status`, `map_closed_status`, `known_speed`" +
+	")" +
+	" VALUES (?, ?, ?, ?, ?, ?)"
 
 func NewProjectTable(db *sql.DB) *ProjectTable {
 	p := new(ProjectTable)
 	p.db = db
 	return p
+}
+
+func (p *ProjectTable) Insert(name string, keys string, jql string, knownSpeed float32, mapOpenStatus string, mapClosedStatus string) (id int, err error) {
+	stmt, err := p.db.Prepare(createDatabseStatement(projectTableInsert, projectTableName))
+	if err != nil {
+		return
+	}
+
+	res, err := stmt.Exec(name, jql, keys, mapOpenStatus, mapClosedStatus, knownSpeed)
+	if err != nil {
+		return
+	}
+
+	id64, err := res.LastInsertId()
+	id = int(id64)
+
+	return
 }
 
 func (p *ProjectTable) Truncate() error {
