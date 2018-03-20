@@ -2,23 +2,30 @@ package main
 
 import (
 	"bufio"
+	"database/sql"
+	"flag"
 	"fmt"
 	"github.com/andygrunwald/go-jira"
 	"github.com/rebel-l/jirastats/packages/database"
+	"github.com/rebel-l/jirastats/packages/utils"
 	jiraSearch "github.com/rebel-l/jirastats/packages/jira"
 	"golang.org/x/crypto/ssh/terminal"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"syscall"
 	"strings"
-	"database/sql"
 )
 
 const StatementInsertTicket = "INSERT INTO ticket(`key`) values(?)"
 const StatementSelectTickets = "SELECT * FROM ticket"
 
 func main() {
-	log.SetLevel(log.DebugLevel)
+	verbose := utils.GetVerboseFlag()
+	flag.Parse()
+
+	// init log level
+	utils.TurnOnVerbose(verbose)
+
 	log.Info("Run collector ...")
 
 	db, err := database.GetDbConnection()

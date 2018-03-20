@@ -1,27 +1,24 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"github.com/rebel-l/jirastats/packages/database"
 	"github.com/rebel-l/jirastats/packages/utils"
-	log "github.com/sirupsen/logrus"
 	"github.com/rebel-l/jirastats/tools/jirastats-setup/commands"
-	"database/sql"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
 	// init flags
-	verbose := flag.Bool("v", false, "Show more information on run")
+	verbose := utils.GetVerboseFlag()
 	resetStats := flag.Bool("r", false, "To reset all stats. !Be careful, there is no recovery!")
 	confProject := flag.Bool("p", false, "Creates a new project only")
 	flag.Parse()
 
 	// init log level
-	if *verbose {
-		log.SetLevel(log.DebugLevel)
-	} else {
-		log.SetLevel(log.InfoLevel)
-	}
+	utils.TurnOnVerbose(verbose)
+
 
 	// start setup
 	log.Info("Run setup ...")
