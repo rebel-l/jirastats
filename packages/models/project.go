@@ -1,5 +1,9 @@
 package models
 
+import (
+	"fmt"
+)
+
 const projectDefaultJql = "project in (%s)"
 const projectDefaultKnownSpeed = 1.0
 const projectDefaultMapOpen = "\"Open\", \"In Progress\", \"Reopened\""
@@ -22,4 +26,8 @@ func NewProject() *Project {
 	p.MapOpenStatus = projectDefaultMapOpen
 	p.MapClosedStatus = projectDefaultMapClosed
 	return p
+}
+
+func (p *Project) GetJql() string {
+	return fmt.Sprintf(p.Jql, p.Keys)
 }

@@ -89,7 +89,7 @@ func (p *ProjectTable) Select(where string, args ...interface{}) (rows *sql.Rows
 	}
 
 	if args != nil {
-		rows, err = stmt.Query(args)
+		rows, err = stmt.Query(args...)
 	} else {
 		rows, err = stmt.Query()
 	}

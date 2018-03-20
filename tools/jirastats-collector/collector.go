@@ -1,21 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"database/sql"
+	"errors"
 	"flag"
-	"fmt"
 	"github.com/andygrunwald/go-jira"
 	"github.com/rebel-l/jirastats/packages/database"
-	"github.com/rebel-l/jirastats/packages/utils"
-	jiraSearch "github.com/rebel-l/jirastats/packages/jira"
-	"golang.org/x/crypto/ssh/terminal"
-	log "github.com/sirupsen/logrus"
-	"os"
-	"syscall"
-	"strings"
 	"github.com/rebel-l/jirastats/packages/models"
-	"errors"
+	"github.com/rebel-l/jirastats/packages/utils"
+	jp "github.com/rebel-l/jirastats/packages/jira"
+	log "github.com/sirupsen/logrus"
 )
 
 const StatementInsertTicket = "INSERT INTO ticket(`key`) values(?)" // TODO: deprecated
@@ -36,6 +30,7 @@ func main() {
 	utils.HandleUnrecoverableError(err)
 
 	c := NewCollector(db)
+	jc := c.getJiraClient()
 	projects, err := c.getProjects()
 	if err != nil {
 		utils.HandleUnrecoverableError(err)
@@ -43,8 +38,20 @@ func main() {
 		utils.HandleUnrecoverableError(errors.New("No projects found"))
 	}
 
+	// TODO: use channels to parallize
 	for _, p := range projects {
-		log.Debugf("Project found ... Id: %d, Name: %s", p.Id, p.Name)
+		log.Infof("Process project ... Id: %d, Name: %s", p.Id, p.Name)
+		search := jp.NewSearch(jc)
+		log.Debugf("JQL: %s", p.GetJql())
+		tickets, err := search.Do(p.GetJql())
+		if err != nil {
+			log.Errorf("Project (Id: %d, Name: %s) was not processed: %s", p.Id, p.Name, err.Error())
+			continue
+		}
+
+		for _, t := range tickets {
+			log.Debugf("Ticket: %s", t.Key)
+		}
 	}
 
 
@@ -72,25 +79,12 @@ func (c *Collector) getProjects() (projects []*models.Project, err error) {
 	return
 }
 
-func getTickets() []jira.Issue {
-	// TODO: deprecated
-	r := bufio.NewReader(os.Stdin)
-	fmt.Println("")
-	fmt.Print("Jira Username: ")
-	username, _ := r.ReadString('\n')
-	fmt.Print("Jira Password: ")
-	bytePassword, _ := terminal.ReadPassword(int(syscall.Stdin))
-	password := string(bytePassword)
-	fmt.Println("")
-	fmt.Println("")
-
-	// init Jira client
-	jiraClient := initJiraClient(username, password)
-	jiraSearch := jiraSearch.NewSearch(jiraClient)
-	result, err := jiraSearch.Do("project = CORE")
-	handleUnrecoverableError(err)
-	return result
+func (c *Collector) getJiraClient() *jira.Client {
+	config := jp.NewConfig(c.db)
+	return jp.NewClient(config)
 }
+
+
 
 func storeTickets(tickets []jira.Issue, db *sql.DB) {
 	// TODO: deprecated
@@ -122,16 +116,6 @@ func readTickets(db *sql.DB) {
 		err = rows.Scan(&id, &key)
 		log.Infof("TicketId: %d with Key: %s", id, key)
 	}
-}
-
-// TODO: should be part of central jira package
-func initJiraClient(username string, password string) *jira.Client {
-	username = strings.TrimSpace(username)
-	password = strings.TrimSpace(password)
-
-	jiraClient, _ := jira.NewClient(nil, "https://jira.home24.de")
-	jiraClient.Authentication.SetBasicAuth(username, password)
-	return jiraClient
 }
 
 func handleUnrecoverableError(err error) {
