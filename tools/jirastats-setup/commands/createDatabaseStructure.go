@@ -16,7 +16,6 @@ func NewCreateDatabaseStructure(db *sql.DB) *CreateDatabaseStructure {
 	dbs.tables = append(dbs.tables, database.NewConfigTable(db))
 	dbs.tables = append(dbs.tables, database.NewProjectTable(db))
 	dbs.tables = append(dbs.tables, database.NewTicketTable(db))
-	dbs.tables = append(dbs.tables, database.NewSatsStatusTable(db))
 	dbs.tables = append(dbs.tables, database.NewSatsTable(db))
 	return dbs
 }

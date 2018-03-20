@@ -44,7 +44,6 @@ func main() {
 		createDatabaseStructure(db)
 		configureApplication(db)
 		configureProjects(db)
-		// TODO status setup: new, open, closed ==> remove table and use as constants
 	}
 
 	log.Info("Setup finished successful ... Goodbye!")

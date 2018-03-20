@@ -14,11 +14,10 @@ const statsTableStructure =
 	"CREATE TABLE IF NOT EXISTS `%s` (" +
 		"`id` INTEGER PRIMARY KEY AUTOINCREMENT," +
 		"`project_id` INTEGER NOT NULL," +
-		"`status_id` INTEGER NOT NULL," +
+		"`status` CHAR(50) NOT NULL," +
 		"`counter` INTEGER DEFAULT 0 NOT NULL," +
 		"`created_at` DATE NOT NULL," +
-		"FOREIGN KEY (project_id) REFERENCES project(`id`)," +
-		"FOREIGN KEY (status_id) REFERENCES stats_status(`id`)" +
+		"FOREIGN KEY (project_id) REFERENCES project(`id`)" +
 	");"
 
 func NewSatsTable(db *sql.DB) *StatsTable {

@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"github.com/rebel-l/jirastats/packages/models"
+	"github.com/sirupsen/logrus"
 )
 
 type ProjectMapper struct {
@@ -25,6 +26,7 @@ func (pm *ProjectMapper) Save(model *models.Project) (err error) {
 		model.Id = id
 	} else {
 		// update
+		logrus.Warn("Update for project not implemented yet!")
 	}
 
 	return
