@@ -31,6 +31,7 @@ func (cm *ConfigMapper) LoadByConfigGroupId(configGroupId int, configs map[strin
 		err = rows.Scan(&id, &name, &groupId, &value)
 		if err != nil {
 			log.Warn("Mapping of config not possible")
+			continue
 		}
 
 		config, ok := configs[name]

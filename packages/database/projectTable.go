@@ -75,3 +75,27 @@ func (p *ProjectTable) getCreateTableStatement() string {
 func (p *ProjectTable) getCreateIndexStatement() string {
 	return createDatabseStatement(projectTableIndex, projectTableName)
 }
+
+func (p *ProjectTable) Select(where string, args ...interface{}) (rows *sql.Rows, err error){
+	statement := p.getSelectAllStatement()
+	if where != "" {
+		statement += " WHERE " + where
+	}
+	log.Debugf("Project select statement: %s", statement)
+
+	stmt, err := p.db.Prepare(statement)
+	if err != nil {
+		return
+	}
+
+	if args != nil {
+		rows, err = stmt.Query(args)
+	} else {
+		rows, err = stmt.Query()
+	}
+	return
+}
+
+func (p *ProjectTable) getSelectAllStatement() string {
+	return createDatabseStatement(SelectAllStatement, projectTableName)
+}

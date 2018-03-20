@@ -39,12 +39,32 @@ func NewTicketTable(db *sql.DB) *TicketTable {
 }
 
 func (t *TicketTable) Load() (rows *sql.Rows, err error){
+	// TODO: deprecated
 	stmt, err := t.db.Prepare(t.getSelectAllStatement())
 	if err != nil {
 		return
 	}
 
 	rows, err = stmt.Query()
+	return
+}
+
+func (t *TicketTable) Select(where string, args ...interface{}) (rows *sql.Rows, err error){
+	statement := t.getSelectAllStatement()
+	if where != "" {
+		statement += " WHERE " + where
+	}
+
+	stmt, err := t.db.Prepare(statement)
+	if err != nil {
+		return
+	}
+
+	if args != nil {
+		rows, err = stmt.Query(args)
+	} else {
+		rows, err = stmt.Query()
+	}
 	return
 }
 

@@ -81,7 +81,7 @@ func (c *ConfigTable) Update(id int, name string, value string) (err error) {
 	return
 }
 
-func (c *ConfigTable) Select(where string, args interface{}) (rows *sql.Rows, err error){
+func (c *ConfigTable) Select(where string, args ...interface{}) (rows *sql.Rows, err error){
 	statement := c.getSelectAllStatement()
 	if where != "" {
 		statement += " WHERE " + where
@@ -92,7 +92,11 @@ func (c *ConfigTable) Select(where string, args interface{}) (rows *sql.Rows, er
 		return
 	}
 
-	rows, err = stmt.Query(args)
+	if args != nil {
+		rows, err = stmt.Query(args)
+	} else {
+		rows, err = stmt.Query()
+	}
 	return
 }
 

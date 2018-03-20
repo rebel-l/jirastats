@@ -14,10 +14,13 @@ import (
 	"os"
 	"syscall"
 	"strings"
+	"github.com/rebel-l/jirastats/packages/models"
+	"errors"
 )
 
-const StatementInsertTicket = "INSERT INTO ticket(`key`) values(?)"
-const StatementSelectTickets = "SELECT * FROM ticket"
+const StatementInsertTicket = "INSERT INTO ticket(`key`) values(?)" // TODO: deprecated
+const StatementSelectTickets = "SELECT * FROM ticket" // TODO: deprecated
+
 
 func main() {
 	verbose := utils.GetVerboseFlag()
@@ -30,16 +33,47 @@ func main() {
 
 	db, err := database.GetDbConnection()
 	defer db.Close()
-	handleUnrecoverableError(err)
+	utils.HandleUnrecoverableError(err)
 
-	tickets := getTickets()
-	storeTickets(tickets, db)
-	readTickets(db)
+	c := NewCollector(db)
+	projects, err := c.getProjects()
+	if err != nil {
+		utils.HandleUnrecoverableError(err)
+	} else if len(projects) == 0 {
+		utils.HandleUnrecoverableError(errors.New("No projects found"))
+	}
+
+	for _, p := range projects {
+		log.Debugf("Project found ... Id: %d, Name: %s", p.Id, p.Name)
+	}
+
+
+	//
+	//tickets := getTickets()
+	//storeTickets(tickets, db)
+	//readTickets(db)
 
 	log.Info("Stopping collector ... Goodbye!")
 }
 
+type Collector struct {
+	db *sql.DB
+}
+
+func NewCollector(db *sql.DB) *Collector {
+	c := new(Collector)
+	c.db = db
+	return c
+}
+
+func (c *Collector) getProjects() (projects []*models.Project, err error) {
+	pm := database.NewProjectMapper(c.db)
+	projects, err = pm.Load()
+	return
+}
+
 func getTickets() []jira.Issue {
+	// TODO: deprecated
 	r := bufio.NewReader(os.Stdin)
 	fmt.Println("")
 	fmt.Print("Jira Username: ")
@@ -59,6 +93,7 @@ func getTickets() []jira.Issue {
 }
 
 func storeTickets(tickets []jira.Issue, db *sql.DB) {
+	// TODO: deprecated
 	stmt, err := db.Prepare(StatementInsertTicket)
 	handleUnrecoverableError(err)
 
@@ -71,6 +106,7 @@ func storeTickets(tickets []jira.Issue, db *sql.DB) {
 }
 
 func readTickets(db *sql.DB) {
+	// TODO: deprecated
 	stmt, err := db.Prepare(StatementSelectTickets)
 	handleUnrecoverableError(err)
 	rows, err := stmt.Query()
@@ -99,6 +135,7 @@ func initJiraClient(username string, password string) *jira.Client {
 }
 
 func handleUnrecoverableError(err error) {
+	// TODO: deprecated
 	if err != nil {
 		log.Errorf("Unrecoverable error appeard: %s", err.Error())
 		log.Panic("Collector failed ... Goodbye!")

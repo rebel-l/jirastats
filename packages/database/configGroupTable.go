@@ -50,7 +50,7 @@ func (cg *ConfigGroupTable) Truncate() error {
 	return nil
 }
 
-func (cg *ConfigGroupTable) Select(where string, args interface{}) (rows *sql.Rows, err error){
+func (cg *ConfigGroupTable) Select(where string, args ...interface{}) (rows *sql.Rows, err error){
 	statement := cg.getSelectAllStatement()
 	if where != "" {
 		statement += " WHERE " + where
@@ -61,7 +61,11 @@ func (cg *ConfigGroupTable) Select(where string, args interface{}) (rows *sql.Ro
 		return
 	}
 
-	rows, err = stmt.Query(args)
+	if args != nil {
+		rows, err = stmt.Query(args)
+	} else {
+		rows, err = stmt.Query()
+	}
 	return
 }
 

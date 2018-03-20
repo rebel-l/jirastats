@@ -49,3 +49,26 @@ func (s *StatsTable) CreateStructure() (err error) {
 func (s *StatsTable) getCreateTableStatement() string {
 	return createDatabseStatement(statsTableStructure, statsTableName)
 }
+
+func (s *StatsTable) Select(where string, args ...interface{}) (rows *sql.Rows, err error){
+	statement := s.getSelectAllStatement()
+	if where != "" {
+		statement += " WHERE " + where
+	}
+
+	stmt, err := s.db.Prepare(statement)
+	if err != nil {
+		return
+	}
+
+	if args != nil {
+		rows, err = stmt.Query(args)
+	} else {
+		rows, err = stmt.Query()
+	}
+	return
+}
+
+func (s *StatsTable) getSelectAllStatement() string {
+	return createDatabseStatement(SelectAllStatement, statsTableName)
+}
