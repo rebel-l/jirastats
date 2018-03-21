@@ -42,7 +42,7 @@ func main() {
 
 	// TODO: use channels to parallize
 	for _, p := range projects {
-		pp := process.NewProject(p, jc)
+		pp := process.NewProject(p, jc, database.NewProjectMapper(db))
 		pp.Process()
 	}
 

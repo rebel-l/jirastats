@@ -71,3 +71,14 @@ func (pm *ProjectMapper) Load() (projects []*models.Project, err error) {
 	log.Debugf("Number of projects found: %d", len(projects))
 	return
 }
+
+func (pm *ProjectMapper) HasTickets(project *models.Project) bool {
+	tt := NewTicketTable(pm.table.db)
+	counter, err := tt.Count("project_id = ?", project.Id)
+	if err != nil {
+		log.Errorf("Tickets are not countable from database: %s", err.Error())
+		return false
+	}
+
+	return counter != 0
+}

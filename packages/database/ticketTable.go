@@ -68,8 +68,42 @@ func (t *TicketTable) Select(where string, args ...interface{}) (rows *sql.Rows,
 	return
 }
 
+func (t *TicketTable) Count(where string, args ...interface{}) (counter int, err error) {
+	statement := t.getSelectCountStatement()
+	if where != "" {
+		statement += " WHERE " + where
+	}
+
+	stmt, err := t.db.Prepare(statement)
+	if err != nil {
+		return
+	}
+
+	var rows *sql.Rows
+	if args != nil {
+		rows, err = stmt.Query(args...)
+	} else {
+		rows, err = stmt.Query()
+	}
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	if rows.Next() {
+		err = rows.Scan(&counter)
+	}
+
+	return
+}
+
 func (t *TicketTable) getSelectAllStatement() string {
 	return createDatabseStatement(SelectAllStatement, ticketTableName)
+}
+
+
+func (t *TicketTable) getSelectCountStatement() string {
+	return createDatabseStatement(SelectCountStatement, statsTableName)
 }
 
 func (t *TicketTable) getTruncateStatement() string {

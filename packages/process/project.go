@@ -1,9 +1,9 @@
 package process
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/andygrunwald/go-jira"
+	"github.com/rebel-l/jirastats/packages/database"
 	"github.com/rebel-l/jirastats/packages/models"
 	jp "github.com/rebel-l/jirastats/packages/jira"
 	log "github.com/sirupsen/logrus"
@@ -11,30 +11,33 @@ import (
 )
 
 type Project struct {
-	db *sql.DB
-	jc *jira.Client
+	search *jp.Search
 	project *models.Project
 	start time.Time
 	counterOpen int
 	counterNew int
 	counterClosed int
+	pm *database.ProjectMapper
 }
 
-func NewProject(project *models.Project, jc *jira.Client) *Project {
+func NewProject(project *models.Project, jc *jira.Client, pm *database.ProjectMapper) *Project {
 	p := new(Project)
-	p.project = project
-	p.jc = jc
 	p.start = time.Now()
+	p.project = project
+	p.search = jp.NewSearch(jc)
+	p.pm = pm
 	return p
 }
 
 func (p *Project) Process() {
 	log.Infof("Process project ... Id: %d, Name: %s", p.project.Id, p.project.Name)
 
-	// TODO: 1st no stats
-	p.initStats()
+	// 1st init tickets if there are none
+	if p.pm.HasTickets(p.project) == false {
+		p.initStats()
+	}
 
-	// TODO 2nd update stats
+	// 2nd update stats
 	p.updateStats()
 
 
@@ -44,13 +47,14 @@ func (p *Project) Process() {
 	return
 }
 
-func (p *Project) initStats() (err error){
+func (p *Project) initStats() (err error) {
+	log.Debugf("Here")
+	// TODO: implement
 	return
 }
 
 func (p *Project) updateStats() (err error){
-	search := jp.NewSearch(p.jc)
-	tickets, err := search.Do(p.getJqlForUpdatedTickets())
+	tickets, err := p.search.Do(p.getJqlForUpdatedTickets())
 	if err != nil {
 		log.Errorf("Project (Id: %d, Name: %s) was not processed: %s", p.project.Id, p.project.Name, err.Error())
 		return
