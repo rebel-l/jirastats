@@ -81,7 +81,6 @@ func (p *ProjectTable) Select(where string, args ...interface{}) (rows *sql.Rows
 	if where != "" {
 		statement += " WHERE " + where
 	}
-	log.Debugf("Project select statement: %s", statement)
 
 	stmt, err := p.db.Prepare(statement)
 	if err != nil {
