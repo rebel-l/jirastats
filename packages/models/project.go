@@ -17,6 +17,7 @@ type Project struct {
 	KnownSpeed float32 `json:"known_speed"`
 	MapOpenStatus string `json:"map_open_status"`
 	MapClosedStatus string `json:"map_closed_status"`
+	// TODO: needs active flag
 }
 
 func NewProject() *Project {

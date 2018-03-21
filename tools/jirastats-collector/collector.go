@@ -10,6 +10,8 @@ import (
 	"github.com/rebel-l/jirastats/packages/utils"
 	jp "github.com/rebel-l/jirastats/packages/jira"
 	log "github.com/sirupsen/logrus"
+	"github.com/rebel-l/jirastats/packages/process"
+	"time"
 )
 
 const StatementInsertTicket = "INSERT INTO ticket(`key`) values(?)" // TODO: deprecated
@@ -40,18 +42,8 @@ func main() {
 
 	// TODO: use channels to parallize
 	for _, p := range projects {
-		log.Infof("Process project ... Id: %d, Name: %s", p.Id, p.Name)
-		search := jp.NewSearch(jc)
-		log.Debugf("JQL: %s", p.GetJql())
-		tickets, err := search.Do(p.GetJql())
-		if err != nil {
-			log.Errorf("Project (Id: %d, Name: %s) was not processed: %s", p.Id, p.Name, err.Error())
-			continue
-		}
-
-		for _, t := range tickets {
-			log.Debugf("Ticket: %s", t.Key)
-		}
+		pp := process.NewProject(p, jc)
+		pp.Process()
 	}
 
 
@@ -60,16 +52,21 @@ func main() {
 	//storeTickets(tickets, db)
 	//readTickets(db)
 
+	t := time.Now()
+	elapsed := t.Sub(c.start)
+	log.Infof("Processed %d projects in %f seconds", len(projects), elapsed.Seconds())
 	log.Info("Stopping collector ... Goodbye!")
 }
 
 type Collector struct {
 	db *sql.DB
+	start time.Time
 }
 
 func NewCollector(db *sql.DB) *Collector {
 	c := new(Collector)
 	c.db = db
+	c.start = time.Now()
 	return c
 }
 
