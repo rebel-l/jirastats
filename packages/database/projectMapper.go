@@ -50,7 +50,6 @@ func (pm *ProjectMapper) Load() (projects []*models.Project, err error) {
 	var mapClosedStatus string
 	var knownSpeed float32
 	for rows.Next() {
-		log.Debug("Map project")
 		err = rows.Scan(&id, &name, &jql, &keys, &mapOpenStatus, &mapClosedStatus, &knownSpeed)
 		if err != nil {
 			log.Warn("Mapping of project not possible")
