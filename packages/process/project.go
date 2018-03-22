@@ -7,6 +7,7 @@ import (
 	"github.com/rebel-l/jirastats/packages/models"
 	jp "github.com/rebel-l/jirastats/packages/jira"
 	log "github.com/sirupsen/logrus"
+	"strings"
 	"time"
 )
 
@@ -48,8 +49,16 @@ func (p *Project) Process() {
 }
 
 func (p *Project) initStats() (err error) {
-	log.Debugf("Here")
-	// TODO: implement
+	tickets, err := p.search.Do(p.getJqlForOpenTieckets())
+	if err != nil {
+		log.Errorf("Project (Id: %d, Name: %s) was not processed: %s", p.project.Id, p.project.Name, err.Error())
+		return
+	}
+
+	// TODO: process in channels
+	for _, t := range tickets {
+		log.Debugf("Ticket (Open): %s", t.Key)
+	}
 	return
 }
 
@@ -76,4 +85,20 @@ func (p *Project) getJqlForUpdatedTickets() string {
 	return jql
 }
 
+func (p *Project) getOpenStatusMapForJql() string {
+	status := strings.Split(p.project.MapOpenStatus, ",")
+	for k, v := range status {
+		v = strings.TrimSpace(v)
+		if strings.Contains(v, "\"") == false {
+			status[k] = "\"" + v + "\""
+		}
+	}
 
+	return strings.Join(status, ",")
+}
+
+func (p *Project) getJqlForOpenTieckets() string {
+	jql := p.project.GetJql() + fmt.Sprintf(" AND status in (%s)", p.getOpenStatusMapForJql())
+	log.Debugf("JQL for open tickets: %s", jql)
+	return jql
+}
