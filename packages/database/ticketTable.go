@@ -17,7 +17,7 @@ const ticketTableStructure =
 		"`status_by_jira` CHAR(50) NOT NULL," +
 		"`status_clustered` CHAR(50) NOT NULL," +
 		"`priority` CHAR(50) NOT NULL," +
-		"`it_project` CHAR(100) NULL," +
+		"`issuetype` CHAR(50) NULL," +
 		"`created_at_by_jira` DATETIME NOT NULL," +
 		"`last_updated_by_jira` DATETIME NOT NULL," +
 		"`created_at` DATETIME NOT NULL," +
@@ -36,17 +36,6 @@ func NewTicketTable(db *sql.DB) *TicketTable {
 	t := new(TicketTable)
 	t.db = db
 	return t
-}
-
-func (t *TicketTable) Load() (rows *sql.Rows, err error){
-	// TODO: deprecated
-	stmt, err := t.db.Prepare(t.getSelectAllStatement())
-	if err != nil {
-		return
-	}
-
-	rows, err = stmt.Query()
-	return
 }
 
 func (t *TicketTable) Select(where string, args ...interface{}) (rows *sql.Rows, err error){
