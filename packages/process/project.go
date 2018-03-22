@@ -12,7 +12,7 @@ import (
 )
 
 type Project struct {
-	search *jp.Search
+	jc *jira.Client
 	project *models.Project
 	start time.Time
 	counterOpen int
@@ -25,7 +25,7 @@ func NewProject(project *models.Project, jc *jira.Client, pm *database.ProjectMa
 	p := new(Project)
 	p.start = time.Now()
 	p.project = project
-	p.search = jp.NewSearch(jc)
+	p.jc = jc
 	p.pm = pm
 	return p
 }
@@ -41,7 +41,6 @@ func (p *Project) Process() {
 	// 2nd update stats
 	p.updateStats()
 
-
 	t := time.Now()
 	elapsed := t.Sub(p.start)
 	log.Infof("Project (Id: %d, Name: %s) was successful processed in %f seconds", p.project.Id, p.project.Name, elapsed.Seconds())
@@ -49,29 +48,43 @@ func (p *Project) Process() {
 }
 
 func (p *Project) initStats() (err error) {
-	tickets, err := p.search.Do(p.getJqlForOpenTieckets())
-	if err != nil {
-		log.Errorf("Project (Id: %d, Name: %s) was not processed: %s", p.project.Id, p.project.Name, err.Error())
-		return
-	}
+	search := jp.NewSearch(p.jc, p.getJqlForOpenTickets())
+	for {
+		tickets, err := search.Do()
+		if err != nil {
+			log.Errorf("Project (Id: %d, Name: %s) was not processed: %s", p.project.Id, p.project.Name, err.Error())
+			return err
+		}
 
-	// TODO: process in channels
-	for _, t := range tickets {
-		log.Debugf("Ticket (Open): %s", t.Key)
+		// TODO: process in channels
+		for _, t := range tickets {
+			log.Debugf("Ticket (Open): %s", t.Key)
+		}
+
+		if search.Next() == false {
+			break
+		}
 	}
 	return
 }
 
 func (p *Project) updateStats() (err error){
-	tickets, err := p.search.Do(p.getJqlForUpdatedTickets())
-	if err != nil {
-		log.Errorf("Project (Id: %d, Name: %s) was not processed: %s", p.project.Id, p.project.Name, err.Error())
-		return
-	}
+	search := jp.NewSearch(p.jc, p.getJqlForUpdatedTickets())
+	for {
+		tickets, err := search.Do()
+		if err != nil {
+			log.Errorf("Project (Id: %d, Name: %s) was not processed: %s", p.project.Id, p.project.Name, err.Error())
+			return err
+		}
 
-	// TODO: process in channels
-	for _, t := range tickets {
-		log.Debugf("Ticket (Updated): %s", t.Key)
+		// TODO: process in channels
+		for _, t := range tickets {
+			log.Debugf("Ticket (Updated): %s", t.Key)
+		}
+
+		if search.Next() == false {
+			break
+		}
 	}
 	return
 }
@@ -97,7 +110,7 @@ func (p *Project) getOpenStatusMapForJql() string {
 	return strings.Join(status, ",")
 }
 
-func (p *Project) getJqlForOpenTieckets() string {
+func (p *Project) getJqlForOpenTickets() string {
 	jql := p.project.GetJql() + fmt.Sprintf(" AND status in (%s)", p.getOpenStatusMapForJql())
 	log.Debugf("JQL for open tickets: %s", jql)
 	return jql

@@ -11,31 +11,52 @@ const searchEndpoint = "/rest/api/2/search"
 
 type Search struct {
 	client *jira.Client
+	request *search.Request
+	total int
 }
 
-func NewSearch(client *jira.Client) *Search {
-	search := new(Search)
-	search.client = client
-	return search
+func NewSearch(client *jira.Client, jql string) *Search {
+	s := new(Search)
+	s.client = client
+	s.request = search.NewRequest(jql)
+	return s
 }
 
-func (s *Search) Do(jql string) (result []jira.Issue, err error) {
-	searchRequest := search.NewRequest(jql)
+func (s *Search) Do() (result []jira.Issue, err error) {
 
 	searchResponse := new(search.Response)
 
-	req, _ := s.client.NewRequest(method, searchEndpoint, searchRequest)
+	req, _ := s.client.NewRequest(method, searchEndpoint, s.request)
 	_, err = s.client.Do(req, searchResponse)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	//log.Debugf("Total: %d", searchResponse.Total)
-	//for _,v := range searchResponse.Issues {
-	//	log.Debugf("Issue: %s", v.Key)
-	//}
-
+	s.total = searchResponse.Total
 	result = searchResponse.Issues
 	return
+}
+
+func (s *Search) Next() bool {
+	/* EXAMPLES:
+		1: t ==> 0, start ==> 0, max ==> 10
+		2: t ==> 5, start ==> 10, max ==> 10 ==> exit
+
+
+		1: t ==> 0, start ==> 0, max ==> 10
+		2: t ==> 15, start ==> 10, max ==> 10 ==> continue
+		3: t ==> 15, start ==> 20, max ==> 10 ==> exit
+
+		1: t ==> 0, start ==> 0, max ==> 10
+		2: t ==> 20, start ==> 10, max ==> 10 ==> continue
+		3: t ==> 20, start ==> 20, max ==> 10 ==> exit
+
+		1: t ==> 0, start ==> 0, max ==> 10
+		2: t ==> 21, start ==> 10, max ==> 10 ==> continue
+		3: t ==> 21, start ==> 20, max ==> 10 ==> continue
+		4: t ==> 21, start ==> 30, max ==> 10 ==> exit
+	*/
+	s.request.Next()
+	return s.total > s.request.StartAt
 }

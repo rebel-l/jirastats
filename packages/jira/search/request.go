@@ -19,3 +19,7 @@ func NewRequest(jql string) *Request {
 	req.Fields = fields
 	return  req
 }
+
+func (r *Request) Next() {
+	r.StartAt += r.MaxResults
+}
