@@ -1,6 +1,7 @@
 package process
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/andygrunwald/go-jira"
 	"github.com/rebel-l/jirastats/packages/database"
@@ -12,6 +13,7 @@ import (
 )
 
 type Project struct {
+	db *sql.DB
 	jc *jira.Client
 	project *models.Project
 	start time.Time
@@ -21,12 +23,13 @@ type Project struct {
 	pm *database.ProjectMapper
 }
 
-func NewProject(project *models.Project, jc *jira.Client, pm *database.ProjectMapper) *Project {
+func NewProject(project *models.Project, jc *jira.Client, db *sql.DB) *Project {
 	p := new(Project)
 	p.start = time.Now()
 	p.project = project
 	p.jc = jc
-	p.pm = pm
+	p.pm = database.NewProjectMapper(db)
+	p.db = db
 	return p
 }
 
@@ -49,27 +52,19 @@ func (p *Project) Process() {
 
 func (p *Project) initStats() (err error) {
 	search := jp.NewSearch(p.jc, p.getJqlForOpenTickets())
-	for {
-		tickets, err := search.Do()
-		if err != nil {
-			log.Errorf("Project (Id: %d, Name: %s) was not processed: %s", p.project.Id, p.project.Name, err.Error())
-			return err
-		}
-
-		// TODO: process in channels
-		for _, t := range tickets {
-			log.Debugf("Ticket (Open): %s", t.Key)
-		}
-
-		if search.Next() == false {
-			break
-		}
-	}
+	err = p.processTickets(search)
+	// TODO: stats save 2 days ago
 	return
 }
 
 func (p *Project) updateStats() (err error){
 	search := jp.NewSearch(p.jc, p.getJqlForUpdatedTickets())
+	err = p.processTickets(search)
+	// TODO: stats save 1 days ago
+	return
+}
+
+func (p *Project) processTickets(search *jp.Search) (err error) {
 	for {
 		tickets, err := search.Do()
 		if err != nil {
@@ -79,7 +74,9 @@ func (p *Project) updateStats() (err error){
 
 		// TODO: process in channels
 		for _, t := range tickets {
-			log.Debugf("Ticket (Updated): %s", t.Key)
+			tm := database.NewTicketMapper(p.db)
+			tp := NewTicket(t, tm)
+			tp.Process()
 		}
 
 		if search.Next() == false {
