@@ -53,7 +53,7 @@ func (p *Project) Process() {
 func (p *Project) initStats() (err error) {
 	search := jp.NewSearch(p.jc, p.getJqlForOpenTickets())
 	err = p.processTickets(search)
-	// TODO: stats save 2 days ago
+	// TODO: stats save 2 days ago ... and EVERY ticket is NEW
 	return
 }
 

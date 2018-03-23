@@ -100,8 +100,17 @@ func (t *Ticket) getNewTicket() *models.Ticket {
 }
 
 func (t *Ticket) setIsNew(ticket *models.Ticket) {
-	// TODO classify as (not) new and return this info
-	t.IsNew = true
+	now := time.Now()
+	now = now.AddDate(0, 0, 1)
+
+	if now.Format(jp.JiraJqlDateFormat) == ticket.CreatedAtByJira.Format(jp.JiraJqlDateFormat) {
+		t.IsNew = true
+		log.Debugf("Ticket %s is new", ticket.Key)
+		return
+	}
+
+	log.Debugf("Ticket %s is old", ticket.Key)
+	t.IsNew = false
 }
 
 func (t *Ticket) processStats(ticket *models.Ticket) {
