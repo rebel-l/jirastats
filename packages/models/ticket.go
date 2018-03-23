@@ -31,3 +31,7 @@ func NewTicket() *Ticket {
 	t.CreatedAt = time.Now()
 	return t
 }
+
+func (t *Ticket) Expire() {
+	t.Expired = time.Now()
+}

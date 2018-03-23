@@ -49,6 +49,26 @@ func (tm *TicketMapper) LoadByKey(key string) (t *models.Ticket, err error) {
 	return
 }
 
+func (tm *TicketMapper) Save(model *models.Ticket) (err error) {
+	if model.Id == 0 {
+		// insert
+		// TODO
+		log.Warn("Insert for ticket not implemented yet!")
+
+		//id, err := tm.table.Insert(model.Name, model.Keys, model.Jql, model.KnownSpeed, model.MapOpenStatus, model.MapClosedStatus)
+		//if err != nil {
+		//	return errors.New(fmt.Sprintf("Not able to insert ticket in database: %s", err.Error()))
+		//}
+		//model.Id = id
+	} else {
+		// update
+		// TODO
+		log.Warn("Update for ticket not implemented yet!")
+	}
+
+	return
+}
+
 func (tm *TicketMapper) mapRowToModel(rows *sql.Rows, t *models.Ticket) (err error) {
 	err = rows.Scan(&t.Id, &t.Key)
 	return
