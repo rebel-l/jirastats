@@ -9,6 +9,8 @@ import (
 type Ticket struct {
 	issue jira.Issue
 	tm *database.TicketMapper
+	IsNew bool
+	StatusClustered string
 }
 
 func NewTicket(issue jira.Issue, tm *database.TicketMapper) *Ticket {
@@ -35,5 +37,7 @@ func (t *Ticket) Process() {
 	}
 	// TODO insert new one
 
-	// TODO: classify new, open, closed and return this info
+	// TODO: classify clustered status: open, closed and return this info
+
+	// TODO classify as (not) new and return this info
 }

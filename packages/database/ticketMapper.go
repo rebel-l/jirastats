@@ -24,7 +24,7 @@ func (tm *TicketMapper) Load() (collection []*models.Ticket, err error) {
 	}
 
 	for rows.Next() {
-		t := new(models.Ticket)
+		t := models.NewTicket()
 		err = tm.mapRowToModel(rows, t)
 		if err != nil {
 			log.Warnf("Not able to map ticket")
@@ -36,7 +36,7 @@ func (tm *TicketMapper) Load() (collection []*models.Ticket, err error) {
 }
 
 func (tm *TicketMapper) LoadByKey(key string) (t *models.Ticket, err error) {
-	t = new(models.Ticket)
+	t = models.NewTicket()
 	rows, err := tm.table.Select("`key` = ? AND `expired` IS NULL", key)
 	defer rows.Close()
 	if err != nil {

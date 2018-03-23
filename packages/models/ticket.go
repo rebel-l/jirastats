@@ -4,6 +4,9 @@ import (
 	"time"
 )
 
+const TicketStatusClusteredOpen = "Open"
+const TicketStatusClusteredClosed = "Closed"
+
 type Ticket struct {
 	Id int `json:"id"`
 	Key string `json:"key"`
@@ -21,4 +24,10 @@ type Ticket struct {
 	Expired time.Time `json:"expired"`
 }
 
-// TODO: create constructor which sets default values like CreatedAt to  time.Now()
+func NewTicket() *Ticket {
+	t := new(Ticket)
+	t.StatusByJira = "Open"
+	t.StatusClustered = TicketStatusClusteredOpen
+	t.CreatedAt = time.Now()
+	return t
+}
