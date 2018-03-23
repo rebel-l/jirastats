@@ -2,8 +2,12 @@ package database
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 	"github.com/rebel-l/jirastats/packages/models"
 	log "github.com/sirupsen/logrus"
+	"strings"
+	"time"
 )
 
 type TicketMapper struct {
@@ -52,14 +56,24 @@ func (tm *TicketMapper) LoadByKey(key string) (t *models.Ticket, err error) {
 func (tm *TicketMapper) Save(model *models.Ticket) (err error) {
 	if model.Id == 0 {
 		// insert
-		// TODO
-		log.Warn("Insert for ticket not implemented yet!")
+		id, err := tm.table.Insert(
+			model.Key,
+			model.ProjectId,
+			model.Summary,
+			strings.Join(model.Components, ","),
+			strings.Join(model.Labels, ","),
+			model.StatusByJira,
+			model.StatusClustered,
+			model.Priority,
+			model.Issuetype,
+			model.CreatedAtByJira.Format(dateTimeFormat),
+			model.LastUpdatedByJira.Format(dateTimeFormat),
+			model.CreatedAt.Format(dateTimeFormat))
 
-		//id, err := tm.table.Insert(model.Name, model.Keys, model.Jql, model.KnownSpeed, model.MapOpenStatus, model.MapClosedStatus)
-		//if err != nil {
-		//	return errors.New(fmt.Sprintf("Not able to insert ticket in database: %s", err.Error()))
-		//}
-		//model.Id = id
+		if err != nil {
+			return errors.New(fmt.Sprintf("Not able to insert ticket in database: %s", err.Error()))
+		}
+		model.Id = id
 	} else {
 		// update
 		// TODO
@@ -70,6 +84,36 @@ func (tm *TicketMapper) Save(model *models.Ticket) (err error) {
 }
 
 func (tm *TicketMapper) mapRowToModel(rows *sql.Rows, t *models.Ticket) (err error) {
-	err = rows.Scan(&t.Id, &t.Key)
+	var components,
+		labels,
+		createdAtByJira,
+		lastUpdatedAtByJira,
+		createdAt string
+	var expired sql.NullString
+
+	err = rows.Scan(
+		&t.Id,
+		&t.Key,
+		&t.ProjectId,
+		&t.Summary,
+		&components,
+		&labels,
+		&t.StatusByJira,
+		&t.StatusClustered,
+		&t.Priority,
+		&t.Issuetype,
+		&createdAtByJira,
+		&lastUpdatedAtByJira,
+		&createdAt,
+		&expired)
+	t.Components = strings.Split(components, ",")
+	t.Labels = strings.Split(labels, ",")
+	t.CreatedAtByJira, _ = time.Parse(dateTimeFormat, createdAtByJira)
+	t.LastUpdatedByJira, _ = time.Parse(dateTimeFormat, lastUpdatedAtByJira)
+	t.CreatedAt, _ = time.Parse(dateTimeFormat, createdAt)
+	if expired.Valid {
+		t.Expired, _ = time.Parse(dateTimeFormat, expired.String)
+	}
+
 	return
 }

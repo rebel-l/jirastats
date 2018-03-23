@@ -37,7 +37,7 @@ func (t *Ticket) Process() {
 	// 1st find not expired old ticket and process if not changed
 	oldTicket, err := t.tm.LoadByKey(t.issue.Key)
 	if err != nil {
-		log.Error("Couldn't load not expired old ticket: %s", err.Error())
+		log.Errorf("Couldn't load not expired old ticket: %s", err.Error())
 	}
 
 	if oldTicket.Id != 0 {

@@ -24,10 +24,14 @@ const ticketTableStructure =
 		"`expired` DATETIME NULL," +
 		"FOREIGN KEY (project_id) REFERENCES project(`id`)" +
 ");"
-const ticketTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS ticket_key_idx ON %s (`key`);"
+const ticketTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS ticket_key_idx ON %s (`key`, `expired`);"
+const ticketTableInsert =
+	"INSERT INTO %s (" +
+		"`key`, `project_id`, `summary`, `components`, `labels`, `status_by_jira`," +
+		"`status_clustered`, `priority`, `issuetype`, `created_at_by_jira`, `last_updated_by_jira`, `created_at`" +
+	") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
-
-// TicektTable represents the database table for tickets
+// TicketTable represents the database table for tickets
 type TicketTable struct {
 	db *sql.DB
 }
@@ -54,6 +58,36 @@ func (t *TicketTable) Select(where string, args ...interface{}) (rows *sql.Rows,
 	} else {
 		rows, err = stmt.Query()
 	}
+	return
+}
+
+func (t *TicketTable) Insert(
+	key string,
+	projectId int,
+	summary string,
+	components string,
+	labels string,
+	statusByJira string,
+	statusClustered string,
+	priority string,
+	issueType string,
+	createdAtByJira string,
+	lastUpdatedAtByJira string,
+	createdAt string) (id int, err error) {
+
+	stmt, err := t.db.Prepare(createDatabseStatement(ticketTableInsert, ticketTableName))
+	if err != nil {
+		return
+	}
+
+	res, err := stmt.Exec(key, projectId, summary, components, labels, statusByJira, statusClustered, priority, issueType, createdAtByJira, lastUpdatedAtByJira, createdAt)
+	if err != nil {
+		return
+	}
+
+	id64, err := res.LastInsertId()
+	id = int(id64)
+
 	return
 }
 
