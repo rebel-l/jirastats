@@ -12,8 +12,8 @@ type Ticket struct {
 	Key string `json:"key"`
 	ProjectId int `json:"project_id`
 	Summary string `json:"summary"`
-	Components string `json:"components"`
-	Labels string `json:"labels"`
+	Components []string `json:"components"`
+	Labels []string `json:"labels"`
 	StatusByJira string `json:"status_by_jira"`
 	StatusClustered string `json:"status_clustered"`
 	Priority string `json:"priority"`

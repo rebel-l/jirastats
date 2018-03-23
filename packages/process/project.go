@@ -75,7 +75,7 @@ func (p *Project) processTickets(search *jp.Search) (err error) {
 		// TODO: process in channels
 		for _, t := range tickets {
 			tm := database.NewTicketMapper(p.db)
-			tp := NewTicket(t, tm)
+			tp := NewTicket(p.project.Id, t, tm, strings.Split(p.project.MapOpenStatus, ","), strings.Split(p.project.MapClosedStatus, ","))
 			tp.Process()
 		}
 
@@ -87,8 +87,8 @@ func (p *Project) processTickets(search *jp.Search) (err error) {
 }
 
 func (p *Project) getJqlForUpdatedTickets() string {
-	startDate := p.start.AddDate(0, 0, -1).Format(jp.JiraDateFormat)
-	endDate := p.start.Format(jp.JiraDateFormat)
+	startDate := p.start.AddDate(0, 0, -1).Format(jp.JiraJqlDateFormat)
+	endDate := p.start.Format(jp.JiraJqlDateFormat)
 
 	jql := p.project.GetJql() + fmt.Sprintf(" AND updated >= %s AND updated < %s", startDate, endDate)
 	log.Debugf("JQL for updated tickets: %s", jql)
