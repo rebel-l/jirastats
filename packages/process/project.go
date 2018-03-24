@@ -64,7 +64,7 @@ func (p *Project) updateStats() (err error){
 	search := jp.NewSearch(p.jc, p.getJqlForUpdatedTickets())
 	err = p.processTickets(search)
 
-	// TODO: how to figure out the tickets removed from result of jql?
+	// TODO: how to figure out the tickets removed from result of jql? ==> idea: not expired is not existing in overall jql
 
 	// TODO: stats save 1 days ago
 	return

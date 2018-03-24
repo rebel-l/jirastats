@@ -14,9 +14,7 @@ type Ticket struct {
 	projectId int
 	issue jira.Issue
 	tm *database.TicketMapper
-	// TODO: below values not necessary
 	IsNew bool
-	StatusClustered string
 	statusMap map[string][]string
 }
 
@@ -45,7 +43,6 @@ func (t *Ticket) Process() {
 		log.Debugf("Unexpired old ticket (%s) found: %d", t.issue.Key, oldTicket.Id)
 		if t.changed(newTicket, oldTicket) == false {
 			log.Debugf("No changes found for ticket: %d (%s)", oldTicket.Id, oldTicket.Key)
-			t.processStats(oldTicket)
 			return
 		}
 
@@ -56,6 +53,8 @@ func (t *Ticket) Process() {
 			return
 		}
 	} else {
+		// appeared the first time
+		t.IsNew = true
 		log.Debugf("No unexpired old ticket (%s) found", t.issue.Key)
 	}
 
@@ -65,8 +64,6 @@ func (t *Ticket) Process() {
 		log.Errorf("New ticket couldn't be saved: %s, error: %s", newTicket.Key, err.Error())
 		return
 	}
-
-	t.processStats(newTicket)
 }
 
 func (t *Ticket) changed(newTicket *models.Ticket, oldTicket *models.Ticket) bool {
@@ -107,24 +104,4 @@ func (t *Ticket) getNewTicket() *models.Ticket {
 	}
 
 	return newTicket
-}
-
-func (t *Ticket) setIsNew(ticket *models.Ticket) {
-	// TODO: ticket is new if it never appeared in tickets for that project
-	now := time.Now()
-	now = now.AddDate(0, 0, 1)
-
-	if now.Format(jp.JiraJqlDateFormat) == ticket.CreatedAtByJira.Format(jp.JiraJqlDateFormat) {
-		t.IsNew = true
-		log.Debugf("Ticket %s is new", ticket.Key)
-		return
-	}
-
-	log.Debugf("Ticket %s is old", ticket.Key)
-	t.IsNew = false
-}
-
-func (t *Ticket) processStats(ticket *models.Ticket) {
-	t.StatusClustered = ticket.StatusClustered
-	t.setIsNew(ticket)
 }
