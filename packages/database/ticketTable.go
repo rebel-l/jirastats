@@ -24,12 +24,21 @@ const ticketTableStructure =
 		"`expired` DATETIME NULL," +
 		"FOREIGN KEY (project_id) REFERENCES project(`id`)" +
 ");"
+// TODO: add is new flag
+
 const ticketTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS ticket_key_idx ON %s (`key`, `expired`);"
 const ticketTableInsert =
 	"INSERT INTO %s (" +
 		"`key`, `project_id`, `summary`, `components`, `labels`, `status_by_jira`," +
 		"`status_clustered`, `priority`, `issuetype`, `created_at_by_jira`, `last_updated_by_jira`, `created_at`" +
 	") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+const ticketTableUpdate =
+	"UPDATE %s SET " +
+		"`key` = ?, `project_id` = ?, `summary` = ?, `components` = ?, `labels` = ?, " +
+		"`status_by_jira` = ?, `status_clustered` = ?, `priority` = ?, `issuetype` = ?, `created_at_by_jira` = ?, " +
+		"`last_updated_by_jira` = ?, `created_at` = ?, `expired` = ? " +
+	"WHERE `id` = ?"
+
 
 // TicketTable represents the database table for tickets
 type TicketTable struct {
@@ -80,7 +89,19 @@ func (t *TicketTable) Insert(
 		return
 	}
 
-	res, err := stmt.Exec(key, projectId, summary, components, labels, statusByJira, statusClustered, priority, issueType, createdAtByJira, lastUpdatedAtByJira, createdAt)
+	res, err := stmt.Exec(
+		key,
+		projectId,
+		summary,
+		components,
+		labels,
+		statusByJira,
+		statusClustered,
+		priority,
+		issueType,
+		createdAtByJira,
+		lastUpdatedAtByJira,
+		createdAt)
 	if err != nil {
 		return
 	}
@@ -88,6 +109,52 @@ func (t *TicketTable) Insert(
 	id64, err := res.LastInsertId()
 	id = int(id64)
 
+	return
+}
+
+func (t *TicketTable) Update(
+	id int,
+	key string,
+	projectId int,
+	summary string,
+	components string,
+	labels string,
+	statusByJira string,
+	statusClustered string,
+	priority string,
+	issueType string,
+	createdAtByJira string,
+	lastUpdatedAtByJira string,
+	createdAt string,
+	expired string) (rowsAffected int, err error) {
+
+	statement := createDatabseStatement(ticketTableUpdate, ticketTableName)
+	stmt, err := t.db.Prepare(statement)
+	if err != nil {
+		return
+	}
+
+	res, err := stmt.Exec(
+		key,
+		projectId,
+		summary,
+		components,
+		labels,
+		statusByJira,
+		statusClustered,
+		priority,
+		issueType,
+		createdAtByJira,
+		lastUpdatedAtByJira,
+		createdAt,
+		expired,
+		id)
+	if err != nil {
+		return
+	}
+
+	rowsAffected64, err := res.RowsAffected()
+	rowsAffected = int(rowsAffected64)
 	return
 }
 
@@ -126,7 +193,7 @@ func (t *TicketTable) getSelectAllStatement() string {
 
 
 func (t *TicketTable) getSelectCountStatement() string {
-	return createDatabseStatement(SelectCountStatement, statsTableName)
+	return createDatabseStatement(SelectCountStatement, ticketTableName)
 }
 
 func (t *TicketTable) getTruncateStatement() string {

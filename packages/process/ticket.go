@@ -14,6 +14,7 @@ type Ticket struct {
 	projectId int
 	issue jira.Issue
 	tm *database.TicketMapper
+	// TODO: below values not necessary
 	IsNew bool
 	StatusClustered string
 	statusMap map[string][]string
@@ -69,7 +70,16 @@ func (t *Ticket) Process() {
 }
 
 func (t *Ticket) changed(newTicket *models.Ticket, oldTicket *models.Ticket) bool {
-	// TODO implement diff new/old
+	switch {
+		case newTicket.Issuetype != oldTicket.Issuetype:
+		case newTicket.Priority != oldTicket.Priority:
+		case newTicket.StatusClustered != oldTicket.StatusClustered:
+		case newTicket.StatusByJira != oldTicket.StatusByJira:
+		case newTicket.Summary != oldTicket.Summary:
+		case utils.AreStringArrayEqual(newTicket.Components, oldTicket.Components) == false:
+		case utils.AreStringArrayEqual(newTicket.Labels, oldTicket.Labels) == false:
+			return true
+	}
 	return false
 }
 
@@ -100,6 +110,7 @@ func (t *Ticket) getNewTicket() *models.Ticket {
 }
 
 func (t *Ticket) setIsNew(ticket *models.Ticket) {
+	// TODO: ticket is new if it never appeared in tickets for that project
 	now := time.Now()
 	now = now.AddDate(0, 0, 1)
 

@@ -51,6 +51,7 @@ func (p *Project) Process() {
 }
 
 func (p *Project) initStats() (err error) {
+	log.Debugf("Init project stats: %d (%s)", p.project.Id, p.project.Name)
 	search := jp.NewSearch(p.jc, p.getJqlForOpenTickets())
 	err = p.processTickets(search)
 	// TODO: stats save 2 days ago ... and EVERY ticket is NEW
@@ -58,8 +59,12 @@ func (p *Project) initStats() (err error) {
 }
 
 func (p *Project) updateStats() (err error){
+	log.Debugf("Update project stats: %d (%s)", p.project.Id, p.project.Name)
 	search := jp.NewSearch(p.jc, p.getJqlForUpdatedTickets())
 	err = p.processTickets(search)
+
+	// TODO: how to figure out the tickets removed from result of jql?
+
 	// TODO: stats save 1 days ago
 	return
 }

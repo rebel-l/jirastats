@@ -76,8 +76,24 @@ func (tm *TicketMapper) Save(model *models.Ticket) (err error) {
 		model.Id = id
 	} else {
 		// update
-		// TODO
-		log.Warn("Update for ticket not implemented yet!")
+		rowsAffect, err := tm.table.Update(
+			model.Id,
+			model.Key,
+			model.ProjectId,
+			model.Summary,
+			strings.Join(model.Components, ","),
+			strings.Join(model.Labels, ","),
+			model.StatusByJira,
+			model.StatusClustered,
+			model.Priority,
+			model.Issuetype,
+			model.CreatedAtByJira.Format(dateTimeFormat),
+			model.LastUpdatedByJira.Format(dateTimeFormat),
+			model.CreatedAt.Format(dateTimeFormat),
+			model.Expired.Format(dateTimeFormat))
+		if err != nil || rowsAffect != 1 {
+			return errors.New(fmt.Sprintf("Not able to update ticket in database: %s", err.Error()))
+		}
 	}
 
 	return

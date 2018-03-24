@@ -80,5 +80,7 @@ func (pm *ProjectMapper) HasTickets(project *models.Project) bool {
 		return false
 	}
 
+	log.Debugf("%d Tickets found for project %d (%s)", counter, project.Id, project.Name)
+
 	return counter != 0
 }
