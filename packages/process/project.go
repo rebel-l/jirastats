@@ -6,6 +6,7 @@ import (
 	"github.com/andygrunwald/go-jira"
 	"github.com/rebel-l/jirastats/packages/database"
 	"github.com/rebel-l/jirastats/packages/models"
+	"github.com/rebel-l/jirastats/packages/utils"
 	jp "github.com/rebel-l/jirastats/packages/jira"
 	log "github.com/sirupsen/logrus"
 	"strings"
@@ -80,7 +81,9 @@ func (p *Project) processTickets(search *jp.Search) (err error) {
 		// TODO: process in channels
 		for _, t := range tickets {
 			tm := database.NewTicketMapper(p.db)
-			tp := NewTicket(p.project.Id, t, tm, strings.Split(p.project.MapOpenStatus, ","), strings.Split(p.project.MapClosedStatus, ","))
+			mapOpenStatus := utils.TrimMap(strings.Split(p.project.MapOpenStatus, ","))
+			mapClosedStatus := utils.TrimMap(strings.Split(p.project.MapClosedStatus, ","))
+			tp := NewTicket(p.project.Id, t, tm, mapOpenStatus, mapClosedStatus)
 			tp.Process()
 		}
 

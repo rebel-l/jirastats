@@ -1,5 +1,9 @@
 package utils
 
+import (
+	"strings"
+)
+
 func IsValueInMap(list []string, search string) bool {
 	for _, v := range list {
 		if v == search {
@@ -21,4 +25,12 @@ func AreStringArrayEqual(one []string, two []string) bool {
 	}
 
 	return true
+}
+
+func TrimMap(list []string) []string {
+	for k, v := range list {
+		list[k] = strings.TrimSpace(v)
+	}
+
+	return list
 }
