@@ -24,7 +24,6 @@ const ticketTableStructure =
 		"`expired` DATETIME NULL," +
 		"FOREIGN KEY (project_id) REFERENCES project(`id`)" +
 ");"
-// TODO: add is new flag
 
 const ticketTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS ticket_key_idx ON %s (`key`, `expired`);"
 const ticketTableInsert =
