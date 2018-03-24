@@ -14,8 +14,9 @@ const statsTableStructure =
 	"CREATE TABLE IF NOT EXISTS `%s` (" +
 		"`id` INTEGER PRIMARY KEY AUTOINCREMENT," +
 		"`project_id` INTEGER NOT NULL," +
-		"`status` CHAR(50) NOT NULL," +
-		"`counter` INTEGER DEFAULT 0 NOT NULL," +
+		"`open` INTEGER DEFAULT 0 NOT NULL," +
+		"`closed` INTEGER DEFAULT 0 NOT NULL," +
+		"`new` INTEGER DEFAULT 0 NOT NULL," +
 		"`created_at` DATE NOT NULL," +
 		"FOREIGN KEY (project_id) REFERENCES project(`id`)" +
 	");"

@@ -18,15 +18,15 @@ type Project struct {
 	jc *jira.Client
 	project *models.Project
 	start time.Time
-	counterOpen int
-	counterNew int
-	counterClosed int
+	actualRun time.Time
+	stats *models.Stats
 	pm *database.ProjectMapper
 }
 
 func NewProject(project *models.Project, jc *jira.Client, db *sql.DB) *Project {
 	p := new(Project)
 	p.start = time.Now()
+	p.actualRun = p.start.AddDate(0, 0, -1)
 	p.project = project
 	p.jc = jc
 	p.pm = database.NewProjectMapper(db)
@@ -53,24 +53,29 @@ func (p *Project) Process() {
 
 func (p *Project) initStats() (err error) {
 	log.Debugf("Init project stats: %d (%s)", p.project.Id, p.project.Name)
+	p.stats = models.NewStats()
+	p.stats.CreatedAt = p.actualRun.AddDate(0, 0, -1) // Initial stats needs to be saved two days ago
 	search := jp.NewSearch(p.jc, p.getJqlForOpenTickets())
 	err = p.processTickets(search)
-	// TODO: stats save 2 days ago ... and EVERY ticket is NEW
+	err = p.processStats()
 	return
 }
 
 func (p *Project) updateStats() (err error){
 	log.Debugf("Update project stats: %d (%s)", p.project.Id, p.project.Name)
+	p.stats = models.NewStats()
+	p.stats.CreatedAt = p.actualRun // Updated stats needs to be saved 1 day ago
 	search := jp.NewSearch(p.jc, p.getJqlForUpdatedTickets())
 	err = p.processTickets(search)
 
 	// TODO: how to figure out the tickets removed from result of jql? ==> idea: not expired is not existing in overall jql
 
-	// TODO: stats save 1 days ago
+	err = p.processStats()
 	return
 }
 
 func (p *Project) processTickets(search *jp.Search) (err error) {
+	i := 0
 	for {
 		tickets, err := search.Do()
 		if err != nil {
@@ -80,22 +85,33 @@ func (p *Project) processTickets(search *jp.Search) (err error) {
 
 		// TODO: process in channels
 		for _, t := range tickets {
+			i++
 			tm := database.NewTicketMapper(p.db)
 			mapOpenStatus := utils.TrimMap(strings.Split(p.project.MapOpenStatus, ","))
 			mapClosedStatus := utils.TrimMap(strings.Split(p.project.MapClosedStatus, ","))
 			tp := NewTicket(p.project.Id, t, tm, mapOpenStatus, mapClosedStatus)
 			tp.Process()
+			if tp.IsNew {
+				p.stats.New++
+			}
 		}
 
 		if search.Next() == false {
 			break
 		}
 	}
+
+	log.Debugf("Tickets for project %d (%s) processed: %d", p.project.Id, p.project.Name, i)
+	return
+}
+
+func (p *Project) processStats() (err error) {
+	log.Infof("Stats processed: %d open, %d closed, %d new", p.stats.Open, p.stats.Closed, p.stats.New)
 	return
 }
 
 func (p *Project) getJqlForUpdatedTickets() string {
-	startDate := p.start.AddDate(0, 0, -1).Format(jp.JiraJqlDateFormat)
+	startDate := p.actualRun.Format(jp.JiraJqlDateFormat)
 	endDate := p.start.Format(jp.JiraJqlDateFormat)
 
 	jql := p.project.GetJql() + fmt.Sprintf(" AND updated >= %s AND updated < %s", startDate, endDate)

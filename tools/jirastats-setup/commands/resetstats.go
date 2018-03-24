@@ -12,13 +12,15 @@ import (
 
 // ResetStats command deletes all stats data
 type ResetStats struct {
-	db *sql.DB
+	db *sql.DB // TODO: deprecated, use statement instead
+	statement *database.Statement
 }
 
 // NewResetsStats returns ResetStats struct
 func NewResetStats(db *sql.DB) *ResetStats {
 	rs := new(ResetStats)
 	rs.db = db
+	rs.statement = database.NewStatement(db)
 	return rs
 }
 
@@ -41,7 +43,7 @@ func (rs *ResetStats) Execute() (err error) {
 
 // resetTicketTable deletes all data in table ticket
 func (rs *ResetStats) resetTicketTable() error {
-	tt := database.NewTicketTable(rs.db)
+	tt := database.NewTicketTable(rs.statement)
 	return tt.Truncate()
 }
 

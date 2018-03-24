@@ -24,7 +24,6 @@ const ticketTableStructure =
 		"`expired` DATETIME NULL," +
 		"FOREIGN KEY (project_id) REFERENCES project(`id`)" +
 ");"
-
 const ticketTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS ticket_key_idx ON %s (`key`, `expired`);"
 const ticketTableInsert =
 	"INSERT INTO %s (" +
@@ -41,31 +40,29 @@ const ticketTableUpdate =
 
 // TicketTable represents the database table for tickets
 type TicketTable struct {
-	db *sql.DB
+	statement *Statement
 }
 
-func NewTicketTable(db *sql.DB) *TicketTable {
+func NewTicketTable(statement *Statement) *TicketTable {
 	t := new(TicketTable)
-	t.db = db
+	t.statement = statement
 	return t
 }
 
-func (t *TicketTable) Select(where string, args ...interface{}) (rows *sql.Rows, err error){
-	statement := t.getSelectAllStatement()
-	if where != "" {
-		statement += " WHERE " + where
-	}
+func (t *TicketTable) Select(where string, args ...interface{}) (rows *sql.Rows, err error) {
+	// TODO: deprecated to fulfill interface. Use complex instead for interface
+	rows, err = t.SelectComplex(where, "", "", "", args...)
+	return
+}
 
-	stmt, err := t.db.Prepare(statement)
-	if err != nil {
-		return
-	}
+func (t *TicketTable) SelectComplex(
+	where string,
+	order string,
+	fields string,
+	group string,
+	args ...interface{}) (rows *sql.Rows, err error){
 
-	if args != nil {
-		rows, err = stmt.Query(args...)
-	} else {
-		rows, err = stmt.Query()
-	}
+	rows, err = t.statement.doSelect(ticketTableName, where, order, fields, group, args...)
 	return
 }
 
@@ -83,12 +80,9 @@ func (t *TicketTable) Insert(
 	lastUpdatedAtByJira string,
 	createdAt string) (id int, err error) {
 
-	stmt, err := t.db.Prepare(createDatabseStatement(ticketTableInsert, ticketTableName))
-	if err != nil {
-		return
-	}
-
-	res, err := stmt.Exec(
+	res, err := t.statement.execute(
+		ticketTableInsert,
+		ticketTableName,
 		key,
 		projectId,
 		summary,
@@ -127,13 +121,9 @@ func (t *TicketTable) Update(
 	createdAt string,
 	expired string) (rowsAffected int, err error) {
 
-	statement := createDatabseStatement(ticketTableUpdate, ticketTableName)
-	stmt, err := t.db.Prepare(statement)
-	if err != nil {
-		return
-	}
-
-	res, err := stmt.Exec(
+	res, err := t.statement.execute(
+		ticketTableUpdate,
+		ticketTableName,
 		key,
 		projectId,
 		summary,
@@ -158,22 +148,7 @@ func (t *TicketTable) Update(
 }
 
 func (t *TicketTable) Count(where string, args ...interface{}) (counter int, err error) {
-	statement := t.getSelectCountStatement()
-	if where != "" {
-		statement += " WHERE " + where
-	}
-
-	stmt, err := t.db.Prepare(statement)
-	if err != nil {
-		return
-	}
-
-	var rows *sql.Rows
-	if args != nil {
-		rows, err = stmt.Query(args...)
-	} else {
-		rows, err = stmt.Query()
-	}
+	rows, err := t.statement.doSelect(ticketTableName, where, "", exprCount, "", args...)
 	defer rows.Close()
 	if err != nil {
 		return
@@ -190,41 +165,20 @@ func (t *TicketTable) getSelectAllStatement() string {
 	return createDatabseStatement(SelectAllStatement, ticketTableName)
 }
 
-
-func (t *TicketTable) getSelectCountStatement() string {
-	return createDatabseStatement(SelectCountStatement, ticketTableName)
-}
-
-func (t *TicketTable) getTruncateStatement() string {
-	return createDatabseStatement(TruncateTable, ticketTableName)
-}
-
-func (t *TicketTable) Truncate() (err error) {
-	stmt, err := t.db.Prepare(t.getTruncateStatement())
-	if err != nil {
-		return
-	}
-	_, err = stmt.Exec()
-	return
+func (t *TicketTable) Truncate() error {
+	_, err := t.statement.execute(TruncateTable, ticketTableName)
+	return err
 }
 
 func (t *TicketTable) CreateStructure() (err error) {
 	log.Debugf("Create structure for %s", ticketTableName)
 	// create table
-	err = executeStatement(t.db, t.getCreateTableStatement())
+	_, err = t.statement.execute(ticketTableStructure, ticketTableName)
 	if err != nil {
 		return
 	}
 
 	// create index
-	err = executeStatement(t.db, t.getCreateIndexStatement())
+	_, err = t.statement.execute(ticketTableIndex, ticketTableName)
 	return
-}
-
-func (t *TicketTable) getCreateTableStatement() string {
-	return createDatabseStatement(ticketTableStructure, ticketTableName)
-}
-
-func (t *TicketTable) getCreateIndexStatement() string {
-	return createDatabseStatement(ticketTableIndex, ticketTableName)
 }

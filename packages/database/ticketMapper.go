@@ -16,12 +16,12 @@ type TicketMapper struct {
 
 func NewTicketMapper(db *sql.DB) *TicketMapper {
 	tm := new(TicketMapper)
-	tm.table = NewTicketTable(db)
+	tm.table = NewTicketTable(NewStatement(db))
 	return tm
 }
 
 func (tm *TicketMapper) Load() (collection []*models.Ticket, err error) {
-	rows, err := tm.table.Select("")
+	rows, err := tm.table.SelectComplex("", "", "", "")
 	defer rows.Close()
 	if err != nil {
 		return
@@ -41,7 +41,7 @@ func (tm *TicketMapper) Load() (collection []*models.Ticket, err error) {
 
 func (tm *TicketMapper) LoadByKey(key string) (t *models.Ticket, err error) {
 	t = models.NewTicket()
-	rows, err := tm.table.Select("`key` = ? AND `expired` IS NULL", key)
+	rows, err := tm.table.SelectComplex("`key` = ? AND `expired` IS NULL", "", "", "", key)
 	defer rows.Close()
 	if err != nil {
 		return
