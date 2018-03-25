@@ -51,7 +51,6 @@ func NewTicketTable(statement *Statement) *TicketTable {
 }
 
 func (t *TicketTable) Select(where string, args ...interface{}) (rows *sql.Rows, err error) {
-	// TODO: deprecated to fulfill interface. Use complex instead for interface
 	rows, err = t.SelectComplex(where, "", "", "", args...)
 	return
 }
