@@ -6,7 +6,7 @@ import (
 )
 
 type StatsTable struct {
-	db *sql.DB
+	statement *Statement
 }
 
 const statsTableName = "stats"
@@ -20,56 +20,104 @@ const statsTableStructure =
 		"`created_at` DATE NOT NULL," +
 		"FOREIGN KEY (project_id) REFERENCES project(`id`)" +
 	");"
+const statsTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS stats_project_created_idx ON %s (`project_id`, `created_at`);"
+const statsTableInsert =
+	"INSERT INTO %s (" +
+		"`project_id`, `open`, `closed`, `new`, `created_at`" +
+	") VALUES (?, ?, ?, ?, ?)"
+const statsTableUpdate =
+	"UPDATE %s SET " +
+		"``project_id` = ?, `open` = ?, `closed` = ?, `new` = ?, `created_at` = ? " +
+	"WHERE `id` = ?"
 
-func NewSatsTable(db *sql.DB) *StatsTable {
+func NewStatsTable(statement *Statement) *StatsTable {
 	s := new(StatsTable)
-	s.db = db
+	s.statement = statement
 	return s
 }
 
 func (s *StatsTable) Truncate() (err error) {
-	stmt, err := s.db.Prepare(s.getTruncateStatement())
-	if err != nil {
-		return
-	}
-	_, err = stmt.Exec()
+	_, err = s.statement.execute(TruncateTable, statsTableName)
 	return
-}
-
-func (s *StatsTable) getTruncateStatement() string {
-	return createDatabseStatement(TruncateTable, statsTableName)
 }
 
 func (s *StatsTable) CreateStructure() (err error) {
 	log.Debugf("Create structure for %s", statsTableName)
+
 	// create table
-	err = executeStatement(s.db, s.getCreateTableStatement())
-	return
-}
-
-func (s *StatsTable) getCreateTableStatement() string {
-	return createDatabseStatement(statsTableStructure, statsTableName)
-}
-
-func (s *StatsTable) Select(where string, args ...interface{}) (rows *sql.Rows, err error){
-	statement := s.getSelectAllStatement()
-	if where != "" {
-		statement += " WHERE " + where
-	}
-
-	stmt, err := s.db.Prepare(statement)
+	_, err = s.statement.execute(statsTableStructure, statsTableName)
 	if err != nil {
 		return
 	}
 
-	if args != nil {
-		rows, err = stmt.Query(args...)
-	} else {
-		rows, err = stmt.Query()
-	}
+	// create index
+	_, err = s.statement.execute(statsTableIndex, statsTableName)
 	return
 }
 
-func (s *StatsTable) getSelectAllStatement() string {
-	return createDatabseStatement(SelectAllStatement, statsTableName)
+func (s *StatsTable) Select(where string, args ...interface{}) (rows *sql.Rows, err error){
+	rows, err = s.SelectComplex(where, "", "", "", args...)
+	return
+}
+
+func (s *StatsTable) SelectComplex(
+	where string,
+	order string,
+	fields string,
+	group string,
+	args ...interface{}) (rows *sql.Rows, err error){
+
+	rows, err = s.statement.doSelect(statsTableName, where, order, fields, group, args...)
+	return
+}
+
+func (s *StatsTable) Insert(
+	projectId int,
+	open int,
+	closed int,
+	new int,
+	createdAt string) (id int, err error) {
+
+	res, err := s.statement.execute(
+		statsTableInsert,
+		statsTableName,
+		projectId,
+		open,
+		closed,
+		new,
+		createdAt)
+	if err != nil {
+		return
+	}
+
+	id64, err := res.LastInsertId()
+	id = int(id64)
+
+	return
+}
+
+func (s *StatsTable) Update(
+	id int,
+	projectId int,
+	open int,
+	closed int,
+	new int,
+	createdAt string) (rowsAffected int, err error) {
+
+	res, err := s.statement.execute(
+		statsTableUpdate,
+		statsTableName,
+		projectId,
+		open,
+		closed,
+		new,
+		createdAt,
+		id)
+	if err != nil {
+		return
+	}
+
+	rowsAffected64, err := res.RowsAffected()
+	rowsAffected = int(rowsAffected64)
+	return
 }

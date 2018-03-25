@@ -49,7 +49,7 @@ func (rs *ResetStats) resetTicketTable() error {
 
 // resetStatsTable deletes all data in table stats
 func (rs *ResetStats) resetStatsTable() error {
-	s := database.NewSatsTable(rs.db)
+	s := database.NewStatsTable(rs.statement)
 	return s.Truncate()
 }
 

@@ -21,6 +21,7 @@ type Project struct {
 	actualRun time.Time
 	stats *models.Stats
 	pm *database.ProjectMapper
+	sm *database.StatsMapper
 }
 
 func NewProject(project *models.Project, jc *jira.Client, db *sql.DB) *Project {
@@ -30,6 +31,7 @@ func NewProject(project *models.Project, jc *jira.Client, db *sql.DB) *Project {
 	p.project = project
 	p.jc = jc
 	p.pm = database.NewProjectMapper(db)
+	p.sm = database.NewStatsMapper(db)
 	p.db = db
 	return p
 }
@@ -53,7 +55,7 @@ func (p *Project) Process() {
 
 func (p *Project) initStats() (err error) {
 	log.Debugf("Init project stats: %d (%s)", p.project.Id, p.project.Name)
-	p.stats = models.NewStats()
+	p.stats = models.NewStats(p.project.Id)
 	p.stats.CreatedAt = p.actualRun.AddDate(0, 0, -1) // Initial stats needs to be saved two days ago
 	search := jp.NewSearch(p.jc, p.getJqlForOpenTickets())
 	err = p.processTickets(search)
@@ -63,7 +65,7 @@ func (p *Project) initStats() (err error) {
 
 func (p *Project) updateStats() (err error){
 	log.Debugf("Update project stats: %d (%s)", p.project.Id, p.project.Name)
-	p.stats = models.NewStats()
+	p.stats = models.NewStats(p.project.Id)
 	p.stats.CreatedAt = p.actualRun // Updated stats needs to be saved 1 day ago
 	search := jp.NewSearch(p.jc, p.getJqlForUpdatedTickets())
 	err = p.processTickets(search)
@@ -120,10 +122,8 @@ func (p *Project) processStats() (err error) {
 		return
 	}
 
+	err = p.sm.Save(p.stats)
 	log.Infof("Stats processed: %d open, %d closed, %d new", p.stats.Open, p.stats.Closed, p.stats.New)
-
-	// TODO: save stats here
-
 	return
 }
 

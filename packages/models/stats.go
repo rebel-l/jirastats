@@ -13,8 +13,9 @@ type Stats struct {
 	CreatedAt time.Time
 }
 
-func NewStats() *Stats {
+func NewStats(projectId int) *Stats {
 	s := new(Stats)
 	s.CreatedAt = time.Now()
+	s.ProjectId = projectId
 	return s
 }
