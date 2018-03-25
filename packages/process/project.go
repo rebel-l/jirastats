@@ -27,7 +27,7 @@ type Project struct {
 func NewProject(project *models.Project, jc *jira.Client, db *sql.DB) *Project {
 	p := new(Project)
 	p.start = time.Now()
-	p.actualRun = p.start.AddDate(0, 0, -1)
+	p.actualRun = p.start.AddDate(0, 0, -1) // TODO: must be -1, just used -2 for testing
 	p.project = project
 	p.jc = jc
 	p.pm = database.NewProjectMapper(db)
@@ -156,7 +156,7 @@ func (p *Project) processRemoved() (err error) {
 		}
 
 		// TODO: parallelize in channels
-		p.markTicketsToKeep(res, tickets)
+		i += p.markTicketsToKeep(res, tickets)
 		if search.Next() == false {
 			break
 		}
