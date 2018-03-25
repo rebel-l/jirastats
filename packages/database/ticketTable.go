@@ -164,10 +164,6 @@ func (t *TicketTable) Count(where string, args ...interface{}) (counter int, err
 	return
 }
 
-func (t *TicketTable) getSelectAllStatement() string {
-	return createDatabseStatement(SelectAllStatement, ticketTableName)
-}
-
 func (t *TicketTable) Truncate() error {
 	_, err := t.statement.execute(TruncateTable, ticketTableName)
 	return err
