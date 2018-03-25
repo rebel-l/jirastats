@@ -10,15 +10,15 @@ const method = "POST"
 const searchEndpoint = "/rest/api/2/search"
 
 type Search struct {
-	client *jira.Client
-	request *search.Request
-	total int
+	client  *jira.Client
+	Request *search.Request
+	total   int
 }
 
 func NewSearch(client *jira.Client, jql string) *Search {
 	s := new(Search)
 	s.client = client
-	s.request = search.NewRequest(jql)
+	s.Request = search.NewRequest(jql)
 	return s
 }
 
@@ -26,7 +26,7 @@ func (s *Search) Do() (result []jira.Issue, err error) {
 
 	searchResponse := new(search.Response)
 
-	req, _ := s.client.NewRequest(method, searchEndpoint, s.request)
+	req, _ := s.client.NewRequest(method, searchEndpoint, s.Request)
 	_, err = s.client.Do(req, searchResponse)
 	if err != nil {
 		log.Error(err)
@@ -57,6 +57,6 @@ func (s *Search) Next() bool {
 		3: t ==> 21, start ==> 20, max ==> 10 ==> continue
 		4: t ==> 21, start ==> 30, max ==> 10 ==> exit
 	*/
-	s.request.Next()
-	return s.total > s.request.StartAt
+	s.Request.Next()
+	return s.total > s.Request.StartAt
 }

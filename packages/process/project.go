@@ -69,8 +69,14 @@ func (p *Project) updateStats() (err error){
 	p.stats.CreatedAt = p.actualRun // Updated stats needs to be saved 1 day ago
 	search := jp.NewSearch(p.jc, p.getJqlForUpdatedTickets())
 	err = p.processTickets(search)
+	if err != nil {
+		return
+	}
 
-	// TODO: how to figure out the tickets removed from result of jql? ==> idea: not expired is not existing in overall jql
+	err = p.processRemoved()
+	if err != nil {
+		return
+	}
 
 	err = p.processStats()
 	return
@@ -126,6 +132,74 @@ func (p *Project) processStats() (err error) {
 	log.Infof("Stats processed: %d open, %d closed, %d new", p.stats.Open, p.stats.Closed, p.stats.New)
 	return
 }
+
+func (p *Project) processRemoved() (err error) {
+	// how to figure out the tickets removed from result of jql? ==> idea: not expired is not existing in overall jql
+	tm := database.NewTicketMapper(p.db)
+	tickets, err := tm.LoadNotExpired(p.project.Id)
+	if err != nil {
+		return
+	}
+
+	log.Debugf("Found %d not expired tickets", len(tickets))
+
+
+	search := jp.NewSearch(p.jc, p.project.GetJql())
+	search.Request.MaxResults = 20
+	search.Request.Fields = make([]string, 0)
+	i := 0
+	for {
+		res, err := search.Do()
+		if err != nil {
+			log.Errorf("Project (Id: %d, Name: %s) removed were not processed: %s", p.project.Id, p.project.Name, err.Error())
+			return err
+		}
+
+		// TODO: parallelize in channels
+		p.markTicketsToKeep(res, tickets)
+		if search.Next() == false {
+			break
+		}
+	}
+
+	j, err := p.expireRemoved(tickets, tm)
+	if err != nil {
+		log.Errorf("Removed tickets couldn't be expired: %s", err.Error())
+	}
+
+	log.Debugf("Removed processed: %d, Kept: %d/%d", i, j, len(tickets))
+	return
+}
+
+func (p *Project) markTicketsToKeep(jiraTickets []jira.Issue, tickets []*models.Ticket) (processed int) {
+	for _, jt := range jiraTickets {
+		processed++
+		for _, t := range tickets {
+			if jt.Key == t.Key {
+				// mark ticket to keep
+				t.Id = 0
+			}
+		}
+	}
+	return
+}
+
+func (p *Project) expireRemoved(tickets []*models.Ticket, tm *database.TicketMapper) (kept int, err error) {
+	for _, t := range tickets {
+		// expire all which still has an id > 0
+		if t.Id == 0 {
+			kept++
+			continue
+		}
+
+		t.Expire()
+		err = tm.Save(t)
+		return
+	}
+	return
+}
+
+
 
 func (p *Project) getJqlForUpdatedTickets() string {
 	startDate := p.actualRun.Format(jp.JiraJqlDateFormat)

@@ -21,17 +21,34 @@ func NewTicketMapper(db *sql.DB) *TicketMapper {
 }
 
 func (tm *TicketMapper) Load() (collection []*models.Ticket, err error) {
-	rows, err := tm.table.SelectComplex("", "", "", "")
+	rows, err := tm.table.Select("")
 	defer rows.Close()
 	if err != nil {
 		return
 	}
 
+	collection = tm.mapRows(rows)
+	return
+}
+
+func (tm *TicketMapper) LoadNotExpired(projectId int) (collection []*models.Ticket, err error) {
+	rows, err := tm.table.Select("`project_id` = ? AND `expired` IS NULL", projectId)
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	collection = tm.mapRows(rows)
+	return
+}
+
+func (tm *TicketMapper) mapRows(rows *sql.Rows) (collection []*models.Ticket) {
 	for rows.Next() {
 		t := models.NewTicket()
-		err = tm.mapRowToModel(rows, t)
+		err := tm.mapRowToModel(rows, t)
 		if err != nil {
-			log.Warnf("Not able to map ticket")
+			log.Warnf("Not able to map ticket: %s", err.Error())
+			continue
 		}
 
 		collection = append(collection, t)
