@@ -98,7 +98,7 @@ func (t *Ticket) getNewTicket() *models.Ticket {
 
 	for clusteredStatus, statusMap := range t.statusMap {
 		if utils.IsValueInMap(statusMap, newTicket.StatusByJira) {
-			newTicket.StatusClustered = clusteredStatus
+			newTicket.SetStatusClustered(clusteredStatus)
 			break
 		}
 	}

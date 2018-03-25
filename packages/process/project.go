@@ -106,7 +106,24 @@ func (p *Project) processTickets(search *jp.Search) (err error) {
 }
 
 func (p *Project) processStats() (err error) {
+	tm := database.NewTicketMapper(p.db)
+
+	// open = expired null && status_clustered open
+	p.stats.Open, err = tm.CountStatusClusteredAndNotExpired(models.TicketStatusClusteredOpen)
+	if err != nil {
+		return
+	}
+
+	// closed = expired today && status closed and is the first closed entry
+	p.stats.Closed, err = tm.CountStatusClusteredFromDay(models.TicketStatusClusteredClosed, time.Now())
+	if err != nil {
+		return
+	}
+
 	log.Infof("Stats processed: %d open, %d closed, %d new", p.stats.Open, p.stats.Closed, p.stats.New)
+
+	// TODO: save stats here
+
 	return
 }
 

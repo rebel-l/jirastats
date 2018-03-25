@@ -54,6 +54,12 @@ func (tm *TicketMapper) LoadByKey(key string) (t *models.Ticket, err error) {
 }
 
 func (tm *TicketMapper) Save(model *models.Ticket) (err error) {
+	var expired sql.NullString
+	if model.Expired.Year() > 1 {
+		expired.Valid = true
+		expired.String = model.Expired.Format(dateTimeFormat)
+	}
+
 	if model.Id == 0 {
 		// insert
 		id, err := tm.table.Insert(
@@ -68,7 +74,8 @@ func (tm *TicketMapper) Save(model *models.Ticket) (err error) {
 			model.Issuetype,
 			model.CreatedAtByJira.Format(dateTimeFormat),
 			model.LastUpdatedByJira.Format(dateTimeFormat),
-			model.CreatedAt.Format(dateTimeFormat))
+			model.CreatedAt.Format(dateTimeFormat),
+			expired)
 
 		if err != nil {
 			return errors.New(fmt.Sprintf("Not able to insert ticket in database: %s", err.Error()))
@@ -90,9 +97,40 @@ func (tm *TicketMapper) Save(model *models.Ticket) (err error) {
 			model.CreatedAtByJira.Format(dateTimeFormat),
 			model.LastUpdatedByJira.Format(dateTimeFormat),
 			model.CreatedAt.Format(dateTimeFormat),
-			model.Expired.Format(dateTimeFormat))
+			expired)
 		if err != nil || rowsAffect != 1 {
 			return errors.New(fmt.Sprintf("Not able to update ticket in database: %s", err.Error()))
+		}
+	}
+
+	return
+}
+
+func (tm *TicketMapper) CountStatusClusteredAndNotExpired(status string) (count int, err error) {
+	count, err = tm.table.Count("`status_clustered` = ? AND `expired` IS NULL", status)
+	return
+}
+
+func (tm *TicketMapper) CountStatusClusteredFromDay(status string, day time.Time) (count int, err error) {
+	where := "`status_clustered` = ?"
+	fields := "MAX(`expired`)"
+	group := "`key` HAVING COUNT(*) = 1"
+	rows, err := tm.table.SelectComplex(where, "", fields, group, status)
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	var maxExpired sql.NullString
+	dayString := day.Format(dateFormat)
+	for rows.Next() {
+		err = rows.Scan(&maxExpired)
+		if err != nil {
+			return
+		}
+
+		if maxExpired.Valid && dayString == maxExpired.String[0:10]{
+			count++
 		}
 	}
 

@@ -35,3 +35,10 @@ func NewTicket() *Ticket {
 func (t *Ticket) Expire() {
 	t.Expired = time.Now()
 }
+
+func (t *Ticket) SetStatusClustered(status string)  {
+	t.StatusClustered = status
+	if t.StatusClustered == TicketStatusClusteredClosed && t.Expired.Year() == 1 {
+		t.Expire()
+	}
+}

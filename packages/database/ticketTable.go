@@ -27,9 +27,10 @@ const ticketTableStructure =
 const ticketTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS ticket_key_idx ON %s (`key`, `expired`);"
 const ticketTableInsert =
 	"INSERT INTO %s (" +
-		"`key`, `project_id`, `summary`, `components`, `labels`, `status_by_jira`," +
-		"`status_clustered`, `priority`, `issuetype`, `created_at_by_jira`, `last_updated_by_jira`, `created_at`" +
-	") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+		"`key`, `project_id`, `summary`, `components`, `labels`, " +
+		"`status_by_jira`, `status_clustered`, `priority`, `issuetype`, `created_at_by_jira`, " +
+		"`last_updated_by_jira`, `created_at`, `expired`" +
+	") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 const ticketTableUpdate =
 	"UPDATE %s SET " +
 		"`key` = ?, `project_id` = ?, `summary` = ?, `components` = ?, `labels` = ?, " +
@@ -78,7 +79,8 @@ func (t *TicketTable) Insert(
 	issueType string,
 	createdAtByJira string,
 	lastUpdatedAtByJira string,
-	createdAt string) (id int, err error) {
+	createdAt string,
+	expired sql.NullString) (id int, err error) {
 
 	res, err := t.statement.execute(
 		ticketTableInsert,
@@ -94,7 +96,8 @@ func (t *TicketTable) Insert(
 		issueType,
 		createdAtByJira,
 		lastUpdatedAtByJira,
-		createdAt)
+		createdAt,
+		expired)
 	if err != nil {
 		return
 	}
@@ -119,7 +122,7 @@ func (t *TicketTable) Update(
 	createdAtByJira string,
 	lastUpdatedAtByJira string,
 	createdAt string,
-	expired string) (rowsAffected int, err error) {
+	expired sql.NullString) (rowsAffected int, err error) {
 
 	res, err := t.statement.execute(
 		ticketTableUpdate,
