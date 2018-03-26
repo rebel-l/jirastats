@@ -7,8 +7,12 @@ import (
 	"github.com/rebel-l/jirastats/packages/utils"
 	jp "github.com/rebel-l/jirastats/packages/jira"
 	log "github.com/sirupsen/logrus"
+	"strings"
 	"time"
 )
+
+const retries = 3
+const wait = 10
 
 type Ticket struct {
 	projectId int
@@ -59,10 +63,18 @@ func (t *Ticket) Process() {
 	}
 
 	// 2nd process new ticket
-	err = t.tm.Save(newTicket)
-	if err != nil {
-		log.Errorf("New ticket couldn't be saved: %s, error: %s", newTicket.Key, err.Error())
-		return
+	for i := 0; i < retries; i++ {
+		err = t.tm.Save(newTicket)
+		if err == nil {
+			break
+		}
+
+		if strings.Contains(err.Error(), "locked") == false || i == retries - 1 {
+			log.Errorf("New ticket couldn't be saved: %s, error: %s", newTicket.Key, err.Error())
+			return
+		}
+
+		time.Sleep(wait * time.Millisecond)
 	}
 }
 

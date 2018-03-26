@@ -49,12 +49,12 @@ func (p *Project) Process() {
 
 	t := time.Now()
 	elapsed := t.Sub(p.start)
-	log.Infof("Project (Id: %d, Name: %s) was successful processed in %f seconds", p.project.Id, p.project.Name, elapsed.Seconds())
+	log.Infof("Project (Id: %d, Name: %s) was successful processed in %s", p.project.Id, p.project.Name, elapsed.String())
 	return
 }
 
 func (p *Project) initStats() (err error) {
-	log.Debugf("Init project stats: %d (%s)", p.project.Id, p.project.Name)
+	log.Infof("Init project stats: %d (%s)", p.project.Id, p.project.Name)
 	p.stats = models.NewStats(p.project.Id)
 	p.stats.CreatedAt = p.actualRun.AddDate(0, 0, -1) // Initial stats needs to be saved two days ago
 	search := jp.NewSearch(p.jc, p.getJqlForOpenTickets())
@@ -64,7 +64,7 @@ func (p *Project) initStats() (err error) {
 }
 
 func (p *Project) updateStats() (err error){
-	log.Debugf("Update project stats: %d (%s)", p.project.Id, p.project.Name)
+	log.Infof("Update project stats: %d (%s)", p.project.Id, p.project.Name)
 	p.stats = models.NewStats(p.project.Id)
 	p.stats.CreatedAt = p.actualRun // Updated stats needs to be saved 1 day ago
 	search := jp.NewSearch(p.jc, p.getJqlForUpdatedTickets())
@@ -83,7 +83,7 @@ func (p *Project) updateStats() (err error){
 }
 
 func (p *Project) processTickets(search *jp.Search) (err error) {
-	i := 0
+	pCounter := 0
 	mapOpenStatus := utils.TrimMap(strings.Split(p.project.MapOpenStatus, ","))
 	mapClosedStatus := utils.TrimMap(strings.Split(p.project.MapClosedStatus, ","))
 	for {
@@ -93,13 +93,19 @@ func (p *Project) processTickets(search *jp.Search) (err error) {
 			return err
 		}
 
+		cOut := make(chan bool)
 		for _, t := range tickets {
-			i++
-			// TODO: process in channels
-			tm := database.NewTicketMapper(p.db)
-			tp := NewTicket(p.project.Id, t, tm, mapOpenStatus, mapClosedStatus)
-			tp.Process()
-			if tp.IsNew {
+			pCounter++
+			go func(jt jira.Issue) {
+				tm := database.NewTicketMapper(p.db)
+				tp := NewTicket(p.project.Id, jt, tm, mapOpenStatus, mapClosedStatus)
+				tp.Process()
+				cOut <- tp.IsNew
+			}(t)
+		}
+
+		for i := 0; i < len(tickets); i++ {
+			if <- cOut {
 				p.stats.New++
 			}
 		}
@@ -109,7 +115,7 @@ func (p *Project) processTickets(search *jp.Search) (err error) {
 		}
 	}
 
-	log.Debugf("Tickets for project %d (%s) processed: %d", p.project.Id, p.project.Name, i)
+	log.Debugf("Tickets for project %d (%s) processed: %d", p.project.Id, p.project.Name, pCounter)
 	return
 }
 
@@ -198,8 +204,6 @@ func (p *Project) expireRemoved(tickets []*models.Ticket, tm *database.TicketMap
 	}
 	return
 }
-
-
 
 func (p *Project) getJqlForUpdatedTickets() string {
 	startDate := p.actualRun.Format(jp.JiraJqlDateFormat)
