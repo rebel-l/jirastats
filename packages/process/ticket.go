@@ -11,9 +11,6 @@ import (
 	"time"
 )
 
-const retries = 3
-const wait = 10
-
 type Ticket struct {
 	projectId int
 	issue jira.Issue
@@ -63,18 +60,18 @@ func (t *Ticket) Process() {
 	}
 
 	// 2nd process new ticket
-	for i := 0; i < retries; i++ {
+	for i := 0; i < retryMax; i++ {
 		err = t.tm.Save(newTicket)
 		if err == nil {
 			break
 		}
 
-		if strings.Contains(err.Error(), "locked") == false || i == retries - 1 {
+		if strings.Contains(err.Error(), "locked") == false || i == retryMax- 1 {
 			log.Errorf("New ticket couldn't be saved: %s, error: %s", newTicket.Key, err.Error())
 			return
 		}
 
-		time.Sleep(wait * time.Millisecond)
+		time.Sleep(retryWait * time.Millisecond)
 	}
 }
 
