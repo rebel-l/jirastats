@@ -123,16 +123,16 @@ func (tm *TicketMapper) Save(model *models.Ticket) (err error) {
 	return
 }
 
-func (tm *TicketMapper) CountStatusClusteredAndNotExpired(status string) (count int, err error) {
-	count, err = tm.table.Count("`status_clustered` = ? AND `expired` IS NULL", status)
+func (tm *TicketMapper) CountStatusClusteredAndNotExpired(status string, projectId int) (count int, err error) {
+	count, err = tm.table.Count("`status_clustered` = ? AND project_id = ? AND `expired` IS NULL", status, projectId)
 	return
 }
 
-func (tm *TicketMapper) CountStatusClusteredFromDay(status string, day time.Time) (count int, err error) {
-	where := "`status_clustered` = ?"
+func (tm *TicketMapper) CountStatusClusteredFromDay(status string, day time.Time, projectId int) (count int, err error) {
+	where := "`status_clustered` = ? AND project_id = ?"
 	fields := "MAX(`expired`)"
 	group := "`key` HAVING COUNT(*) = 1"
-	rows, err := tm.table.SelectComplex(where, "", fields, group, status)
+	rows, err := tm.table.SelectComplex(where, "", fields, group, status, projectId)
 	defer rows.Close()
 	if err != nil {
 		return

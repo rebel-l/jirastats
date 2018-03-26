@@ -123,13 +123,13 @@ func (p *Project) processStats() (err error) {
 	tm := database.NewTicketMapper(p.db)
 
 	// open = expired null && status_clustered open
-	p.stats.Open, err = tm.CountStatusClusteredAndNotExpired(models.TicketStatusClusteredOpen)
+	p.stats.Open, err = tm.CountStatusClusteredAndNotExpired(models.TicketStatusClusteredOpen, p.project.Id)
 	if err != nil {
 		return
 	}
 
 	// closed = expired today && status closed and is the first closed entry
-	p.stats.Closed, err = tm.CountStatusClusteredFromDay(models.TicketStatusClusteredClosed, time.Now())
+	p.stats.Closed, err = tm.CountStatusClusteredFromDay(models.TicketStatusClusteredClosed, time.Now(), p.project.Id)
 	if err != nil {
 		return
 	}
@@ -153,7 +153,8 @@ func (p *Project) processRemoved() (err error) {
 	search := jp.NewSearch(p.jc, p.project.GetJql())
 	search.Request.MaxResults = 20
 	search.Request.Fields = make([]string, 0)
-	i := 0
+	cProcessed := 0
+	//
 	for {
 		res, err := search.Do()
 		if err != nil {
@@ -162,18 +163,19 @@ func (p *Project) processRemoved() (err error) {
 		}
 
 		// TODO: parallelize in channels
-		i += p.markTicketsToKeep(res, tickets)
+		cProcessed += p.markTicketsToKeep(res, tickets)
 		if search.Next() == false {
 			break
 		}
 	}
+	//
 
-	j, err := p.expireRemoved(tickets, tm)
+	cKept, err := p.expireRemoved(tickets, tm)
 	if err != nil {
 		log.Errorf("Removed tickets couldn't be expired: %s", err.Error())
 	}
 
-	log.Infof("Removed processed: %d, Kept: %d/%d", i, j, len(tickets))
+	log.Infof("Removed processed: %d, Kept: %d/%d", cProcessed, cKept, len(tickets))
 	return
 }
 
