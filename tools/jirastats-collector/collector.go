@@ -46,7 +46,7 @@ func main() {
 	// calculate elapsed time
 	t := time.Now()
 	elapsed := t.Sub(c.start)
-	log.Infof("Processed %d projects in %f seconds", len(projects), elapsed.Seconds())
+	log.Infof("Processed %d projects in %s", len(projects), elapsed.String())
 	log.Info("Stopping collector ... Goodbye!")
 }
 
