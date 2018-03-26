@@ -27,7 +27,7 @@ type Project struct {
 func NewProject(project *models.Project, jc *jira.Client, db *sql.DB) *Project {
 	p := new(Project)
 	p.start = time.Now()
-	p.actualRun = p.start.AddDate(0, 0, -1) // TODO: must be -1, just used -2 for testing
+	p.actualRun = p.start.AddDate(0, 0, -1)
 	p.project = project
 	p.jc = jc
 	p.pm = database.NewProjectMapper(db)
@@ -84,6 +84,8 @@ func (p *Project) updateStats() (err error){
 
 func (p *Project) processTickets(search *jp.Search) (err error) {
 	i := 0
+	mapOpenStatus := utils.TrimMap(strings.Split(p.project.MapOpenStatus, ","))
+	mapClosedStatus := utils.TrimMap(strings.Split(p.project.MapClosedStatus, ","))
 	for {
 		tickets, err := search.Do()
 		if err != nil {
@@ -91,12 +93,10 @@ func (p *Project) processTickets(search *jp.Search) (err error) {
 			return err
 		}
 
-		// TODO: process in channels
 		for _, t := range tickets {
 			i++
+			// TODO: process in channels
 			tm := database.NewTicketMapper(p.db)
-			mapOpenStatus := utils.TrimMap(strings.Split(p.project.MapOpenStatus, ","))
-			mapClosedStatus := utils.TrimMap(strings.Split(p.project.MapClosedStatus, ","))
 			tp := NewTicket(p.project.Id, t, tm, mapOpenStatus, mapClosedStatus)
 			tp.Process()
 			if tp.IsNew {
@@ -167,7 +167,7 @@ func (p *Project) processRemoved() (err error) {
 		log.Errorf("Removed tickets couldn't be expired: %s", err.Error())
 	}
 
-	log.Debugf("Removed processed: %d, Kept: %d/%d", i, j, len(tickets))
+	log.Infof("Removed processed: %d, Kept: %d/%d", i, j, len(tickets))
 	return
 }
 
