@@ -153,22 +153,27 @@ func (p *Project) processRemoved() (err error) {
 	search := jp.NewSearch(p.jc, p.project.GetJql())
 	search.Request.MaxResults = 20
 	search.Request.Fields = make([]string, 0)
-	cProcessed := 0
-	//
+	i := 0
+	ccp := make(chan int)
 	for {
+
 		res, err := search.Do()
 		if err != nil {
 			log.Errorf("Project (Id: %d, Name: %s) removed were not processed: %s", p.project.Id, p.project.Name, err.Error())
 			return err
 		}
 
-		// TODO: parallelize in channels
-		cProcessed += p.markTicketsToKeep(res, tickets)
+		i++
+		go p.markTicketsToKeep(res, tickets, ccp)
 		if search.Next() == false {
 			break
 		}
 	}
-	//
+
+	cProcessed := 0
+	for x := 0; x < i; x++ {
+		cProcessed += <- ccp
+	}
 
 	cKept, err := p.expireRemoved(tickets, tm)
 	if err != nil {
@@ -179,9 +184,10 @@ func (p *Project) processRemoved() (err error) {
 	return
 }
 
-func (p *Project) markTicketsToKeep(jiraTickets []jira.Issue, tickets []*models.Ticket) (processed int) {
+func (p *Project) markTicketsToKeep(jiraTickets []jira.Issue, tickets []*models.Ticket, ccp chan int) () {
+	cProcessed := 0
 	for _, jt := range jiraTickets {
-		processed++
+		cProcessed++
 		for _, t := range tickets {
 			if jt.Key == t.Key {
 				// mark ticket to keep
@@ -189,6 +195,7 @@ func (p *Project) markTicketsToKeep(jiraTickets []jira.Issue, tickets []*models.
 			}
 		}
 	}
+	ccp <- cProcessed
 	return
 }
 

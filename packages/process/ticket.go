@@ -47,12 +47,14 @@ func (t *Ticket) Process() {
 			return
 		}
 
+		log.Debugf("Changes found for ticket: %d (%s)", oldTicket.Id, oldTicket.Key)
 		oldTicket.Expire()
 		err = t.tm.Save(oldTicket)
 		if err != nil {
 			log.Errorf("Old ticket could not be expired: %d (%s), error: %s", oldTicket.Id, oldTicket.Key, err.Error())
 			return
 		}
+		log.Debugf("Ticket expired: %d (%s)", oldTicket.Id, oldTicket.Key)
 	} else {
 		// appeared the first time
 		t.IsNew = true
