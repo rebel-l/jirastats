@@ -35,7 +35,7 @@ func (t *Ticket) Process() {
 	newTicket := t.getNewTicket()
 
 	// 1st find not expired old ticket and process if not changed
-	oldTicket, err := t.tm.LoadByKey(t.issue.Key)
+	oldTicket, err := t.tm.LoadByKey(t.issue.Key, t.projectId)
 	if err != nil {
 		log.Errorf("Couldn't load not expired old ticket: %s", err.Error())
 	}

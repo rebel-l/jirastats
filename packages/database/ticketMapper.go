@@ -56,9 +56,9 @@ func (tm *TicketMapper) mapRows(rows *sql.Rows) (collection []*models.Ticket) {
 	return
 }
 
-func (tm *TicketMapper) LoadByKey(key string) (t *models.Ticket, err error) {
+func (tm *TicketMapper) LoadByKey(key string, projectId int) (t *models.Ticket, err error) {
 	t = models.NewTicket()
-	rows, err := tm.table.SelectComplex("`key` = ? AND `expired` IS NULL", "", "", "", key)
+	rows, err := tm.table.SelectComplex("`key` = ? AND project_id = ? AND `expired` IS NULL", "", "", "", key, projectId)
 	defer rows.Close()
 	if err != nil {
 		return
