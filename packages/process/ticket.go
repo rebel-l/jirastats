@@ -48,7 +48,7 @@ func (t *Ticket) Process() {
 		}
 
 		log.Debugf("Changes found for ticket: %d (%s)", oldTicket.Id, oldTicket.Key)
-		oldTicket.Expire()
+		oldTicket.ExpireEndOfDayBefore() // needs to be actual run at 23:59:59
 		err = t.tm.Save(oldTicket)
 		if err != nil {
 			log.Errorf("Old ticket could not be expired: %d (%s), error: %s", oldTicket.Id, oldTicket.Key, err.Error())

@@ -251,7 +251,7 @@ func (p *Project) expireRemoved(tickets []*models.Ticket, tm *database.TicketMap
 			continue
 		}
 
-		t.Expire()
+		t.ExpireNow()
 		err = tm.Save(t)
 		return
 	}

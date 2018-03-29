@@ -6,6 +6,8 @@ import (
 
 const TicketStatusClusteredOpen = "Open"
 const TicketStatusClusteredClosed = "Closed"
+const dateFormat = "2006-01-02"
+const dateTimeFormat = "2006-01-02T15:04:05Z"
 
 type Ticket struct {
 	Id int `json:"id"`
@@ -32,13 +34,19 @@ func NewTicket() *Ticket {
 	return t
 }
 
-func (t *Ticket) Expire() {
+func (t *Ticket) ExpireNow() {
 	t.Expired = time.Now()
+}
+
+func (t *Ticket) ExpireEndOfDayBefore() {
+	t.Expired = time.Now()
+	t.Expired.AddDate(0, 0, -1)
+	t.Expired, _ = time.Parse(dateTimeFormat, t.Expired.Format(dateFormat) + "T23:59:59Z")
 }
 
 func (t *Ticket) SetStatusClustered(status string)  {
 	t.StatusClustered = status
 	if t.StatusClustered == TicketStatusClusteredClosed && t.Expired.Year() == 1 {
-		t.Expire()
+		t.ExpireNow()
 	}
 }
