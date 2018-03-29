@@ -24,7 +24,7 @@ const ticketTableStructure =
 		"`expired` DATETIME NULL," +
 		"FOREIGN KEY (project_id) REFERENCES project(`id`)" +
 ");"
-const ticketTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS ticket_key_idx ON %s (`key`, `expired`);"
+const ticketTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS ticket_key_pid_expired_idx ON %s (`key`, `expired`, `project_id`);"
 const ticketTableInsert =
 	"INSERT INTO %s (" +
 		"`key`, `project_id`, `summary`, `components`, `labels`, " +
