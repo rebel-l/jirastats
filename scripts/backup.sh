@@ -4,17 +4,19 @@ BACKUP_ROOT_PATH=./backup
 BACKUP_PATH=$BACKUP_ROOT_PATH/$TIMESTAMP
 STORAGE_PATH=./storage
 DELETE_BACKUP=0
-SKIP_BACKUP=0
+DO_BACKUP=1
+REMOVE_ORIGINAL=0
 
 showHelp(){
     echo
     echo "Scripts resets project folder to initial state (cleanup datafiles etc)"
-    echo "usage: ./scripts/resetProject.sh [options]"
+    echo "usage: ./scripts/backup.sh [options]"
     echo
     echo "Options:"
     echo "-h, -?    shows this help"
     echo "-d        deletes old backups"
     echo "-s        skips backup of files"
+    echo "-r        removes original data file: BE CAREFUL, ALL DATA IS LOST IF YOU COMBINE IT WITH OPTION -s!"
     echo
 }
 
@@ -35,7 +37,7 @@ resetProject(){
     rm $STORAGE_PATH/*.db
 }
 
-while getopts "h?ds" opt; do
+while getopts "h?drs" opt; do
     case "$opt" in
         h|\?)
             showHelp
@@ -44,15 +46,18 @@ while getopts "h?ds" opt; do
         d)
             DELETE_BACKUP=1
             ;;
+        r)
+            REMOVE_ORIGINAL=1
+            ;;
         s)
-            SKIP_BACKUP=1
+            DO_BACKUP=0
             ;;
     esac
 done
 
 
 echo
-echo -en "\033[40;36m\033[1mReset Jira Stats project ...\033[0m"
+echo -en "\033[40;36m\033[1mBackup Data of Jira Stats project ...\033[0m"
 echo
 echo
 
@@ -61,14 +66,17 @@ then
     deletBackups
 fi
 
-if [ $SKIP_BACKUP -eq 0 ]
+if [ $DO_BACKUP -eq 1 ]
 then
     doBackup
 fi
 
-resetProject
+if [ $REMOVE_ORIGINAL -eq 1 ]
+then
+    resetProject
+fi
 
 echo
-echo -en "\033[40;32m\033[1mJira Stats reset successful :-)\033[0m"
+echo -en "\033[40;32m\033[1mJira Stats backup successful :-)\033[0m"
 echo
 echo
