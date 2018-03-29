@@ -39,13 +39,13 @@ func NewProject(project *models.Project, jc *jira.Client, db *sql.DB) *Project {
 func (p *Project) Process() {
 	log.Infof("Process project ... Id: %d, Name: %s", p.project.Id, p.project.Name)
 
-	// 1st init tickets if there are none
 	if p.pm.HasTickets(p.project) == false {
+		// init tickets if there are none
 		p.initStats()
+	} else {
+		// update stats
+		p.updateStats()
 	}
-
-	// 2nd update stats
-	p.updateStats()
 
 	t := time.Now()
 	elapsed := t.Sub(p.start)
@@ -57,9 +57,23 @@ func (p *Project) initStats() (err error) {
 	log.Infof("Init project stats: %d (%s)", p.project.Id, p.project.Name)
 	p.stats = models.NewStats(p.project.Id)
 	p.stats.CreatedAt = p.actualRun.AddDate(0, 0, -1) // Initial stats needs to be saved two days ago
-	search := jp.NewSearch(p.jc, p.getJqlForOpenTickets())
+
+	// 1. load closed, cluster closed ones, expire and don't process stats
+	search := jp.NewSearch(p.jc, p.getJqlForClosedTickets())
 	err = p.processTickets(search)
-	err = p.processStats()
+	if err != nil {
+		return
+	}
+
+	// 2. load open ones, cluster open ones and count only open
+	search = jp.NewSearch(p.jc, p.getJqlForOpenTickets())
+	err = p.processTickets(search)
+	if err != nil {
+		return
+	}
+
+	// On start of project there are no unplanned new tickets and per definition no closed (old ones are ignored)
+	err = p.processOnlyOpenStats()
 	return
 }
 
@@ -78,7 +92,7 @@ func (p *Project) updateStats() (err error){
 		return
 	}
 
-	err = p.processStats()
+	err = p.processAllStats()
 	return
 }
 
@@ -119,23 +133,53 @@ func (p *Project) processTickets(search *jp.Search) (err error) {
 	return
 }
 
-func (p *Project) processStats() (err error) {
-	tm := database.NewTicketMapper(p.db)
-
-	// open = expired null && status_clustered open
-	p.stats.Open, err = tm.CountStatusClusteredAndNotExpired(models.TicketStatusClusteredOpen, p.project.Id)
+func (p *Project) processAllStats() (err error) {
+	// process open
+	p.processOpenStats()
 	if err != nil {
 		return
 	}
 
-	// closed = expired today && status closed and is the first closed entry
-	p.stats.Closed, err = tm.CountStatusClusteredFromDay(models.TicketStatusClusteredClosed, time.Now(), p.project.Id)
+	// process closed
+	err = p.processClosedStats()
 	if err != nil {
 		return
 	}
 
 	err = p.sm.Save(p.stats)
 	log.Infof("Stats processed: %d open, %d closed, %d new", p.stats.Open, p.stats.Closed, p.stats.New)
+	return
+}
+
+func (p *Project) processOnlyOpenStats()  (err error) {
+	// reset new & closed
+	p.stats.New = 0
+	p.stats.Closed = 0
+
+	// process open
+	p.processOpenStats()
+	if err != nil {
+		return
+	}
+
+	err = p.sm.Save(p.stats)
+	log.Infof("Stats processed: %d open, %d closed, %d new", p.stats.Open, p.stats.Closed, p.stats.New)
+	return
+}
+
+func (p *Project) processOpenStats() (err error) {
+	tm := database.NewTicketMapper(p.db)
+
+	// open = expired null && status_clustered open
+	p.stats.Open, err = tm.CountStatusClusteredAndNotExpired(models.TicketStatusClusteredOpen, p.project.Id)
+	return
+}
+
+func (p *Project) processClosedStats() (err error) {
+	tm := database.NewTicketMapper(p.db)
+
+	// closed = expired today && status closed and is the first closed entry
+	p.stats.Closed, err = tm.CountStatusClusteredFromDay(models.TicketStatusClusteredClosed, time.Now(), p.project.Id)
 	return
 }
 
@@ -223,8 +267,8 @@ func (p *Project) getJqlForUpdatedTickets() string {
 	return jql
 }
 
-func (p *Project) getOpenStatusMapForJql() string {
-	status := strings.Split(p.project.MapOpenStatus, ",")
+func (p *Project) getStatusMapForJql(statusMap string) string {
+	status := strings.Split(statusMap, ",")
 	for k, v := range status {
 		v = strings.TrimSpace(v)
 		if strings.Contains(v, "\"") == false {
@@ -236,7 +280,13 @@ func (p *Project) getOpenStatusMapForJql() string {
 }
 
 func (p *Project) getJqlForOpenTickets() string {
-	jql := p.project.GetJql() + fmt.Sprintf(" AND status in (%s)", p.getOpenStatusMapForJql())
+	jql := p.project.GetJql() + fmt.Sprintf(" AND status in (%s)", p.getStatusMapForJql(p.project.MapOpenStatus))
 	log.Debugf("JQL for open tickets: %s", jql)
+	return jql
+}
+
+func (p *Project) getJqlForClosedTickets() string {
+	jql := p.project.GetJql() + fmt.Sprintf(" AND status in (%s)", p.getStatusMapForJql(p.project.MapClosedStatus))
+	log.Debugf("JQL for closed tickets: %s", jql)
 	return jql
 }
