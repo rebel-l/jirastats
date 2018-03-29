@@ -80,11 +80,17 @@ func (t *Ticket) Process() {
 func (t *Ticket) changed(newTicket *models.Ticket, oldTicket *models.Ticket) bool {
 	switch {
 		case newTicket.Issuetype != oldTicket.Issuetype:
+			return true
 		case newTicket.Priority != oldTicket.Priority:
+			return true
 		case newTicket.StatusClustered != oldTicket.StatusClustered:
+			return true
 		case newTicket.StatusByJira != oldTicket.StatusByJira:
+			return true
 		case newTicket.Summary != oldTicket.Summary:
+			return true
 		case utils.AreStringArrayEqual(newTicket.Components, oldTicket.Components) == false:
+			return true
 		case utils.AreStringArrayEqual(newTicket.Labels, oldTicket.Labels) == false:
 			return true
 	}
