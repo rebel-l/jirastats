@@ -7,6 +7,7 @@ import (
 	"github.com/rebel-l/jirastats/packages/utils"
 	jp "github.com/rebel-l/jirastats/packages/jira"
 	log "github.com/sirupsen/logrus"
+	"math/rand"
 	"strings"
 	"time"
 )
@@ -73,7 +74,8 @@ func (t *Ticket) Process() {
 			return
 		}
 
-		time.Sleep(retryWait * time.Millisecond)
+		wt := time.Duration(rand.Intn(retryWait))
+		time.Sleep(wt * time.Millisecond)
 	}
 }
 

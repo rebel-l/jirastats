@@ -107,19 +107,12 @@ func (p *Project) processTickets(search *jp.Search) (err error) {
 			return err
 		}
 
-		cOut := make(chan bool)
 		for _, t := range tickets {
 			pCounter++
-			go func(jt jira.Issue) {
-				tm := database.NewTicketMapper(p.db)
-				tp := NewTicket(p.project.Id, jt, tm, mapOpenStatus, mapClosedStatus)
-				tp.Process()
-				cOut <- tp.IsNew
-			}(t)
-		}
-
-		for i := 0; i < len(tickets); i++ {
-			if <- cOut {
+			tm := database.NewTicketMapper(p.db)
+			tp := NewTicket(p.project.Id, t, tm, mapOpenStatus, mapClosedStatus)
+			tp.Process()
+			if tp.IsNew {
 				p.stats.New++
 			}
 		}

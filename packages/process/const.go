@@ -1,4 +1,4 @@
 package process
 
-const retryMax = 3
-const retryWait = 10
+const retryMax = 10
+const retryWait = 20
