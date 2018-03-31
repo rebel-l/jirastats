@@ -20,11 +20,10 @@ type ProjectList struct {
 	Projects []*models.Project
 }
 
-func NewProjects(db *sql.DB, router *mux.Router) *Projects {
+func NewProjects(db *sql.DB, router *mux.Router) {
 	dp := new(Projects)
 	dp.pm = database.NewProjectMapper(db)
 	router.HandleFunc(projectsPath, dp.GetAllProjects).Methods(http.MethodGet)
-	return dp
 }
 
 func (dp *Projects) GetAllProjects(res http.ResponseWriter, req *http.Request) {

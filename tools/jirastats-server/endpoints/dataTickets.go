@@ -13,12 +13,10 @@ type DataTickets struct {
 	db *sql.DB
 }
 
-func NewDataTickets(db *sql.DB, router *mux.Router) *DataTickets {
+func NewDataTickets(db *sql.DB, router *mux.Router) {
 	dt := new(DataTickets)
 	dt.db = db
 	router.HandleFunc("/data/tickets", dt.Handler).Methods(http.MethodGet)
-
-	return dt
 }
 
 func (dt *DataTickets) Handler(res http.ResponseWriter, req *http.Request) {

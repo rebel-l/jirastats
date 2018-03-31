@@ -31,8 +31,11 @@ func main() {
 	router := mux.NewRouter()
 
 	// Init Endpoints
-	_ = endpoints.NewDataTickets(db, router)
-	_ = endpoints.NewProjects(db, router)
+	endpoints.NewDataTickets(db, router)
+	endpoints.NewProjects(db, router)
+
+	// Init File Server ... must be the last one
+	endpoints.NewPublic(router)
 
 	// start server
 	err = http.ListenAndServe(":" + strconv.Itoa(PORT), router)
