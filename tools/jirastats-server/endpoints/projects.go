@@ -17,7 +17,7 @@ type Projects struct {
 }
 
 type ProjectList struct {
-	Projects []*models.Project
+	Projects []*models.Project `json:"projects"`
 }
 
 func NewProjects(db *sql.DB, router *mux.Router) {
