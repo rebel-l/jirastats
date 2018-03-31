@@ -2,11 +2,11 @@ package endpoints
 
 import (
 	"database/sql"
+	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/rebel-l/jirastats/packages/database"
-	"net/http"
 	log "github.com/sirupsen/logrus"
-	"encoding/json"
+	"net/http"
 )
 
 type DataTickets struct {
