@@ -1,0 +1,40 @@
+{
+  "name": "jirastats",
+  "version": "1.0.0",
+  "description": "A tool for collecting and presenting some statistcs about your Jira project.",
+  "main": "client/index.js",
+  "scripts": {
+    "build-dev": "webpack --mode development --config webpack.dev.js",
+    "build": "webpack --mode production --config webpack.prod.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rebel-l/jirastats.git"
+  },
+  "keywords": [
+    "Jira",
+    "statistics",
+    "analytics",
+    "project management",
+    "kanban",
+    "scrum",
+    "agile"
+  ],
+  "author": "Rebel L",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/rebel-l/jirastats/issues"
+  },
+  "homepage": "https://github.com/rebel-l/jirastats#readme",
+  "dependencies": {
+    "babel": "^6.23.0",
+    "babel-cli": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0",
+    "webpack": "^4.4.1",
+    "webpack-cli": "^2.0.13",
+    "webpack-merge": "^4.1.2"
+  }
+}
