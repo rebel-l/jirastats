@@ -22,6 +22,7 @@ func NewDataTickets(db *sql.DB, router *mux.Router) *DataTickets {
 }
 
 func (dt *DataTickets) Handler(res http.ResponseWriter, req *http.Request) {
+	log.Debug("Get all data from tickets")
 	status := http.StatusOK
 
 	tm := database.NewTicketMapper(dt.db)

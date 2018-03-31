@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"github.com/gorilla/mux"
 	"github.com/rebel-l/jirastats/packages/database"
 	"github.com/rebel-l/jirastats/packages/utils"
@@ -13,7 +14,12 @@ import (
 const PORT = 3000
 
 func main() {
-	log.SetLevel(log.DebugLevel)
+	verbose := utils.GetVerboseFlag()
+	flag.Parse()
+
+	// init log level
+	utils.TurnOnVerbose(verbose)
+
 	log.Infof("Run server on Port %d ...", PORT)
 
 	// Init database
@@ -26,6 +32,7 @@ func main() {
 
 	// Init Endpoints
 	_ = endpoints.NewDataTickets(db, router)
+	_ = endpoints.NewProjects(db, router)
 
 	// start server
 	err = http.ListenAndServe(":" + strconv.Itoa(PORT), router)

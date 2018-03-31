@@ -14,7 +14,7 @@ type ProjectMapper struct {
 
 func NewProjectMapper(db *sql.DB) *ProjectMapper {
 	pm := new(ProjectMapper)
-	pm.table = NewProjectTable(db)
+	pm.table = NewProjectTable(NewStatement(db))
 	return pm
 }
 
@@ -73,7 +73,7 @@ func (pm *ProjectMapper) Load() (projects []*models.Project, err error) {
 }
 
 func (pm *ProjectMapper) HasTickets(project *models.Project) bool {
-	tt := NewTicketTable(NewStatement(pm.table.db))
+	tt := NewTicketTable(pm.table.statement)
 	counter, err := tt.Count("project_id = ?", project.Id)
 	if err != nil {
 		log.Errorf("Tickets are not countable from database: %s", err.Error())

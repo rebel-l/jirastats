@@ -13,9 +13,9 @@ type CreateDatabaseStructure struct {
 func NewCreateDatabaseStructure(db *sql.DB) *CreateDatabaseStructure {
 	statement := database.NewStatement(db)
 	dbs := new(CreateDatabaseStructure)
-	dbs.tables = append(dbs.tables, database.NewConfigGroupTable(db))
-	dbs.tables = append(dbs.tables, database.NewConfigTable(db))
-	dbs.tables = append(dbs.tables, database.NewProjectTable(db))
+	dbs.tables = append(dbs.tables, database.NewConfigGroupTable(db)) // TODO: refactor using statement
+	dbs.tables = append(dbs.tables, database.NewConfigTable(db)) // TODO: refactor using statement
+	dbs.tables = append(dbs.tables, database.NewProjectTable(statement))
 	dbs.tables = append(dbs.tables, database.NewTicketTable(statement))
 	dbs.tables = append(dbs.tables, database.NewStatsTable(statement))
 	return dbs

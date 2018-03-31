@@ -5,11 +5,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type ProjectTable struct {
-	db *sql.DB
-}
-
 const projectTableName = "project"
+
 const projectTableStructure =
 	"CREATE TABLE IF NOT EXISTS `%s` (" +
 		"`id` INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -27,19 +24,33 @@ const projectTableInsert =
 	")" +
 	" VALUES (?, ?, ?, ?, ?, ?)"
 
-func NewProjectTable(db *sql.DB) *ProjectTable {
+type ProjectTable struct {
+	statement *Statement
+}
+
+func NewProjectTable(statement *Statement) *ProjectTable {
 	p := new(ProjectTable)
-	p.db = db
+	p.statement = statement
 	return p
 }
 
-func (p *ProjectTable) Insert(name string, keys string, jql string, knownSpeed float32, mapOpenStatus string, mapClosedStatus string) (id int, err error) {
-	stmt, err := p.db.Prepare(createDatabseStatement(projectTableInsert, projectTableName))
-	if err != nil {
-		return
-	}
+func (p *ProjectTable) Insert(
+	name string,
+	keys string,
+	jql string,
+	knownSpeed float32,
+	mapOpenStatus string,
+	mapClosedStatus string) (id int, err error) {
 
-	res, err := stmt.Exec(name, jql, keys, mapOpenStatus, mapClosedStatus, knownSpeed)
+	res, err := p.statement.execute(
+		projectTableInsert,
+		projectTableName,
+		name,
+		jql,
+		keys,
+		mapOpenStatus,
+		mapClosedStatus,
+		knownSpeed)
 	if err != nil {
 		return
 	}
@@ -58,43 +69,28 @@ func (p *ProjectTable) Truncate() error {
 func (p *ProjectTable) CreateStructure() (err error) {
 	log.Debugf("Create structure for %s", projectTableName)
 	// create table
-	err = executeStatement(p.db, p.getCreateTableStatement())
+	_, err = p.statement.execute(projectTableStructure, projectTableName)
 	if err != nil {
 		return
 	}
 
 	// create index
-	err = executeStatement(p.db, p.getCreateIndexStatement())
+	_, err = p.statement.execute(projectTableIndex, projectTableName)
 	return
 }
 
-func (p *ProjectTable) getCreateTableStatement() string {
-	return createDatabseStatement(projectTableStructure, projectTableName)
-}
-
-func (p *ProjectTable) getCreateIndexStatement() string {
-	return createDatabseStatement(projectTableIndex, projectTableName)
-}
-
-func (p *ProjectTable) Select(where string, args ...interface{}) (rows *sql.Rows, err error){
-	statement := p.getSelectAllStatement()
-	if where != "" {
-		statement += " WHERE " + where
-	}
-
-	stmt, err := p.db.Prepare(statement)
-	if err != nil {
-		return
-	}
-
-	if args != nil {
-		rows, err = stmt.Query(args...)
-	} else {
-		rows, err = stmt.Query()
-	}
+func (p *ProjectTable) Select(where string, args ...interface{}) (rows *sql.Rows, err error) {
+	rows, err = p.SelectComplex(where, "", "", "", args...)
 	return
 }
 
-func (p *ProjectTable) getSelectAllStatement() string {
-	return createDatabseStatement(SelectAllStatement, projectTableName)
+func (p *ProjectTable) SelectComplex(
+	where string,
+	order string,
+	fields string,
+	group string,
+	args ...interface{}) (rows *sql.Rows, err error){
+
+	rows, err = p.statement.doSelect(projectTableName, where, order, fields, group, args...)
+	return
 }
