@@ -56,7 +56,7 @@ func (p *Project) Process() {
 func (p *Project) initStats() (err error) {
 	log.Infof("Init project stats: %d (%s)", p.project.Id, p.project.Name)
 	p.stats = models.NewStats(p.project.Id)
-	p.stats.CreatedAt = p.actualRun.AddDate(0, 0, -1) // Initial stats needs to be saved two days ago
+	p.stats.CreatedAt = p.actualRun
 
 	// 1. load closed, cluster closed ones, expire and don't process stats
 	search := jp.NewSearch(p.jc, p.getJqlForClosedTickets())
