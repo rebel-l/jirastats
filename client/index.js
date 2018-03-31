@@ -3,9 +3,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 // Components
-import ProjectSelect from './components/ProjectSelect';
+import App from './components/App';
 
 ReactDOM.render(
-    <ProjectSelect/>,
+    <App/>,
     document.getElementById('app')
 );

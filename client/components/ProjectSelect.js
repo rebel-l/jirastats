@@ -19,18 +19,20 @@ class ProjectSelect extends Component {
         });
     }
 
-    handleSelect(){
-        console.log("selected something")
+    handleSelect(event){
+        if (event.target.value != 0) {
+            console.log("selected: " + event.target.value)
+        }
     }
 
     render() {
         return (
             <div>
                 <label>Select Project: </label>
-                <select onChange={this.handleSelect}>
-                    <option key={0} id={0}></option>
+                <select onChange={this.handleSelect} value={this.state.value}>
+                    <option key={0} value={0}></option>
                     {this.state.projects.map(project =>
-                        <option key={project.id} id={project.id}>{project.name}</option>
+                        <option key={project.id} value={project.id}>{project.name}</option>
                     )}
                 </select>
             </div>
