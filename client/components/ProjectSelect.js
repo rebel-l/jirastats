@@ -1,8 +1,18 @@
 // Framework
 import axios from 'axios';
 import React, {Component} from 'react';
+import { connect } from "react-redux";
 
-class ProjectSelect extends Component {
+// Actions
+import Chart from "../actions/Chart";
+
+const mapDispatchToProps = dispatch => {
+    return {
+        projectSelect: chart => dispatch(Chart(chart))
+    };
+};
+
+class Project extends Component {
     constructor(props) {
         super(props);
 
@@ -21,10 +31,9 @@ class ProjectSelect extends Component {
 
     handleSelect(event){
         if (event.target.value != 0) {
-            console.log("selected: " + event.target.value)
-            // TODO: get the stats data for project
-            // TODO: send the data to redux
-            // TODO: let redux charts listen to redux event and send chart options to chart component
+            axios.get(`/data/stats/${event.target.value}`).then(res => {
+                this.props.projectSelect(res.data);
+            })
         }
     }
 
@@ -42,5 +51,7 @@ class ProjectSelect extends Component {
         );
     }
 }
+
+const ProjectSelect = connect(null, mapDispatchToProps)(Project);
 
 export default ProjectSelect
