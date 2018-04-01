@@ -30,7 +30,7 @@ class Project extends Component {
     }
 
     handleSelect(event){
-        if (event.target.value != 0) {
+        if (event.target.value !== 0) {
             axios.get(`/data/stats/${event.target.value}`).then(res => {
                 this.props.projectSelect(res.data);
             })
@@ -42,7 +42,7 @@ class Project extends Component {
             <div>
                 <label>Select Project: </label>
                 <select onChange={this.handleSelect} value={this.state.value}>
-                    <option key={0} value={0}></option>
+                    <option key={0} value={0}>... select project ...</option>
                     {this.state.projects.map(project =>
                         <option key={project.id} value={project.id}>{project.name}</option>
                     )}
