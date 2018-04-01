@@ -30,7 +30,7 @@ class Project extends Component {
     }
 
     handleSelect(event){
-        if (event.target.value !== 0) {
+        if (event.target.value !== "0") {
             axios.get(`/data/stats/${event.target.value}`).then(res => {
                 this.props.projectSelect(res.data);
             })
