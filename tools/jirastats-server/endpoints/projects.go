@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rebel-l/jirastats/packages/database"
 	"github.com/rebel-l/jirastats/packages/models"
+	"github.com/rebel-l/jirastats/tools/jirastats-server/response"
 	"net/http"
 	log "github.com/sirupsen/logrus"
 )
@@ -31,19 +32,19 @@ func (dp *Projects) GetAllProjects(res http.ResponseWriter, req *http.Request) {
 	projects, err := dp.pm.Load()
 	if err != nil {
 		msg := fmt.Sprintf("Not able to load tickets: %s", err.Error())
-		e := NewErrorJson(msg, res)
+		e := response.NewErrorJson(msg, res)
 		e.SendInternalServerError()
 		return
 	}
 
 	if len(projects) == 0 {
 		msg := "No Projects found. Please create at least one to proceed."
-		e := NewErrorJson(msg, res)
+		e := response.NewErrorJson(msg, res)
 		e.SendNotFound()
 		return
 	}
 
 	payload := ProjectList{projects}
-	s := NewSuccessJson(payload, res)
+	s := response.NewSuccessJson(payload, res)
 	s.SendOK()
 }

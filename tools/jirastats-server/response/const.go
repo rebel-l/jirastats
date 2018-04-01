@@ -1,4 +1,4 @@
-package endpoints
+package response
 
 const (
 	ContentHeader    = "Content-Type"
