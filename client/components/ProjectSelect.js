@@ -22,6 +22,9 @@ class ProjectSelect extends Component {
     handleSelect(event){
         if (event.target.value != 0) {
             console.log("selected: " + event.target.value)
+            // TODO: get the stats data for project
+            // TODO: send the data to redux
+            // TODO: let redux charts listen to redux event and send chart options to chart component
         }
     }
 
