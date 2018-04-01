@@ -33,6 +33,7 @@ func main() {
 	// Init Endpoints
 	endpoints.NewDataTickets(db, router)
 	endpoints.NewProjects(db, router)
+	endpoints.NewDataStats(db, router)
 
 	// Init File Server ... must be the last one
 	endpoints.NewPublic(router)

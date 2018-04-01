@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rebel-l/jirastats/packages/models"
+	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 type StatsMapper struct {
@@ -45,5 +47,42 @@ func (sm *StatsMapper) Save(model *models.Stats) (err error) {
 		}
 	}
 
+	return
+}
+
+func (sm *StatsMapper) LoadByProjectId(projectId int) (collection []*models.Stats, err error) {
+	rows, err := sm.table.Select("project_id = ?", projectId)
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	collection = sm.mapRows(rows)
+
+	return
+}
+
+func (sm *StatsMapper) mapRowToModel(rows *sql.Rows, s *models.Stats) (err error) {
+	var createdAt string
+	err = rows.Scan(&s.Id, &s.ProjectId, &s.Open, &s.Closed, &s.New, &createdAt)
+	if err != nil {
+		return
+	}
+
+	s.CreatedAt, _ = time.Parse(dateTimeFormat, createdAt)
+	return
+}
+
+func (sm *StatsMapper) mapRows(rows *sql.Rows) (collection []*models.Stats) {
+	for rows.Next() {
+		s := models.NewStats(0)
+		err := sm.mapRowToModel(rows, s)
+		if err != nil {
+			log.Warnf("Not able to map stats: %s", err.Error())
+			continue
+		}
+
+		collection = append(collection, s)
+	}
 	return
 }

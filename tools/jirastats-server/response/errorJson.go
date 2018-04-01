@@ -26,6 +26,10 @@ func (e *ErrorJson) SendNotFound() {
 	e.send(http.StatusNotFound)
 }
 
+func (e *ErrorJson) SendBadRequest() {
+	e.send(http.StatusBadRequest)
+}
+
 func (e *ErrorJson) send(statusCode int) {
 	log.Error(e.Error)
 	e.res.Header().Set(ContentHeader, ContentTypeJson)

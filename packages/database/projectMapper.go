@@ -34,6 +34,21 @@ func (pm *ProjectMapper) Save(model *models.Project) (err error) {
 	return
 }
 
+func (pm *ProjectMapper) LoadProjectById(id int) (p *models.Project, err error) {
+	rows, err := pm.table.Select("id = ?", id)
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	p = models.NewProject()
+	if rows.Next() {
+		p = models.NewProject()
+		err = pm.mapRowToModel(rows, p)
+	}
+	return
+}
+
 func (pm *ProjectMapper) Load() (projects []*models.Project, err error) {
 	rows, err := pm.table.Select("")
 	defer rows.Close()
@@ -42,33 +57,7 @@ func (pm *ProjectMapper) Load() (projects []*models.Project, err error) {
 		return
 	}
 
-	var id int
-	var name string
-	var jql string
-	var keys string
-	var mapOpenStatus string
-	var mapClosedStatus string
-	var knownSpeed float32
-	for rows.Next() {
-		err = rows.Scan(&id, &name, &jql, &keys, &mapOpenStatus, &mapClosedStatus, &knownSpeed)
-		if err != nil {
-			log.Warn("Mapping of project not possible")
-			continue
-		}
-
-		project := models.NewProject()
-		project.Id = id
-		project.Name = name
-		project.Jql = jql
-		project.Keys = keys
-		project.MapOpenStatus = mapOpenStatus
-		project.MapClosedStatus = mapClosedStatus
-		project.KnownSpeed = knownSpeed
-
-		projects = append(projects, project)
-	}
-
-	log.Debugf("Number of projects found: %d", len(projects))
+	projects = pm.mapRows(rows)
 	return
 }
 
@@ -83,4 +72,23 @@ func (pm *ProjectMapper) HasTickets(project *models.Project) bool {
 	log.Debugf("%d Tickets found for project %d (%s)", counter, project.Id, project.Name)
 
 	return counter != 0
+}
+
+func (pm *ProjectMapper) mapRowToModel(rows *sql.Rows, p *models.Project) (err error) {
+	err = rows.Scan(&p.Id, &p.Name, &p.Jql, &p.Keys, &p.MapOpenStatus, &p.MapClosedStatus, &p.KnownSpeed)
+	return
+}
+
+func (pm *ProjectMapper) mapRows(rows *sql.Rows) (collection []*models.Project) {
+	for rows.Next() {
+		p := models.NewProject()
+		err := pm.mapRowToModel(rows, p)
+		if err != nil {
+			log.Warnf("Not able to map project: %s", err.Error())
+			continue
+		}
+
+		collection = append(collection, p)
+	}
+	return
 }
