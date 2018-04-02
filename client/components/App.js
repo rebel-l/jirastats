@@ -6,16 +6,24 @@ import ProjectSelect from "./ProjectSelect";
 import Chart from "./Chart";
 import ChartButton from "./ChartButton";
 
+// Constants
+import {CHARTTYPE_PROGRESS} from "./../constants/ChartTypes";
+import {CHARTTYPE_SPEED} from "./../constants/ChartTypes";
+import {CHARTTYPE_FORECAST} from "./../constants/ChartTypes";
+import {CHARTTYPE_OPENTASKS} from "./../constants/ChartTypes";
+import {CHARTTYPE_COMPARISON} from "./../constants/ChartTypes";
+
 class App extends Component {
     render() {
         return (
             <div>
                 <ProjectSelect/>
                 <div>
-                    <ChartButton name="Progress" chartType="progress"/>
-                    <ChartButton name="Speed" chartType="speed"/>
-                    <ChartButton name="Forecast" chartType="forecast"/>
-                    <ChartButton name="Open Tasks" chartType="opentask"/>
+                    <ChartButton name="Progress" chartType={CHARTTYPE_PROGRESS}/>
+                    <ChartButton name="Speed" chartType={CHARTTYPE_SPEED}/>
+                    <ChartButton name="Forecast" chartType={CHARTTYPE_FORECAST}/>
+                    <ChartButton name="Open Tasks" chartType={CHARTTYPE_OPENTASKS}/>
+                    <ChartButton name="Comparison" chartType={CHARTTYPE_COMPARISON}/>
                 </div>
                 <Chart/>
             </div>

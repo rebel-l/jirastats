@@ -1,6 +1,8 @@
+// Constants
 import {CHART_BUTTON} from "../constants/ActionTypes";
+import {CHARTTYPE_PROGRESS} from "./../constants/ChartTypes";
 
-const Reducer = (state = ["progress"], action) => {
+const Reducer = (state = [CHARTTYPE_PROGRESS], action) => {
     switch (action.type) {
         case CHART_BUTTON:
             return [ ...state, action.payload ];
