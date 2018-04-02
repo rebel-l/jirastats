@@ -5,10 +5,11 @@ import Highcharts from 'highcharts';
 
 // Constants
 import {CHARTTYPE_PROGRESS} from "./../constants/ChartTypes";
+import {CHARTTYPE_SPEED} from "./../constants/ChartTypes";
 
 const mapStateToProps = state => {
     return {
-        chart: state.chart,
+        chartData: state.chart,
         chartButton: state.chartButton
     };
 };
@@ -16,37 +17,48 @@ const mapStateToProps = state => {
 class ChartComp extends Component {
     componentDidUpdate () {
         let chartType = this.props.chartButton[this.props.chartButton.length - 1];
-        switch (chartType) {
-            case CHARTTYPE_PROGRESS:
-                let last = this.props.chart[this.props.chart.length - 1];
-                if (last) {
-                    Highcharts.chart('chart', {
-                        title: {
-                            text: last.project_name
-                        },
-                        subtitle: {
-                            text: 'Progress'
-                        },
-                        xAxis: {
-                            title: {
-                                text: "Date"
-                            },
-                            categories: last.categories
-                        },
-                        yAxis: {
-                            title: {
-                                text: 'Number of Tickets'
-                            }
-                        },
-                        legend: {
-                            layout: 'vertical',
-                            align: 'right',
-                            verticalAlign: 'middle'
-                        },
-                        series: last.series
-                    });
+        let chartData = this.props.chartData[this.props.chartData.length - 1];
+        if (chartData) {
+            switch (chartType) {
+                case CHARTTYPE_PROGRESS:
+                    Highcharts.chart('chart', this.getChartOptions("line", chartData));
+                    break;
+                case CHARTTYPE_SPEED:
+                    Highcharts.chart('chart', this.getChartOptions("column", chartData));
+                    break;
+            }
+        }
+    }
+
+    getChartOptions(type, chartData) {
+        return {
+            chart: {
+                type: type
+            },
+            title: {
+                text: chartData.project_name
+            },
+            subtitle: {
+                text: 'Progress'
+            },
+            xAxis: {
+                title: {
+                    text: "Date"
+                },
+                categories: chartData.categories
+            },
+            yAxis: {
+                title: {
+                    text: 'Number of Tickets'
                 }
-                break;
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle'
+            },
+            series: chartData.series,
+            credits: false
         }
     }
 
@@ -54,6 +66,7 @@ class ChartComp extends Component {
         let chartType = this.props.chartButton[this.props.chartButton.length - 1];
         switch (chartType) {
             case CHARTTYPE_PROGRESS:
+            case CHARTTYPE_SPEED:
                 return (
                     <div key={"chartContainer"}>
                         <div id="chart" />
