@@ -114,6 +114,7 @@ func (p *Project) processTickets(search *jp.Search) (err error) {
 			tp.Process()
 			if tp.IsNew {
 				p.stats.New++
+				log.Debugf("New ticket %s was added for project %d, Number of new is now %d", t.Key, p.project.Id, p.stats.New)
 			}
 		}
 
