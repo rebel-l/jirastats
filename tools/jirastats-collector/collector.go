@@ -19,6 +19,8 @@ const concurrentProjects = 5
 
 func main() {
 	verbose := utils.GetVerboseFlag()
+	interval := flag.Int("i", 1, "Interval of days included (default is 1), e.g. 3 means update stats starts 3 days before now")
+
 	flag.Parse()
 
 	// init log level
@@ -30,7 +32,7 @@ func main() {
 	defer db.Close()
 	utils.HandleUnrecoverableError(err)
 
-	c := NewCollector(db)
+	c := NewCollector(db, *interval)
 	projects, err := c.getProjects()
 	if err != nil {
 		utils.HandleUnrecoverableError(err)
@@ -52,15 +54,17 @@ type Collector struct {
 	db *sql.DB
 	jc *jira.Client
 	start time.Time
+	interval int
 	distributedProjects [][]*models.Project
 	wg sync.WaitGroup
 }
 
-func NewCollector(db *sql.DB) *Collector {
+func NewCollector(db *sql.DB, interval int) *Collector {
 	c := new(Collector)
 	c.start = time.Now()
 	c.db = db
 	c.jc = c.getJiraClient()
+	c.interval = interval
 	return c
 }
 
@@ -98,7 +102,7 @@ func (c *Collector) executeConcurrent() {
 func (c *Collector) executeSetOfProjects(projects []*models.Project) {
 	defer c.wg.Done()
 	for _, p := range projects {
-		pp := process.NewProject(p, c.jc, c.db)
+		pp := process.NewProject(p, c.jc, c.db, c.interval)
 		pp.Process()
 	}
 }

@@ -24,10 +24,10 @@ type Project struct {
 	sm *database.StatsMapper
 }
 
-func NewProject(project *models.Project, jc *jira.Client, db *sql.DB) *Project {
+func NewProject(project *models.Project, jc *jira.Client, db *sql.DB, interval int) *Project {
 	p := new(Project)
 	p.start = time.Now()
-	p.actualRun = p.start.AddDate(0, 0, -1)
+	p.actualRun = p.start.AddDate(0, 0, -interval)
 	p.project = project
 	p.jc = jc
 	p.pm = database.NewProjectMapper(db)
@@ -80,7 +80,7 @@ func (p *Project) initStats() (err error) {
 func (p *Project) updateStats() (err error){
 	log.Infof("Update project stats: %d (%s)", p.project.Id, p.project.Name)
 	p.stats = models.NewStats(p.project.Id)
-	p.stats.CreatedAt = p.actualRun // Updated stats needs to be saved 1 day ago
+	p.stats.CreatedAt = p.actualRun
 	search := jp.NewSearch(p.jc, p.getJqlForUpdatedTickets())
 	err = p.processTickets(search)
 	if err != nil {
