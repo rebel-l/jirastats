@@ -256,7 +256,8 @@ func (p *Project) getJqlForUpdatedTickets() string {
 	startDate := p.actualRun.Format(jp.JiraJqlDateFormat)
 	endDate := p.start.Format(jp.JiraJqlDateFormat)
 
-	jql := p.project.GetJql() + fmt.Sprintf(" AND updated >= %s AND updated < %s", startDate, endDate)
+	jql := p.project.GetJql() +
+		fmt.Sprintf(" AND (updated >= %s AND updated < %s OR created >= %s AND created < %s)", startDate, endDate, startDate, endDate)
 	log.Debugf("JQL for updated tickets: %s", jql)
 	return jql
 }
