@@ -1,7 +1,7 @@
-import {CHART_BUTTON} from "../constants/actionTypes";
+import {CHART_TYPE_BUTTON_ACTION} from "../constants/actionTypes";
 
 const ChartButton = chartButton => ({
-    type: CHART_BUTTON,
+    type: CHART_TYPE_BUTTON_ACTION,
     payload: chartButton
 });
 
