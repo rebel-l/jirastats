@@ -2,12 +2,12 @@
 import { combineReducers } from 'redux';
 
 // Components
-import Chart from './reducers/Chart';
 import ChartButton from "./reducers/ChartButton";
+import Project from "./reducers/Project";
 
 const Reducer = combineReducers({
-    chart: Chart,
-    chartButton: ChartButton
+    chartButton: ChartButton,
+    project: Project
 });
 
 export default Reducer;

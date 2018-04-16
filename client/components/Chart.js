@@ -1,4 +1,5 @@
 // Framework
+import axios from "axios/index";
 import React, {Component} from 'react';
 import { connect } from "react-redux";
 import Highcharts from 'highcharts';
@@ -10,24 +11,26 @@ import {CHARTTYPE_SPEED} from "./../constants/ChartTypes";
 const mapStateToProps = state => {
     return {
         chartData: state.chart,
-        chartButton: state.chartButton
+        chartButton: state.chartButton,
+        project: state.project
     };
 };
 
 class ChartComp extends Component {
     componentDidUpdate () {
         let chartType = this.props.chartButton[this.props.chartButton.length - 1];
-        let chartData = this.props.chartData[this.props.chartData.length - 1];
-        if (chartData) {
+        let project = this.props.project[this.props.project.length - 1];
+
+        axios.get(`/data/stats/${project}`).then(res => {
             switch (chartType) {
                 case CHARTTYPE_PROGRESS:
-                    Highcharts.chart('chart', this.getChartOptions("line", chartData));
+                    Highcharts.chart('chart', this.getChartOptions("line", res.data));
                     break;
                 case CHARTTYPE_SPEED:
-                    Highcharts.chart('chart', this.getChartOptions("column", chartData));
+                    Highcharts.chart('chart', this.getChartOptions("column", res.data));
                     break;
             }
-        }
+        });
     }
 
     getChartOptions(type, chartData) {

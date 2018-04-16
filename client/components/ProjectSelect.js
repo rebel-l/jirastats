@@ -4,15 +4,15 @@ import React, {Component} from 'react';
 import { connect } from "react-redux";
 
 // Actions
-import Chart from "../actions/Chart";
+import Project from "../actions/Project"
 
 const mapDispatchToProps = dispatch => {
     return {
-        projectSelect: chart => dispatch(Chart(chart))
+        project: project => dispatch(Project(project))
     };
 };
 
-class Project extends Component {
+class ProjectSelectComponent extends Component {
     constructor(props) {
         super(props);
 
@@ -31,9 +31,7 @@ class Project extends Component {
 
     handleSelect(event){
         if (event.target.value !== "0") {
-            axios.get(`/data/stats/${event.target.value}`).then(res => {
-                this.props.projectSelect(res.data);
-            })
+            this.props.project(event.target.value);
         }
     }
 
@@ -52,6 +50,6 @@ class Project extends Component {
     }
 }
 
-const ProjectSelect = connect(null, mapDispatchToProps)(Project);
+const ProjectSelect = connect(null, mapDispatchToProps)(ProjectSelectComponent);
 
 export default ProjectSelect
