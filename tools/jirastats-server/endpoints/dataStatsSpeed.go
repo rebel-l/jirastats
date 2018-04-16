@@ -2,45 +2,30 @@ package endpoints
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rebel-l/jirastats/packages/database"
 	"github.com/rebel-l/jirastats/tools/jirastats-server/response"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
+	"fmt"
 )
 
-const dataStatsProgressPath = "/data/stats/progress/{projectId}"
-const dateFormat = "02.01.2006"
+const dataStatsSpeedPath = "/data/stats/speed/{projectId}"
 
-type DataStatsProgress struct {
+type DataStatsSpeed struct {
 	sm *database.StatsMapper
 	pm *database.ProjectMapper
 }
 
-// TODO: move to own file
-type Stats struct {
-	ProjectId int `json:"project_id"`
-	ProjectName string `json:"project_name"`
-	Categories []string `json:"categories"`
-	Series []*Serie `json:"series"`
-}
-
-// TODO: move to own file
-type Serie struct {
-	Name string `json:"name"`
-	Data []int `json:"data"`
-}
-
-func NewDataStatsProgress(db *sql.DB, router *mux.Router) {
-	ds := new(DataStatsProgress)
+func NewDataStatsSpeed(db *sql.DB, router *mux.Router) {
+	ds := new(DataStatsSpeed)
 	ds.sm = database.NewStatsMapper(db)
 	ds.pm = database.NewProjectMapper(db)
-	router.HandleFunc(dataStatsProgressPath, ds.GetStats).Methods(http.MethodGet)
+	router.HandleFunc(dataStatsSpeedPath, ds.GetStats).Methods(http.MethodGet)
 }
 
-func (ds *DataStatsProgress) GetStats(res http.ResponseWriter, req *http.Request) {
+func (ds *DataStatsSpeed) GetStats(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	projectId, err := strconv.Atoi(vars["projectId"])
 	if err != nil {
@@ -50,7 +35,7 @@ func (ds *DataStatsProgress) GetStats(res http.ResponseWriter, req *http.Request
 		return
 	}
 
-	log.Debugf("Get all progress stats for project: %d", projectId)
+	log.Debugf("Get all speed stats for project: %d", projectId)
 
 	s := new(Stats)
 	s.ProjectId = projectId
@@ -68,7 +53,7 @@ func (ds *DataStatsProgress) GetStats(res http.ResponseWriter, req *http.Request
 	success.SendOK()
 }
 
-func (ds *DataStatsProgress) setProjectName(s *Stats, res http.ResponseWriter) bool {
+func (ds *DataStatsSpeed) setProjectName(s *Stats, res http.ResponseWriter) bool {
 	// TODO: maybe can be set by client, not necessary to send it again
 	// TODO: add to Stats struct
 	project, err := ds.pm.LoadProjectById(s.ProjectId)
@@ -90,7 +75,8 @@ func (ds *DataStatsProgress) setProjectName(s *Stats, res http.ResponseWriter) b
 	return true
 }
 
-func (ds *DataStatsProgress) setStats(s *Stats, res http.ResponseWriter) bool {
+func (ds *DataStatsSpeed) setStats(s *Stats, res http.ResponseWriter) bool {
+	// TODO: cluster by week
 	stats, err := ds.sm.LoadByProjectId(s.ProjectId)
 	if err != nil {
 		msg := fmt.Sprintf("Not able to load stats for project id %d: %s", s.ProjectId, err.Error())
@@ -106,21 +92,22 @@ func (ds *DataStatsProgress) setStats(s *Stats, res http.ResponseWriter) bool {
 		return false
 	}
 
-	openSeries := new(Serie)
-	openSeries.Name = "Open"
 	closedSeries := new(Serie)
 	closedSeries.Name = "Closed"
 	newSeries := new(Serie)
 	newSeries.Name = "New"
+	speedSeries := new(Serie)
+	speedSeries.Name = "Open"
 
 	for _, v := range stats {
 		s.Categories = append(s.Categories, v.CreatedAt.Format(dateFormat))
-		openSeries.Data = append(openSeries.Data, v.Open)
 		closedSeries.Data = append(closedSeries.Data, v.Closed)
 		newSeries.Data = append(newSeries.Data, v.New)
+		speedSeries.Data = append(speedSeries.Data, v.Closed - v.New)
 	}
 
-	s.Series = append(s.Series, openSeries, closedSeries, newSeries)
+	s.Series = append(s.Series, closedSeries, newSeries, speedSeries)
 
 	return true
 }
+

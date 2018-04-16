@@ -34,6 +34,7 @@ func main() {
 	endpoints.NewDataTickets(db, router)
 	endpoints.NewProjects(db, router)
 	endpoints.NewDataStatsProgress(db, router)
+	endpoints.NewDataStatsSpeed(db, router)
 
 	// Init File Server ... must be the last one
 	endpoints.NewPublic(router)
