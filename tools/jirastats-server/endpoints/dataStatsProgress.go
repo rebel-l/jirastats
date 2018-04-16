@@ -11,10 +11,10 @@ import (
 	"strconv"
 )
 
-const dataStatsPath = "/data/stats/{projectId}"
+const dataStatsProgressPath = "/data/stats/progress/{projectId}"
 const dateFormat = "02.01.2006"
 
-type DataStats struct {
+type DataStatsProgress struct {
 	sm *database.StatsMapper
 	pm *database.ProjectMapper
 }
@@ -31,14 +31,14 @@ type Serie struct {
 	Data []int `json:"data"`
 }
 
-func NewDataStats(db *sql.DB, router *mux.Router) {
-	ds := new(DataStats)
+func NewDataStatsProgress(db *sql.DB, router *mux.Router) {
+	ds := new(DataStatsProgress)
 	ds.sm = database.NewStatsMapper(db)
 	ds.pm = database.NewProjectMapper(db)
-	router.HandleFunc(dataStatsPath, ds.GetStatsFroProject).Methods(http.MethodGet)
+	router.HandleFunc(dataStatsProgressPath, ds.GetStats).Methods(http.MethodGet)
 }
 
-func (ds *DataStats) GetStatsFroProject(res http.ResponseWriter, req *http.Request) {
+func (ds *DataStatsProgress) GetStats(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	projectId, err := strconv.Atoi(vars["projectId"])
 	if err != nil {
@@ -66,7 +66,7 @@ func (ds *DataStats) GetStatsFroProject(res http.ResponseWriter, req *http.Reque
 	success.SendOK()
 }
 
-func (ds *DataStats) setProjectName(s *Stats, res http.ResponseWriter) bool {
+func (ds *DataStatsProgress) setProjectName(s *Stats, res http.ResponseWriter) bool {
 	project, err := ds.pm.LoadProjectById(s.ProjectId)
 	if err != nil {
 		msg := fmt.Sprintf("Not able to load project id %d: %s", s.ProjectId, err.Error())
@@ -86,7 +86,7 @@ func (ds *DataStats) setProjectName(s *Stats, res http.ResponseWriter) bool {
 	return true
 }
 
-func (ds *DataStats) setStats(s *Stats, res http.ResponseWriter) bool {
+func (ds *DataStatsProgress) setStats(s *Stats, res http.ResponseWriter) bool {
 	stats, err := ds.sm.LoadByProjectId(s.ProjectId)
 	if err != nil {
 		msg := fmt.Sprintf("Not able to load stats for project id %d: %s", s.ProjectId, err.Error())

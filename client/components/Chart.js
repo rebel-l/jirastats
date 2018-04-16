@@ -21,7 +21,7 @@ class ChartComp extends Component {
         let chartType = this.props.chartButton[this.props.chartButton.length - 1];
         let project = this.props.project[this.props.project.length - 1];
 
-        axios.get(`/data/stats/${project}`).then(res => {
+        axios.get(`/data/stats/${chartType}/${project}`).then(res => {
             switch (chartType) {
                 case CHARTTYPE_PROGRESS:
                     Highcharts.chart('chart', this.getChartOptions("line", res.data));
