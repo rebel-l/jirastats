@@ -15,12 +15,13 @@ import (
 	"sync"
 )
 
-const concurrentProjects = 5
+const defaultConcurrentProjects = 5
+const defaultInterval = 1
 
 func main() {
 	verbose := utils.GetVerboseFlag()
-	interval := flag.Int("i", 1, "Interval of days included (default is 1), e.g. 3 means update stats starts 3 days before now")
-
+	interval := flag.Int("i", defaultInterval, "Interval of days included, e.g. 3 means update stats starts 3 days before now")
+	concurrentProjects := flag.Int("p", defaultConcurrentProjects, "Number of projects to execute concurrent")
 	flag.Parse()
 
 	// init log level
@@ -32,7 +33,7 @@ func main() {
 	defer db.Close()
 	utils.HandleUnrecoverableError(err)
 
-	c := NewCollector(db, *interval)
+	c := NewCollector(db, *interval, *concurrentProjects)
 	projects, err := c.getProjects()
 	if err != nil {
 		utils.HandleUnrecoverableError(err)
@@ -55,16 +56,18 @@ type Collector struct {
 	jc *jira.Client
 	start time.Time
 	interval int
+	concurrentProjects int
 	distributedProjects [][]*models.Project
 	wg sync.WaitGroup
 }
 
-func NewCollector(db *sql.DB, interval int) *Collector {
+func NewCollector(db *sql.DB, interval int, concurrentProjects int) *Collector {
 	c := new(Collector)
 	c.start = time.Now()
 	c.db = db
 	c.jc = c.getJiraClient()
 	c.interval = interval
+	c.concurrentProjects = concurrentProjects
 	return c
 }
 
@@ -80,19 +83,19 @@ func (c *Collector) getJiraClient() *jira.Client {
 }
 
 func (c *Collector) distributeProjects(projects []*models.Project) {
-	c.distributedProjects = make([][]*models.Project, concurrentProjects)
+	c.distributedProjects = make([][]*models.Project, c.concurrentProjects)
 	i := 0
 	for _, p := range projects {
 		c.distributedProjects[i] = append(c.distributedProjects[i], p)
 		i++
-		if i == concurrentProjects {
+		if i == c.concurrentProjects {
 			i = 0
 		}
 	}
 }
 
 func (c *Collector) executeConcurrent() {
-	for i := 0; i < concurrentProjects; i++ {
+	for i := 0; i < c.concurrentProjects; i++ {
 		c.wg.Add(1)
 		go c.executeSetOfProjects(c.distributedProjects[i])
 	}
