@@ -27,10 +27,18 @@ type Stats struct {
 	Series []*Serie `json:"series"`
 }
 
+func (s *Stats) AddCategory(name string) {
+	s.Categories = append(s.Categories, name)
+}
+
 // TODO: move to own file
 type Serie struct {
 	Name string `json:"name"`
 	Data []int `json:"data"`
+}
+
+func (s *Serie) AddData(data int) {
+	s.Data = append(s.Data, data)
 }
 
 func NewDataStatsProgress(db *sql.DB, router *mux.Router) {

@@ -51,7 +51,7 @@ func (sm *StatsMapper) Save(model *models.Stats) (err error) {
 }
 
 func (sm *StatsMapper) LoadByProjectId(projectId int) (collection []*models.Stats, err error) {
-	rows, err := sm.table.Select("project_id = ?", projectId)
+	rows, err := sm.table.SelectComplex("project_id = ?", "created_at ASC", "", "", projectId)
 	defer rows.Close()
 	if err != nil {
 		return

@@ -2,13 +2,13 @@ package endpoints
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rebel-l/jirastats/packages/database"
 	"github.com/rebel-l/jirastats/tools/jirastats-server/response"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
-	"fmt"
 )
 
 const dataStatsSpeedPath = "/data/stats/speed/{projectId}"
@@ -16,6 +16,8 @@ const dataStatsSpeedPath = "/data/stats/speed/{projectId}"
 type DataStatsSpeed struct {
 	sm *database.StatsMapper
 	pm *database.ProjectMapper
+	stats *Stats
+	series map[string]*Serie
 }
 
 func NewDataStatsSpeed(db *sql.DB, router *mux.Router) {
@@ -37,77 +39,117 @@ func (ds *DataStatsSpeed) GetStats(res http.ResponseWriter, req *http.Request) {
 
 	log.Debugf("Get all speed stats for project: %d", projectId)
 
-	s := new(Stats)
-	s.ProjectId = projectId
-	ok := ds.setProjectName(s, res)
+	ds.stats = new(Stats)
+	ds.stats.ProjectId = projectId
+	ok := ds.setProjectName(res)
 	if ok == false {
 		return
 	}
 
-	ok = ds.setStats(s, res)
+	ok = ds.setStats(res)
 	if ok == false {
 		return
 	}
 
-	success := response.NewSuccessJson(s, res)
+	success := response.NewSuccessJson(ds.stats, res)
 	success.SendOK()
 }
 
-func (ds *DataStatsSpeed) setProjectName(s *Stats, res http.ResponseWriter) bool {
+func (ds *DataStatsSpeed) setProjectName(res http.ResponseWriter) bool {
 	// TODO: maybe can be set by client, not necessary to send it again
 	// TODO: add to Stats struct
-	project, err := ds.pm.LoadProjectById(s.ProjectId)
+	project, err := ds.pm.LoadProjectById(ds.stats.ProjectId)
 	if err != nil {
-		msg := fmt.Sprintf("Not able to load project id %d: %s", s.ProjectId, err.Error())
+		msg := fmt.Sprintf("Not able to load project id %d: %s", ds.stats.ProjectId, err.Error())
 		e := response.NewErrorJson(msg, res)
 		e.SendInternalServerError()
 		return false
 	}
 
 	if project == nil {
-		msg := fmt.Sprintf("No project found for id: %d", s.ProjectId)
+		msg := fmt.Sprintf("No project found for id: %d", ds.stats.ProjectId)
 		e := response.NewErrorJson(msg, res)
 		e.SendNotFound()
 		return false
 	}
 
-	s.ProjectName = project.Name
+	ds.stats.ProjectName = project.Name
 	return true
 }
 
-func (ds *DataStatsSpeed) setStats(s *Stats, res http.ResponseWriter) bool {
-	// TODO: cluster by week
-	stats, err := ds.sm.LoadByProjectId(s.ProjectId)
+func (ds *DataStatsSpeed) setStats(res http.ResponseWriter) bool {
+	stats, err := ds.sm.LoadByProjectId(ds.stats.ProjectId)
 	if err != nil {
-		msg := fmt.Sprintf("Not able to load stats for project id %d: %s", s.ProjectId, err.Error())
+		msg := fmt.Sprintf("Not able to load stats for project id %d: %s", ds.stats.ProjectId, err.Error())
 		e := response.NewErrorJson(msg, res)
 		e.SendInternalServerError()
 		return false
 	}
 
 	if len(stats) == 0 {
-		msg := fmt.Sprintf("No stats found for project id: %d", s.ProjectId)
+		msg := fmt.Sprintf("No stats found for project id: %d", ds.stats.ProjectId)
 		e := response.NewErrorJson(msg, res)
 		e.SendNotFound()
 		return false
 	}
 
-	closedSeries := new(Serie)
-	closedSeries.Name = "Closed"
-	newSeries := new(Serie)
-	newSeries.Name = "New"
-	speedSeries := new(Serie)
-	speedSeries.Name = "Open"
+	ds.series = make(map[string]*Serie, 3)
+	ds.series["closed"] = new(Serie)
+	ds.series["closed"].Name = "Closed"
+	ds.series["new"] = new(Serie)
+	ds.series["new"].Name = "New"
+	ds.series["speed"] = new(Serie)
+	ds.series["speed"].Name = "Speed Index"
 
-	for _, v := range stats {
-		s.Categories = append(s.Categories, v.CreatedAt.Format(dateFormat))
-		closedSeries.Data = append(closedSeries.Data, v.Closed)
-		newSeries.Data = append(newSeries.Data, v.New)
-		speedSeries.Data = append(speedSeries.Data, v.Closed - v.New)
+	var previousYear, previousWeek int
+	var closedTickets, newTickets int
+	for i := 0; i < len(stats); i++ {
+		/*
+		Iteration	|	previous year/week	|	actual year/week	|	actions
+			0		|		0/0 			| 		2018/2 			| 	sum up
+			1		|		2018/2			| 		2018/2 			| 	sum up
+			2		|		2018/2			| 		2018/3 			| 	add actual serie, reset counter, sum up
+			3		|		2018/3			| 		2018/3 			| 	sum up + add serie as it is last
+		*/
+
+		v := stats[i]
+		actualYear, actualWeek := v.CreatedAt.ISOWeek()
+
+		if i == 0 {
+			previousYear = actualYear
+			previousWeek = actualWeek
+		}
+
+		if actualYear != previousYear || actualWeek != previousWeek {
+			// add numbers to serie
+			ds.addData(previousYear, previousWeek, closedTickets, newTickets)
+
+			// reset counters
+			closedTickets = 0
+			newTickets = 0
+		}
+
+		// sum up
+		closedTickets += v.Closed
+		newTickets += v.New
+
+		if i == len(stats) - 1 {
+			// add numbers of last run to serie
+			ds.addData(actualYear, actualWeek, closedTickets, newTickets)
+		}
+
+		previousYear = actualYear
+		previousWeek = actualWeek
 	}
 
-	s.Series = append(s.Series, closedSeries, newSeries, speedSeries)
+	ds.stats.Series = append(ds.stats.Series, ds.series["closed"], ds.series["new"], ds.series["speed"])
 
 	return true
 }
 
+func (ds *DataStatsSpeed) addData(year int, week int, closedTickets int, newTickets int) {
+	ds.stats.Categories = append(ds.stats.Categories, fmt.Sprintf("%d/%d", year, week))
+	ds.series["closed"].Data = append(ds.series["closed"].Data, closedTickets)
+	ds.series["new"].Data = append(ds.series["new"].Data, newTickets)
+	ds.series["speed"].Data = append(ds.series["speed"].Data, closedTickets - newTickets)
+}
