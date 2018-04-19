@@ -20,6 +20,7 @@ const ticketTableStructure =
 		"`status_clustered` CHAR(50) NOT NULL," +
 		"`priority` CHAR(50) NOT NULL," +
 		"`issuetype` CHAR(50) NULL," +
+		"`removed` INTEGER NOT NULL DEFAULT 0," +
 		"`created_at_by_jira` DATETIME NOT NULL," +
 		"`last_updated_by_jira` DATETIME NOT NULL," +
 		"`created_at` DATETIME NOT NULL," +
@@ -31,13 +32,13 @@ const ticketTableInsert =
 	"INSERT INTO %s (" +
 		"`key`, `project_id`, `summary`, `components`, `labels`, " +
 		"`is_new`, `status_by_jira`, `status_clustered`, `priority`, `issuetype`, " +
-		"`created_at_by_jira`, `last_updated_by_jira`, `created_at`, `expired`" +
-	") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+		"`removed`, `created_at_by_jira`, `last_updated_by_jira`, `created_at`, `expired`" +
+	") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 const ticketTableUpdate =
 	"UPDATE %s SET " +
 		"`key` = ?, `project_id` = ?, `summary` = ?, `components` = ?, `labels` = ?, " +
 		"`is_new` = ?, `status_by_jira` = ?, `status_clustered` = ?, `priority` = ?, `issuetype` = ?, " +
-		"`created_at_by_jira` = ?, `last_updated_by_jira` = ?, `created_at` = ?, `expired` = ? " +
+		"`removed` = ?, `created_at_by_jira` = ?, `last_updated_by_jira` = ?, `created_at` = ?, `expired` = ? " +
 	"WHERE `id` = ?"
 
 
@@ -79,6 +80,7 @@ func (t *TicketTable) Insert(
 	statusClustered string,
 	priority string,
 	issueType string,
+	removed int,
 	createdAtByJira string,
 	lastUpdatedAtByJira string,
 	createdAt string,
@@ -97,6 +99,7 @@ func (t *TicketTable) Insert(
 		statusClustered,
 		priority,
 		issueType,
+		removed,
 		createdAtByJira,
 		lastUpdatedAtByJira,
 		createdAt,
@@ -123,6 +126,7 @@ func (t *TicketTable) Update(
 	statusClustered string,
 	priority string,
 	issueType string,
+	removed int,
 	createdAtByJira string,
 	lastUpdatedAtByJira string,
 	createdAt string,
@@ -141,6 +145,7 @@ func (t *TicketTable) Update(
 		statusClustered,
 		priority,
 		issueType,
+		removed,
 		createdAtByJira,
 		lastUpdatedAtByJira,
 		createdAt,

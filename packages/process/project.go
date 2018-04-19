@@ -185,8 +185,7 @@ func (p *Project) processRemoved() (err error) {
 		return
 	}
 
-	log.Debugf("Found %d not expired tickets", len(tickets))
-
+	log.Debugf("Project %d: Found %d not expired tickets", p.project.Id, len(tickets))
 
 	search := jp.NewSearch(p.jc, p.project.GetJql())
 	search.Request.MaxResults = 20
@@ -246,6 +245,7 @@ func (p *Project) expireRemoved(tickets []*models.Ticket, tm *database.TicketMap
 		}
 
 		t.ExpireNow()
+		t.Removed = true
 		err = tm.Save(t)
 		return
 	}

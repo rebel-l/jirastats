@@ -21,6 +21,7 @@ type Ticket struct {
 	StatusClustered string `json:"status_clustered"`
 	Priority string `json:"priority"`
 	Issuetype string `json:"issuetype"`
+	Removed bool `json:"removed"`
 	CreatedAtByJira time.Time `json:"created_at_by_jira"`
 	LastUpdatedByJira time.Time `json:"last_updated_by_jira"`
 	CreatedAt time.Time `json:"created_at"`
@@ -32,6 +33,7 @@ func NewTicket() *Ticket {
 	t.StatusByJira = "Open"
 	t.StatusClustered = TicketStatusClusteredOpen
 	t.IsNew = false
+	t.Removed = false
 	t.CreatedAt = time.Now()
 	return t
 }

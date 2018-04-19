@@ -58,10 +58,11 @@ func (t *Ticket) Process() {
 				return
 			}
 			log.Debugf("Project %d: Ticket expired: %d (%s)", t.projectId, prevTicket.Id, prevTicket.Key)
-		} else {
+		} else if prevTicket.Removed {
 			// expired ... only new if it was removed for some reason and appears again
-			//t.IsNew = true // TODO: only if old one was removed
-			//newTicket.IsNew = true
+			log.Debugf("Project %d: Ticket appeared again: %d (%s)", t.projectId, prevTicket.Id, prevTicket.Key)
+			t.IsNew = true
+			newTicket.IsNew = true
 		}
 	} else {
 		// appeared the first time

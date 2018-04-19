@@ -91,6 +91,7 @@ func (tm *TicketMapper) Save(model *models.Ticket) (err error) {
 			model.StatusClustered,
 			model.Priority,
 			model.Issuetype,
+			utils.BtoI(model.Removed),
 			model.CreatedAtByJira.Format(dateTimeFormat),
 			model.LastUpdatedByJira.Format(dateTimeFormat),
 			model.CreatedAt.Format(dateTimeFormat),
@@ -114,6 +115,7 @@ func (tm *TicketMapper) Save(model *models.Ticket) (err error) {
 			model.StatusClustered,
 			model.Priority,
 			model.Issuetype,
+			utils.BtoI(model.Removed),
 			model.CreatedAtByJira.Format(dateTimeFormat),
 			model.LastUpdatedByJira.Format(dateTimeFormat),
 			model.CreatedAt.Format(dateTimeFormat),
@@ -164,7 +166,8 @@ func (tm *TicketMapper) mapRowToModel(rows *sql.Rows, t *models.Ticket) (err err
 		lastUpdatedAtByJira,
 		createdAt string
 	var expired sql.NullString
-	var isNew int
+	var isNew,
+		removed int
 
 	err = rows.Scan(
 		&t.Id,
@@ -178,6 +181,7 @@ func (tm *TicketMapper) mapRowToModel(rows *sql.Rows, t *models.Ticket) (err err
 		&t.StatusClustered,
 		&t.Priority,
 		&t.Issuetype,
+		&removed,
 		&createdAtByJira,
 		&lastUpdatedAtByJira,
 		&createdAt,
@@ -188,6 +192,7 @@ func (tm *TicketMapper) mapRowToModel(rows *sql.Rows, t *models.Ticket) (err err
 	t.LastUpdatedByJira, _ = time.Parse(dateTimeFormat, lastUpdatedAtByJira)
 	t.CreatedAt, _ = time.Parse(dateTimeFormat, createdAt)
 	t.IsNew = utils.ItoB(isNew)
+	t.Removed = utils.ItoB(removed)
 	if expired.Valid {
 		t.Expired, _ = time.Parse(dateTimeFormat, expired.String)
 	}
