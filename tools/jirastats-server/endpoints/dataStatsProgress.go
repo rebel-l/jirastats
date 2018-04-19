@@ -19,28 +19,6 @@ type DataStatsProgress struct {
 	pm *database.ProjectMapper
 }
 
-// TODO: move to own file
-type Stats struct {
-	ProjectId int `json:"project_id"`
-	ProjectName string `json:"project_name"`
-	Categories []string `json:"categories"`
-	Series []*Serie `json:"series"`
-}
-
-func (s *Stats) AddCategory(name string) {
-	s.Categories = append(s.Categories, name)
-}
-
-// TODO: move to own file
-type Serie struct {
-	Name string `json:"name"`
-	Data []int `json:"data"`
-}
-
-func (s *Serie) AddData(data int) {
-	s.Data = append(s.Data, data)
-}
-
 func NewDataStatsProgress(db *sql.DB, router *mux.Router) {
 	ds := new(DataStatsProgress)
 	ds.sm = database.NewStatsMapper(db)
@@ -60,7 +38,7 @@ func (ds *DataStatsProgress) GetStats(res http.ResponseWriter, req *http.Request
 
 	log.Debugf("Get all progress stats for project: %d", projectId)
 
-	s := new(Stats)
+	s := new(response.Stats)
 	s.ProjectId = projectId
 	ok := ds.setProjectName(s, res)
 	if ok == false {
@@ -76,7 +54,7 @@ func (ds *DataStatsProgress) GetStats(res http.ResponseWriter, req *http.Request
 	success.SendOK()
 }
 
-func (ds *DataStatsProgress) setProjectName(s *Stats, res http.ResponseWriter) bool {
+func (ds *DataStatsProgress) setProjectName(s *response.Stats, res http.ResponseWriter) bool {
 	// TODO: maybe can be set by client, not necessary to send it again
 	// TODO: add to Stats struct
 	project, err := ds.pm.LoadProjectById(s.ProjectId)
@@ -98,7 +76,7 @@ func (ds *DataStatsProgress) setProjectName(s *Stats, res http.ResponseWriter) b
 	return true
 }
 
-func (ds *DataStatsProgress) setStats(s *Stats, res http.ResponseWriter) bool {
+func (ds *DataStatsProgress) setStats(s *response.Stats, res http.ResponseWriter) bool {
 	stats, err := ds.sm.LoadByProjectId(s.ProjectId)
 	if err != nil {
 		msg := fmt.Sprintf("Not able to load stats for project id %d: %s", s.ProjectId, err.Error())
@@ -114,11 +92,11 @@ func (ds *DataStatsProgress) setStats(s *Stats, res http.ResponseWriter) bool {
 		return false
 	}
 
-	openSeries := new(Serie)
+	openSeries := new(response.Serie)
 	openSeries.Name = "Open"
-	closedSeries := new(Serie)
+	closedSeries := new(response.Serie)
 	closedSeries.Name = "Closed"
-	newSeries := new(Serie)
+	newSeries := new(response.Serie)
 	newSeries.Name = "New"
 
 	for _, v := range stats {

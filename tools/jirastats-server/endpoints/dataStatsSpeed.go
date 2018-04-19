@@ -16,8 +16,8 @@ const dataStatsSpeedPath = "/data/stats/speed/{projectId}"
 type DataStatsSpeed struct {
 	sm *database.StatsMapper
 	pm *database.ProjectMapper
-	stats *Stats
-	series map[string]*Serie
+	stats *response.Stats
+	series map[string]*response.Serie
 }
 
 func NewDataStatsSpeed(db *sql.DB, router *mux.Router) {
@@ -39,7 +39,7 @@ func (ds *DataStatsSpeed) GetStats(res http.ResponseWriter, req *http.Request) {
 
 	log.Debugf("Get all speed stats for project: %d", projectId)
 
-	ds.stats = new(Stats)
+	ds.stats = new(response.Stats)
 	ds.stats.ProjectId = projectId
 	ok := ds.setProjectName(res)
 	if ok == false {
@@ -93,12 +93,12 @@ func (ds *DataStatsSpeed) setStats(res http.ResponseWriter) bool {
 		return false
 	}
 
-	ds.series = make(map[string]*Serie, 3)
-	ds.series["closed"] = new(Serie)
+	ds.series = make(map[string]*response.Serie, 3)
+	ds.series["closed"] = new(response.Serie)
 	ds.series["closed"].Name = "Closed"
-	ds.series["new"] = new(Serie)
+	ds.series["new"] = new(response.Serie)
 	ds.series["new"].Name = "New"
-	ds.series["speed"] = new(Serie)
+	ds.series["speed"] = new(response.Serie)
 	ds.series["speed"].Name = "Speed Index"
 
 	var previousYear, previousWeek int
