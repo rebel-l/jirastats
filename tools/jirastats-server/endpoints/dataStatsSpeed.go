@@ -39,9 +39,8 @@ func (ds *DataStatsSpeed) GetStats(res http.ResponseWriter, req *http.Request) {
 
 	log.Debugf("Get all speed stats for project: %d", projectId)
 
-	ds.stats = new(response.Stats)
-	ds.stats.ProjectId = projectId
-	ok := ds.setProjectName(res)
+	var ok bool
+	ds.stats, ok = response.NewStats(projectId, ds.pm, res)
 	if ok == false {
 		return
 	}
@@ -53,28 +52,6 @@ func (ds *DataStatsSpeed) GetStats(res http.ResponseWriter, req *http.Request) {
 
 	success := response.NewSuccessJson(ds.stats, res)
 	success.SendOK()
-}
-
-func (ds *DataStatsSpeed) setProjectName(res http.ResponseWriter) bool {
-	// TODO: maybe can be set by client, not necessary to send it again
-	// TODO: add to Stats struct
-	project, err := ds.pm.LoadProjectById(ds.stats.ProjectId)
-	if err != nil {
-		msg := fmt.Sprintf("Not able to load project id %d: %s", ds.stats.ProjectId, err.Error())
-		e := response.NewErrorJson(msg, res)
-		e.SendInternalServerError()
-		return false
-	}
-
-	if project == nil {
-		msg := fmt.Sprintf("No project found for id: %d", ds.stats.ProjectId)
-		e := response.NewErrorJson(msg, res)
-		e.SendNotFound()
-		return false
-	}
-
-	ds.stats.ProjectName = project.Name
-	return true
 }
 
 func (ds *DataStatsSpeed) setStats(res http.ResponseWriter) bool {

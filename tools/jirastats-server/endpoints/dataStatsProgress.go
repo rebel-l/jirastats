@@ -15,8 +15,9 @@ const dataStatsProgressPath = "/data/stats/progress/{projectId}"
 const dateFormat = "02.01.2006"
 
 type DataStatsProgress struct {
-	sm *database.StatsMapper
 	pm *database.ProjectMapper
+	sm *database.StatsMapper
+	stats *response.Stats
 }
 
 func NewDataStatsProgress(db *sql.DB, router *mux.Router) {
@@ -38,55 +39,34 @@ func (ds *DataStatsProgress) GetStats(res http.ResponseWriter, req *http.Request
 
 	log.Debugf("Get all progress stats for project: %d", projectId)
 
-	s := new(response.Stats)
-	s.ProjectId = projectId
-	ok := ds.setProjectName(s, res)
+	var ok bool
+	ds.stats, ok = response.NewStats(projectId, ds.pm, res)
 	if ok == false {
 		return
 	}
 
-	ok = ds.setStats(s, res)
+	ok = ds.setStats(res)
 	if ok == false {
 		return
 	}
 
-	success := response.NewSuccessJson(s, res)
+	success := response.NewSuccessJson(ds.stats, res)
 	success.SendOK()
 }
 
-func (ds *DataStatsProgress) setProjectName(s *response.Stats, res http.ResponseWriter) bool {
-	// TODO: maybe can be set by client, not necessary to send it again
-	// TODO: add to Stats struct
-	project, err := ds.pm.LoadProjectById(s.ProjectId)
+
+
+func (ds *DataStatsProgress) setStats(res http.ResponseWriter) bool {
+	stats, err := ds.sm.LoadByProjectId(ds.stats.ProjectId)
 	if err != nil {
-		msg := fmt.Sprintf("Not able to load project id %d: %s", s.ProjectId, err.Error())
-		e := response.NewErrorJson(msg, res)
-		e.SendInternalServerError()
-		return false
-	}
-
-	if project == nil {
-		msg := fmt.Sprintf("No project found for id: %d", s.ProjectId)
-		e := response.NewErrorJson(msg, res)
-		e.SendNotFound()
-		return false
-	}
-
-	s.ProjectName = project.Name
-	return true
-}
-
-func (ds *DataStatsProgress) setStats(s *response.Stats, res http.ResponseWriter) bool {
-	stats, err := ds.sm.LoadByProjectId(s.ProjectId)
-	if err != nil {
-		msg := fmt.Sprintf("Not able to load stats for project id %d: %s", s.ProjectId, err.Error())
+		msg := fmt.Sprintf("Not able to load stats for project id %d: %s", ds.stats.ProjectId, err.Error())
 		e := response.NewErrorJson(msg, res)
 		e.SendInternalServerError()
 		return false
 	}
 
 	if len(stats) == 0 {
-		msg := fmt.Sprintf("No stats found for project id: %d", s.ProjectId)
+		msg := fmt.Sprintf("No stats found for project id: %d", ds.stats.ProjectId)
 		e := response.NewErrorJson(msg, res)
 		e.SendNotFound()
 		return false
@@ -100,13 +80,13 @@ func (ds *DataStatsProgress) setStats(s *response.Stats, res http.ResponseWriter
 	newSeries.Name = "New"
 
 	for _, v := range stats {
-		s.Categories = append(s.Categories, v.CreatedAt.Format(dateFormat))
-		openSeries.Data = append(openSeries.Data, v.Open)
-		closedSeries.Data = append(closedSeries.Data, v.Closed)
-		newSeries.Data = append(newSeries.Data, v.New)
+		ds.stats.AddCategory(v.CreatedAt.Format(dateFormat))
+		openSeries.AddData(v.Open)
+		closedSeries.AddData(v.Closed)
+		newSeries.AddData(v.New)
 	}
 
-	s.Series = append(s.Series, openSeries, closedSeries, newSeries)
+	ds.stats.Series = append(ds.stats.Series, openSeries, closedSeries, newSeries)
 
 	return true
 }
