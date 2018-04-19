@@ -16,6 +16,7 @@ type Ticket struct {
 	Summary string `json:"summary"`
 	Components []string `json:"components"`
 	Labels []string `json:"labels"`
+	IsNew bool `json:"is_new"`
 	StatusByJira string `json:"status_by_jira"`
 	StatusClustered string `json:"status_clustered"`
 	Priority string `json:"priority"`
@@ -30,6 +31,7 @@ func NewTicket() *Ticket {
 	t := new(Ticket)
 	t.StatusByJira = "Open"
 	t.StatusClustered = TicketStatusClusteredOpen
+	t.IsNew = false
 	t.CreatedAt = time.Now()
 	return t
 }

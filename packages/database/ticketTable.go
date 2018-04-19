@@ -6,6 +6,7 @@ import (
 )
 
 const ticketTableName = "ticket"
+// TODO: add the remove flag to data for debug reasons
 const ticketTableStructure =
 	"CREATE TABLE IF NOT EXISTS `%s` (" +
 		"`id` INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -14,6 +15,7 @@ const ticketTableStructure =
 		"`summary` VARCHAR(2000) NOT NULL," +
 		"`components` VARCHAR(2000) NULL," +
 		"`labels` VARCHAR(2000) NULL," +
+		"`is_new` INTEGER NOT NULL DEFAULT 0," +
 		"`status_by_jira` CHAR(50) NOT NULL," +
 		"`status_clustered` CHAR(50) NOT NULL," +
 		"`priority` CHAR(50) NOT NULL," +
@@ -28,14 +30,14 @@ const ticketTableIndex = "CREATE UNIQUE INDEX IF NOT EXISTS ticket_key_pid_expir
 const ticketTableInsert =
 	"INSERT INTO %s (" +
 		"`key`, `project_id`, `summary`, `components`, `labels`, " +
-		"`status_by_jira`, `status_clustered`, `priority`, `issuetype`, `created_at_by_jira`, " +
-		"`last_updated_by_jira`, `created_at`, `expired`" +
-	") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+		"`is_new`, `status_by_jira`, `status_clustered`, `priority`, `issuetype`, " +
+		"`created_at_by_jira`, `last_updated_by_jira`, `created_at`, `expired`" +
+	") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 const ticketTableUpdate =
 	"UPDATE %s SET " +
 		"`key` = ?, `project_id` = ?, `summary` = ?, `components` = ?, `labels` = ?, " +
-		"`status_by_jira` = ?, `status_clustered` = ?, `priority` = ?, `issuetype` = ?, `created_at_by_jira` = ?, " +
-		"`last_updated_by_jira` = ?, `created_at` = ?, `expired` = ? " +
+		"`is_new` = ?, `status_by_jira` = ?, `status_clustered` = ?, `priority` = ?, `issuetype` = ?, " +
+		"`created_at_by_jira` = ?, `last_updated_by_jira` = ?, `created_at` = ?, `expired` = ? " +
 	"WHERE `id` = ?"
 
 
@@ -72,6 +74,7 @@ func (t *TicketTable) Insert(
 	summary string,
 	components string,
 	labels string,
+	isNew int,
 	statusByJira string,
 	statusClustered string,
 	priority string,
@@ -89,6 +92,7 @@ func (t *TicketTable) Insert(
 		summary,
 		components,
 		labels,
+		isNew,
 		statusByJira,
 		statusClustered,
 		priority,
@@ -114,6 +118,7 @@ func (t *TicketTable) Update(
 	summary string,
 	components string,
 	labels string,
+	isNew int,
 	statusByJira string,
 	statusClustered string,
 	priority string,
@@ -131,6 +136,7 @@ func (t *TicketTable) Update(
 		summary,
 		components,
 		labels,
+		isNew,
 		statusByJira,
 		statusClustered,
 		priority,

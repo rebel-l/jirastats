@@ -35,31 +35,39 @@ func (t *Ticket) Process() {
 	log.Infof("Process ticket: %s", t.issue.Key)
 	newTicket := t.getNewTicket()
 
-	// 1st find not expired old ticket and process if not changed
-	oldTicket, err := t.tm.LoadByKey(t.issue.Key, t.projectId)
+	// 1st find previous ticket and process if changed
+	prevTicket, err := t.tm.LoadLastByKey(t.issue.Key, t.projectId)
 	if err != nil {
-		log.Errorf("Couldn't load not expired old ticket: %s", err.Error())
+		log.Errorf("Project %d: Couldn't load not expired old ticket: %s",t.projectId, err.Error())
 	}
 
-	if oldTicket.Id != 0 {
-		log.Debugf("Unexpired old ticket (%s) found: %d", t.issue.Key, oldTicket.Id)
-		if t.changed(newTicket, oldTicket) == false {
-			log.Debugf("No changes found for ticket: %d (%s)", oldTicket.Id, oldTicket.Key)
+	if prevTicket.Id != 0 {
+		log.Debugf("Project %d: old ticket (%s) found: %d", t.projectId, t.issue.Key, prevTicket.Id)
+		if t.changed(newTicket, prevTicket) == false {
+			log.Debugf("Project %d: No changes found for ticket: %d (%s)", t.projectId, prevTicket.Id, prevTicket.Key)
 			return
 		}
 
-		log.Debugf("Changes found for ticket: %d (%s)", oldTicket.Id, oldTicket.Key)
-		oldTicket.ExpireEndOfDayBefore() // needs to be actual run at 23:59:59
-		err = t.tm.Save(oldTicket)
-		if err != nil {
-			log.Errorf("Old ticket could not be expired: %d (%s), error: %s", oldTicket.Id, oldTicket.Key, err.Error())
-			return
+		log.Debugf("Project %d: Changes found for ticket: %d (%s)", t.projectId, prevTicket.Id, prevTicket.Key)
+		if prevTicket.Expired.IsZero() {
+			// not expired
+			prevTicket.ExpireEndOfDayBefore() // needs to be actual run at 23:59:59
+			err = t.tm.Save(prevTicket)
+			if err != nil {
+				log.Errorf("Project %d: Old ticket could not be expired: %d (%s), error: %s", t.projectId, prevTicket.Id, prevTicket.Key, err.Error())
+				return
+			}
+			log.Debugf("Project %d: Ticket expired: %d (%s)", t.projectId, prevTicket.Id, prevTicket.Key)
+		} else {
+			// expired ... only new if it was removed for some reason and appears again
+			//t.IsNew = true // TODO: only if old one was removed
+			//newTicket.IsNew = true
 		}
-		log.Debugf("Ticket expired: %d (%s)", oldTicket.Id, oldTicket.Key)
 	} else {
 		// appeared the first time
 		t.IsNew = true
-		log.Debugf("No unexpired old ticket (%s) found", t.issue.Key)
+		newTicket.IsNew = true
+		log.Debugf("Project %d: No old ticket (%s) found", t.projectId, t.issue.Key)
 	}
 
 	// 2nd process new ticket
@@ -70,7 +78,7 @@ func (t *Ticket) Process() {
 		}
 
 		if strings.Contains(err.Error(), "locked") == false || i == retryMax- 1 {
-			log.Errorf("New ticket couldn't be saved: %s, error: %s", newTicket.Key, err.Error())
+			log.Errorf("Project %d: New ticket couldn't be saved: %s, error: %s", t.projectId, newTicket.Key, err.Error())
 			return
 		}
 

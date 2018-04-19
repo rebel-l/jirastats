@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rebel-l/jirastats/packages/models"
+	"github.com/rebel-l/jirastats/packages/utils"
 	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
@@ -56,9 +57,9 @@ func (tm *TicketMapper) mapRows(rows *sql.Rows) (collection []*models.Ticket) {
 	return
 }
 
-func (tm *TicketMapper) LoadByKey(key string, projectId int) (t *models.Ticket, err error) {
+func (tm *TicketMapper) LoadLastByKey(key string, projectId int) (t *models.Ticket, err error) {
 	t = models.NewTicket()
-	rows, err := tm.table.SelectComplex("`key` = ? AND project_id = ? AND `expired` IS NULL", "", "", "", key, projectId)
+	rows, err := tm.table.SelectComplex("`key` = ? AND project_id = ?", "created_at DESC, expired ASC LIMIT 1", "", "", key, projectId)
 	defer rows.Close()
 	if err != nil {
 		return
@@ -85,6 +86,7 @@ func (tm *TicketMapper) Save(model *models.Ticket) (err error) {
 			model.Summary,
 			strings.Join(model.Components, ","),
 			strings.Join(model.Labels, ","),
+			utils.BtoI(model.IsNew),
 			model.StatusByJira,
 			model.StatusClustered,
 			model.Priority,
@@ -107,6 +109,7 @@ func (tm *TicketMapper) Save(model *models.Ticket) (err error) {
 			model.Summary,
 			strings.Join(model.Components, ","),
 			strings.Join(model.Labels, ","),
+			utils.BtoI(model.IsNew),
 			model.StatusByJira,
 			model.StatusClustered,
 			model.Priority,
@@ -161,6 +164,7 @@ func (tm *TicketMapper) mapRowToModel(rows *sql.Rows, t *models.Ticket) (err err
 		lastUpdatedAtByJira,
 		createdAt string
 	var expired sql.NullString
+	var isNew int
 
 	err = rows.Scan(
 		&t.Id,
@@ -169,6 +173,7 @@ func (tm *TicketMapper) mapRowToModel(rows *sql.Rows, t *models.Ticket) (err err
 		&t.Summary,
 		&components,
 		&labels,
+		&isNew,
 		&t.StatusByJira,
 		&t.StatusClustered,
 		&t.Priority,
@@ -182,6 +187,7 @@ func (tm *TicketMapper) mapRowToModel(rows *sql.Rows, t *models.Ticket) (err err
 	t.CreatedAtByJira, _ = time.Parse(dateTimeFormat, createdAtByJira)
 	t.LastUpdatedByJira, _ = time.Parse(dateTimeFormat, lastUpdatedAtByJira)
 	t.CreatedAt, _ = time.Parse(dateTimeFormat, createdAt)
+	t.IsNew = utils.ItoB(isNew)
 	if expired.Valid {
 		t.Expired, _ = time.Parse(dateTimeFormat, expired.String)
 	}
