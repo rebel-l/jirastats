@@ -24,16 +24,16 @@ class ChartComp extends Component {
         axios.get(`/data/stats/${chartType}/${project}`).then(res => {
             switch (chartType) {
                 case CHARTTYPE_PROGRESS:
-                    Highcharts.chart('chart', this.getChartOptions("line", res.data, "Date"));
+                    Highcharts.chart('chart', this.getChartOptions("Progress", "line", res.data, "Date"));
                     break;
                 case CHARTTYPE_SPEED:
-                    Highcharts.chart('chart', this.getChartOptions("column", res.data, "Week"));
+                    Highcharts.chart('chart', this.getChartOptions("Speed", "column", res.data, "Week"));
                     break;
             }
         });
     }
 
-    getChartOptions(type, chartData, xAxisTitle) {
+    getChartOptions(subtitle, type, chartData, xAxisTitle) {
         return {
             chart: {
                 type: type
@@ -42,7 +42,7 @@ class ChartComp extends Component {
                 text: chartData.project_name
             },
             subtitle: {
-                text: 'Progress'
+                text: subtitle
             },
             xAxis: {
                 title: {
