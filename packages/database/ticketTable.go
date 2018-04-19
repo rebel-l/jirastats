@@ -6,7 +6,6 @@ import (
 )
 
 const ticketTableName = "ticket"
-// TODO: add the remove flag to data for debug reasons
 const ticketTableStructure =
 	"CREATE TABLE IF NOT EXISTS `%s` (" +
 		"`id` INTEGER PRIMARY KEY AUTOINCREMENT," +
