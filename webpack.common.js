@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const WebpackCleanupPlugin = require('webpack-cleanup-plugin');
 
 module.exports = {
     entry: {
@@ -24,6 +25,12 @@ module.exports = {
         new HtmlWebpackPlugin({
             title: "Jira Stats",
             template: "./client/index.html"
+        }),
+        new WebpackCleanupPlugin({
+            exclude: [
+                "index.html",
+                ".gitignore"
+            ],
         })
     ]
 };
