@@ -7,6 +7,7 @@ import Highcharts from 'highcharts';
 // Constants
 import {CHARTTYPE_PROGRESS} from "./../constants/ChartTypes";
 import {CHARTTYPE_SPEED} from "./../constants/ChartTypes";
+import {CHARTTYPE_OPENTICKETS} from "./../constants/ChartTypes";
 
 const mapStateToProps = state => {
     return {
@@ -21,6 +22,7 @@ class ChartComp extends Component {
         let chartType = this.props.chartButton[this.props.chartButton.length - 1];
         let project = this.props.project[this.props.project.length - 1];
 
+        // axios.get(`/data/stats/progress/${project}`).then(res => { // TODO: temporary static test
         axios.get(`/data/stats/${chartType}/${project}`).then(res => {
             switch (chartType) {
                 case CHARTTYPE_PROGRESS:
@@ -28,6 +30,34 @@ class ChartComp extends Component {
                     break;
                 case CHARTTYPE_SPEED:
                     Highcharts.chart('chart', this.getChartOptions("Speed", "column", res.data, "Week"));
+                    break;
+                case CHARTTYPE_OPENTICKETS:
+                    let chartData = {
+                        project_name: "A project",
+                        series: [{
+                            name: 'Tickets',
+                            colorByPoint: true,
+                            data: res.data.data_chart /*[{
+                                name: 'Catalog Service',
+                                y: 42.5,
+                                sliced: true,
+                                // selected: true
+                            }, {
+                                name: 'Order Service',
+                                y: 14.5
+                            }, {
+                                name: 'Wishlist Service',
+                                y: 1
+                            }, {
+                                name: 'Customer Service',
+                                y: 11
+                            }, {
+                                name: 'Catalog Importer',
+                                y: 31
+                            }]*/
+                        }]
+                    };
+                    Highcharts.chart('pieChart', this.getPieChartOptions(res.data.name, chartData));
                     break;
             }
         });
@@ -65,6 +95,40 @@ class ChartComp extends Component {
         }
     }
 
+    getPieChartOptions(subtitle, chartData) {
+        return {
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false,
+                type: 'pie'
+            },
+            title: {
+                text: chartData.project_name
+            },
+            subtitle: {
+                text: subtitle
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                        style: {
+                            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                        }
+                    }
+                }
+            },
+            series: chartData.series
+        }
+    }
+
     render() {
         let chartType = this.props.chartButton[this.props.chartButton.length - 1];
         switch (chartType) {
@@ -73,6 +137,13 @@ class ChartComp extends Component {
                 return (
                     <div key={"chartContainer"}>
                         <div id="chart" />
+                    </div>
+                );
+            case CHARTTYPE_OPENTICKETS:
+                // TODO: add data table and have multiple charts
+                return (
+                    <div key={"pieChartContainer"}>
+                        <div id="pieChart" />
                     </div>
                 );
             default:

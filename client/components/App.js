@@ -10,7 +10,7 @@ import ChartButton from "./ChartButton";
 import {CHARTTYPE_PROGRESS} from "./../constants/ChartTypes";
 import {CHARTTYPE_SPEED} from "./../constants/ChartTypes";
 import {CHARTTYPE_FORECAST} from "./../constants/ChartTypes";
-import {CHARTTYPE_OPENTASKS} from "./../constants/ChartTypes";
+import {CHARTTYPE_OPENTICKETS} from "./../constants/ChartTypes";
 import {CHARTTYPE_COMPARISON} from "./../constants/ChartTypes";
 
 class App extends Component {
@@ -22,7 +22,7 @@ class App extends Component {
                     <ChartButton name="Progress" chartType={CHARTTYPE_PROGRESS}/>
                     <ChartButton name="Speed" chartType={CHARTTYPE_SPEED}/>
                     <ChartButton name="Forecast" chartType={CHARTTYPE_FORECAST}/>
-                    <ChartButton name="Open Tasks" chartType={CHARTTYPE_OPENTASKS}/>
+                    <ChartButton name="Open Tickets" chartType={CHARTTYPE_OPENTICKETS}/>
                     <ChartButton name="Comparison" chartType={CHARTTYPE_COMPARISON}/>
                 </div>
                 <Chart/>
