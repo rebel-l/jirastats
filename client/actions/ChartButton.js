@@ -1,4 +1,4 @@
-import {CHART_TYPE_BUTTON_ACTION} from "../constants/actionTypes";
+import {CHART_TYPE_BUTTON_ACTION} from "../constants/ActionTypes";
 
 const ChartButton = chartButton => ({
     type: CHART_TYPE_BUTTON_ACTION,
