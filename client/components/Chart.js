@@ -8,6 +8,7 @@ import Highcharts from 'highcharts';
 import {CHARTTYPE_PROGRESS} from "./../constants/ChartTypes";
 import {CHARTTYPE_SPEED} from "./../constants/ChartTypes";
 import {CHARTTYPE_OPENTICKETS} from "./../constants/ChartTypes";
+import Table from "./Table";
 
 const mapStateToProps = state => {
     return {
@@ -18,6 +19,17 @@ const mapStateToProps = state => {
 };
 
 class ChartComp extends Component {
+    constructor(props){
+        super(props);
+        this.table = {
+            header: ['Status', 'Count'],
+            data: [{
+                name: 'Open',
+                value: 2
+            }]
+        }
+    }
+
     componentDidUpdate () {
         let chartType = this.props.chartButton[this.props.chartButton.length - 1];
         let project = this.props.project[this.props.project.length - 1];
@@ -37,27 +49,12 @@ class ChartComp extends Component {
                         series: [{
                             name: 'Tickets',
                             colorByPoint: true,
-                            data: res.data.data_chart /*[{
-                                name: 'Catalog Service',
-                                y: 42.5,
-                                sliced: true,
-                                // selected: true
-                            }, {
-                                name: 'Order Service',
-                                y: 14.5
-                            }, {
-                                name: 'Wishlist Service',
-                                y: 1
-                            }, {
-                                name: 'Customer Service',
-                                y: 11
-                            }, {
-                                name: 'Catalog Importer',
-                                y: 31
-                            }]*/
+                            data: res.data.data_chart
                         }]
                     };
                     Highcharts.chart('pieChart', this.getPieChartOptions(res.data.name, chartData));
+                    // this.table.header = ['Status', 'Count'];
+                    // this.table.data = res.data.data_table;
                     break;
             }
         });
@@ -142,8 +139,11 @@ class ChartComp extends Component {
             case CHARTTYPE_OPENTICKETS:
                 // TODO: add data table and have multiple charts
                 return (
-                    <div key={"pieChartContainer"}>
-                        <div id="pieChart" />
+                    <div key={"ChartContainer"}>
+                        <div>
+                            <div id="pieChart" />
+                            <Table key={'table-123'} options={this.table}/>
+                        </div>
                     </div>
                 );
             default:
