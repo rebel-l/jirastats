@@ -3,7 +3,7 @@ import React, {Component} from "react";
 
 // Components
 import ProjectSelect from "./ProjectSelect";
-import Chart from "./Chart";
+import ChartContainer from "./ChartContainer";
 import ChartButton from "./ChartButton";
 
 // Constants
@@ -15,17 +15,19 @@ import {CHARTTYPE_COMPARISON} from "./../constants/ChartTypes";
 
 class App extends Component {
     render() {
+        let appId = 'Application';
+        let chartTypeSelectorId = 'ChartTypeSelector';
         return (
-            <div>
+            <div key={appId} id={appId}>
                 <ProjectSelect/>
-                <div>
+                <div key={chartTypeSelectorId} id={chartTypeSelectorId}>
                     <ChartButton name="Progress" chartType={CHARTTYPE_PROGRESS}/>
                     <ChartButton name="Speed" chartType={CHARTTYPE_SPEED}/>
                     <ChartButton name="Forecast" chartType={CHARTTYPE_FORECAST}/>
                     <ChartButton name="Open Tickets" chartType={CHARTTYPE_OPENTICKETS}/>
                     <ChartButton name="Comparison" chartType={CHARTTYPE_COMPARISON}/>
                 </div>
-                <Chart/>
+                <ChartContainer/>
             </div>
         );
     }
