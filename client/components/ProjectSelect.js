@@ -36,8 +36,9 @@ class ProjectSelectComponent extends Component {
     }
 
     render() {
+        let id = 'ProjectSelector';
         return (
-            <div>
+            <div key={id} id={id}>
                 <label>Select Project: </label>
                 <select onChange={this.handleSelect} value={this.state.value}>
                     <option key={0} value={0}>... select project ...</option>
