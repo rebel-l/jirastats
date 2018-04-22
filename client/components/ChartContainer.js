@@ -9,6 +9,7 @@ import ChartContainerAction from "./../actions/ChartContainer";
 // Components
 import ChartLine from "./charts/Line";
 import ChartColumn from "./charts/Column";
+import PieChartTable from "./charts/PieChartTable";
 
 // Constants
 import {CHARTTYPE_PROGRESS} from "./../constants/ChartTypes";
@@ -18,7 +19,6 @@ import {CHARTTYPE_OPENTICKETS} from "./../constants/ChartTypes";
 const mapStateToProps = state => {
     return {
         chartButton: state.chartButton,
-        // chartContainer: state.chartContainer,
         project: state.project
     };
 };
@@ -30,10 +30,6 @@ const mapDispatchToProps = dispatch => {
 };
 
 class ChartContainerComp extends  Component {
-    constructor(props){
-        super(props);
-    }
-
     componentDidUpdate () {
         let chartType = this.getChartType();
         let project = this.getProjectId();
@@ -73,6 +69,12 @@ class ChartContainerComp extends  Component {
                 };
                 child = (<ChartColumn key={key} type={chartType} project={project} options={options} />);
                 break;
+            case CHARTTYPE_OPENTICKETS:
+                child = (<PieChartTable key={key} type={chartType} project={project}/>);
+                break;
+            default:
+                child = (<p>"{chartType}" not implemented yet.</p>);
+                break
         }
 
         return(
