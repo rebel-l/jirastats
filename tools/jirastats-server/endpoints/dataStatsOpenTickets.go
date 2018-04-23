@@ -58,20 +58,18 @@ func (ds *DataStatsOpenTickets) GetStats(res http.ResponseWriter, req *http.Requ
 
 			absolute numbers for a data table, relative numbers for chart
 	*/
-	dataStatus := make(map[string]*DataTable)
+	dataStatus := make(map[string]*response.TableData)
 	countTickets := len(tickets)
 	for _, t := range tickets {
 		if v, ok := dataStatus[t.StatusByJira]; ok {
 			v.Value++
 		} else {
-			dataStatus[t.StatusByJira] = new(DataTable)
-			dataStatus[t.StatusByJira].Name = t.StatusByJira
-			dataStatus[t.StatusByJira].Value = 1
+			dataStatus[t.StatusByJira] = response.NewTableData(t.StatusByJira, 1)
 		}
 	}
 
-	finalDataStatus := make([]*DataPieChart, len(dataStatus))
-	pc := NewPieChart("Status", finalDataStatus)
+	finalDataStatus := make([]*response.PieChart, len(dataStatus))
+	pc := response.NewPieChartTable("Status", finalDataStatus)
 	i := 0
 	maxValue := 0
 	maxItem := 0
@@ -80,7 +78,7 @@ func (ds *DataStatsOpenTickets) GetStats(res http.ResponseWriter, req *http.Requ
 			maxValue = d.Value
 			maxItem = i
 		}
-		finalDataStatus[i] = NewDataChart(d.Name, float64(d.Value) * 100.0 / float64(countTickets))
+		finalDataStatus[i] = response.NewPieChart(d.Name, float64(d.Value) * 100.0 / float64(countTickets))
 		pc.DataTable = append(pc.DataTable, d)
 		i++
 	}
@@ -91,39 +89,4 @@ func (ds *DataStatsOpenTickets) GetStats(res http.ResponseWriter, req *http.Requ
 
 	success := response.NewSuccessJson(pc, res)
 	success.SendOK()
-}
-
-// TODO: move to own file
-type DataPieChart struct {
-	Name string `json:"name"`
-	Y float64 `json:"y"`
-	Sliced bool `json:"sliced"`
-	Selected bool `json:"selected"`
-}
-
-func NewDataChart(name string, y float64) *DataPieChart {
-	dc := new(DataPieChart)
-	dc.Name = name
-	dc.Y = y
-	return dc
-}
-
-// TODO: move to own file
-type DataTable struct {
-	Name string `json:"name"`
-	Value int `json:"value"`
-}
-
-// TODO: move to own file
-type PieChart struct {
-	Name string               `json:"name"`
-	DataTable []*DataTable    `json:"data_table"`
-	DataChart []*DataPieChart `json:"data_chart"`
-}
-
-func NewPieChart(name string, chartData []*DataPieChart) *PieChart {
-	pc := new(PieChart)
-	pc.Name = name
-	pc.DataChart = chartData
-	return pc
 }
