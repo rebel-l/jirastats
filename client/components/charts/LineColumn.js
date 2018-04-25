@@ -5,7 +5,6 @@ import Highcharts from 'highcharts';
 
 const mapStateToProps = state => {
     return {
-        newChartType: state.chartButton,
         data: state.chartContainer
     };
 };
@@ -13,20 +12,14 @@ const mapStateToProps = state => {
 class ChartLineComp extends Component {
     constructor(props){
         super(props);
-        this.actualChartType = props.type;
         this.options = props.options;
-    }
-
-    shouldComponentUpdate(nextProps, nextStates){
-        this.id = "LineChart-" + nextProps.project + "-" + this.actualChartType;
-        return true;
     }
 
     componentDidUpdate(){
         let data = this.getData();
         let options = {
             chart: {
-                type: 'line'
+                type: this.options.type
             },
             title: {
                 text: data.project_name
@@ -53,7 +46,7 @@ class ChartLineComp extends Component {
             series: data.series,
             credits: false
         };
-        Highcharts.chart(this.id, options);
+        Highcharts.chart(this.options.id, options);
     }
 
     getData(){
@@ -61,14 +54,8 @@ class ChartLineComp extends Component {
     };
 
     render(){
-        let newChartType = this.props.newChartType[this.props.newChartType.length - 1];
-        if (newChartType !== this.actualChartType) {
-            // we get the data for a different chart
-            return null;
-        }
-
         return (
-            <div key={this.id} id={this.id} />
+            <div key={this.options.id} id={this.options.id} />
         );
     }
 }
