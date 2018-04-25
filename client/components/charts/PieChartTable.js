@@ -8,7 +8,6 @@ import Table from "./../Table";
 
 const mapStateToProps = state => {
     return {
-        newChartType: state.chartButton,
         data: state.chartContainer
     };
 };
@@ -18,6 +17,7 @@ class PieChartTableComp extends Component {
         super(props);
         this.actualChartType = props.type;
         this.projectId = props.project;
+        this.renderCounter = 0;
     }
 
     getData(){
@@ -25,9 +25,9 @@ class PieChartTableComp extends Component {
     };
 
     render(){
-        let newChartType = this.props.newChartType[this.props.newChartType.length - 1];
-        if (newChartType !== this.actualChartType) {
-            // we get the data for a different chart
+        this.renderCounter++;
+        if(this.renderCounter == 1){
+            // we need to wait with rendering until first update is received
             return null;
         }
 

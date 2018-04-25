@@ -33,9 +33,7 @@ class ChartContainerComp extends  Component {
         let chartType = this.getChartType();
         let project = this.getProjectId();
         axios.get(`/data/stats/${chartType}/${project}`).then(res => {
-            console.log("Data received");
             this.props.chartContainer(res.data);
-            console.log("Data triggered event");
         });
     }
 
@@ -48,7 +46,6 @@ class ChartContainerComp extends  Component {
     }
 
     render(){
-        console.log("Render container");
         let id = 'ChartContainer';
         let chartType = this.getChartType();
         let project = this.getProjectId();
@@ -64,7 +61,7 @@ class ChartContainerComp extends  Component {
                     yAxis: "Number of Tickets"
                 };
                 child = (
-                    <ChartLineColumn key={key} type={chartType} project={project} options={options}/>
+                    <ChartLineColumn key={key} options={options}/>
                 );
                 break;
             case CHARTTYPE_SPEED:
@@ -75,10 +72,10 @@ class ChartContainerComp extends  Component {
                     xAxis: "Week",
                     yAxis: "Number of Tickets"
                 };
-                child = (<ChartLineColumn key={key} type={chartType} project={project} options={options} />);
+                child = (<ChartLineColumn key={key} options={options} />);
                 break;
             case CHARTTYPE_OPENTICKETS:
-                // child = (<PieChartTable key={key} type={chartType} project={project}/>);
+                child = (<PieChartTable key={key} type={chartType} project={project}/>);
                 break;
             default:
                 child = (<p>"{chartType}" not implemented yet.</p>);
