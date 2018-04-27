@@ -51,7 +51,7 @@ func (ds *DataStatsOpenTickets) GetStats(res http.ResponseWriter, req *http.Requ
 		TODO: data to collect
 			components
 			issue types
-			status
+			xstatus
 			priority
 			techdebt
 			labels (except tech debt)
@@ -59,8 +59,17 @@ func (ds *DataStatsOpenTickets) GetStats(res http.ResponseWriter, req *http.Requ
 			absolute numbers for a data table, relative numbers for chart
 	*/
 	dataStatus := make(map[string]*response.TableData)
+	dataPriority := make(map[string]*response.TableData)
 	countTickets := len(tickets)
 	for _, t := range tickets {
+		// Priority
+		if v, ok := dataPriority[t.Priority]; ok {
+			v.Value++
+		} else {
+			dataPriority[t.Priority] = response.NewTableData(t.Priority, 1)
+		}
+
+		// Status
 		if v, ok := dataStatus[t.StatusByJira]; ok {
 			v.Value++
 		} else {
@@ -68,25 +77,40 @@ func (ds *DataStatsOpenTickets) GetStats(res http.ResponseWriter, req *http.Requ
 		}
 	}
 
-	finalDataStatus := make([]*response.PieChart, len(dataStatus))
-	pc := response.NewPieChartTable("Status", finalDataStatus)
-	i := 0
-	maxValue := 0
-	maxItem := 0
-	for _, d := range dataStatus {
-		if d.Value > maxValue {
-			maxValue = d.Value
-			maxItem = i
-		}
-		finalDataStatus[i] = response.NewPieChart(d.Name, float64(d.Value) * 100.0 / float64(countTickets))
-		pc.DataTable = append(pc.DataTable, d)
-		i++
-	}
-	finalDataStatus[maxItem].Sliced = true
-	finalDataStatus[maxItem].Selected = true
+	finalDataStatus := make([]*response.PieChartEntry, len(dataStatus))
+	finalDataPriority := make([]*response.PieChartEntry, len(dataPriority))
+
+	pc := make(map[string]*response.PieChartTable)
+	pc["status"] = ds.createPieChart("Status", finalDataStatus, dataStatus, countTickets)
+	pc["priority"] = ds.createPieChart("Priority", finalDataPriority, dataPriority, countTickets)
 
 	// TODO: parallize processing data
 
 	success := response.NewSuccessJson(pc, res)
 	success.SendOK()
+}
+
+func (ds *DataStatsOpenTickets) createPieChart(
+	name string,
+	chart []*response.PieChartEntry,
+	data map[string]*response.TableData,
+	counter int) *response.PieChartTable {
+
+	pc := response.NewPieChartTable(name, chart)
+	i := 0
+	maxValue := 0
+	maxItem := 0
+	for _, d := range data {
+		if d.Value > maxValue {
+			maxValue = d.Value
+			maxItem = i
+		}
+		chart[i] = response.NewPieChartEntry(d.Name, float64(d.Value) * 100.0 / float64(counter))
+		pc.DataTable = append(pc.DataTable, d)
+		i++
+	}
+	chart[maxItem].Sliced = true
+	chart[maxItem].Selected = true
+
+	return pc
 }

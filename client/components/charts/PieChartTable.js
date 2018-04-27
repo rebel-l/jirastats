@@ -24,6 +24,24 @@ class PieChartTableComp extends Component {
         return this.props.data[this.props.data.length -1];
     };
 
+    getPieChartData(data){
+        let pieChartData = {
+            title: "A project",
+            subtitle: data.name,
+            seriesData: data.data_chart
+        };
+        return pieChartData;
+    }
+
+    getTableData(data){
+        let tableData = {
+            name: data.name,
+            header: [data.name, "Count"],
+            rows: data.data_table
+        };
+        return tableData;
+    }
+
     render(){
         this.renderCounter++;
         if(this.renderCounter == 1){
@@ -33,20 +51,17 @@ class PieChartTableComp extends Component {
 
         let id = "PieChartTable-" +  this.projectId + "-" + this.actualChartType;
         let data = this.getData();
-        let pieChartData = {
-            title: "A project",
-            subtitle: data.name,
-            seriesData: data.data_chart
-        };
-        let tableData = {
-            name: data.name,
-            header: [data.name, "Count"],
-            rows: data.data_table
-        };
+
         return (
             <div key={id} id={id}>
-                <ChartPie key={id + "-Chart-" + data.name} type={this.actualChartType} data={pieChartData}/>
-                <Table key={id + "-Table-" + data.name} type={this.actualChartType} data={tableData}/>
+                <div key={id + "-" + data.priority.name} id={id + "-" + data.priority.name}>
+                    <ChartPie key={id + "-Chart-" + data.priority.name} type={this.actualChartType} data={this.getPieChartData(data.priority)}/>
+                    <Table key={id + "-Table-" + data.priority.name} type={this.actualChartType} data={this.getTableData(data.priority)}/>
+                </div>
+                <div key={id + "-" + data.status.name} id={id + "-" + data.status.name}>
+                    <ChartPie key={id + "-Chart-" + data.status.name} type={this.actualChartType} data={this.getPieChartData(data.status)}/>
+                    <Table key={id + "-Table-" + data.status.name} type={this.actualChartType} data={this.getTableData(data.status)}/>
+                </div>
             </div>
         );
     }
