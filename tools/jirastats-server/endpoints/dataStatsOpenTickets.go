@@ -58,23 +58,21 @@ func (ds *DataStatsOpenTickets) GetStats(res http.ResponseWriter, req *http.Requ
 
 			absolute numbers for a data table, relative numbers for chart
 	*/
+	/*
+	tables := map[string]map[string]*response.TableData{
+		"Status": make(map[string]*response.TableData),
+		"Priority": make(map[string]*response.TableData),
+	}
+	*/
 	dataStatus := make(map[string]*response.TableData)
 	dataPriority := make(map[string]*response.TableData)
 	countTickets := len(tickets)
 	for _, t := range tickets {
 		// Priority
-		if v, ok := dataPriority[t.Priority]; ok {
-			v.Value++
-		} else {
-			dataPriority[t.Priority] = response.NewTableData(t.Priority, 1)
-		}
+		ds.countTableData(t.Priority, dataPriority)
 
 		// Status
-		if v, ok := dataStatus[t.StatusByJira]; ok {
-			v.Value++
-		} else {
-			dataStatus[t.StatusByJira] = response.NewTableData(t.StatusByJira, 1)
-		}
+		ds.countTableData(t.StatusByJira, dataStatus)
 	}
 
 	finalDataStatus := make([]*response.PieChartEntry, len(dataStatus))
@@ -88,6 +86,14 @@ func (ds *DataStatsOpenTickets) GetStats(res http.ResponseWriter, req *http.Requ
 
 	success := response.NewSuccessJson(pc, res)
 	success.SendOK()
+}
+
+func (ds *DataStatsOpenTickets) countTableData(key string, tableData map[string]*response.TableData) {
+	if v, ok := tableData[key]; ok {
+		v.Value++
+	} else {
+		tableData[key] = response.NewTableData(key, 1)
+	}
 }
 
 func (ds *DataStatsOpenTickets) createPieChart(
