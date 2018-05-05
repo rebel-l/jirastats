@@ -24,28 +24,26 @@ class PieChartTableComp extends Component {
         return this.props.data[this.props.data.length -1];
     };
 
-    getPieChartData(data){
-        let pieChartData = {
-            title: "A project",
+    getPieChartData(title, data){
+        return {
+            title: title,
             subtitle: data.name,
             seriesData: data.data_chart
         };
-        return pieChartData;
     }
 
     getTableData(data){
-        let tableData = {
+        return {
             name: data.name,
             header: [data.name, "Count"],
             rows: data.data_table
         };
-        return tableData;
     }
 
-    renderChild(id, data) {
+    renderChild(id, name, data) {
         return (
             <div key={id + "-" + data.name} id={id + "-" + data.name}>
-                <ChartPie key={id + "-Chart-" + data.name} type={this.actualChartType} data={this.getPieChartData(data)}/>
+                <ChartPie key={id + "-Chart-" + data.name} type={this.actualChartType} data={this.getPieChartData(name, data)}/>
                 <Table key={id + "-Table-" + data.name} type={this.actualChartType} data={this.getTableData(data)}/>
             </div>
         );
@@ -53,7 +51,7 @@ class PieChartTableComp extends Component {
 
     render(){
         this.renderCounter++;
-        if(this.renderCounter == 1){
+        if(this.renderCounter === 1){
             // we need to wait with rendering until first update is received
             return null;
         }
@@ -63,12 +61,12 @@ class PieChartTableComp extends Component {
 
         return (
             <div key={id} id={id}>
-                {this.renderChild(id, data.priorities)}
-                {this.renderChild(id, data.status)}
-                {this.renderChild(id, data.issue_types)}
-                {this.renderChild(id, data.tech_debt)}
-                {this.renderChild(id, data.components)}
-                {this.renderChild(id, data.labels)}
+                {this.renderChild(id, data.project.name, data.stats.priorities)}
+                {this.renderChild(id, data.project.name, data.stats.status)}
+                {this.renderChild(id, data.project.name, data.stats.issue_types)}
+                {this.renderChild(id, data.project.name, data.stats.tech_debt)}
+                {this.renderChild(id, data.project.name, data.stats.components)}
+                {this.renderChild(id, data.project.name, data.stats.labels)}
             </div>
         );
     }

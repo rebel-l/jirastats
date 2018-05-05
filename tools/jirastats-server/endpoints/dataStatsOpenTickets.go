@@ -10,7 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 const dataStatsOpenTicketsPath = "/data/stats/opentickets/{projectId}"
@@ -41,6 +40,14 @@ func (ds *DataStatsOpenTickets) GetStats(res http.ResponseWriter, req *http.Requ
 	projectId, err := strconv.Atoi(vars["projectId"])
 	if err != nil {
 		msg := "Stats could not be loaded as project id was not provided"
+		e := response.NewErrorJson(msg, res)
+		e.SendBadRequest()
+		return
+	}
+
+	project, err := ds.pm.LoadProjectById(projectId)
+	if err != nil {
+		msg := fmt.Sprintf("Project with id %d could not be found", projectId)
 		e := response.NewErrorJson(msg, res)
 		e.SendBadRequest()
 		return
@@ -90,15 +97,10 @@ func (ds *DataStatsOpenTickets) GetStats(res http.ResponseWriter, req *http.Requ
 		// TODO: parallize processing data
 	}
 
-	pc := make(map[string]*response.PieChartTable)
-	for k, v := range tables {
-		displayName := strings.Title(strings.Replace(k, "_", " ", len(k)))
-		finalData := make([]*response.PieChartEntry, len(v))
-		pc[k] = ds.createPieChart(displayName, finalData, v, countTickets)
-		// TODO: parallize processing data
-	}
+	stats := response.NewStatsPiechartTable(project)
+	stats.GeneratePiechartTables(tables, countTickets)
 
-	success := response.NewSuccessJson(pc, res)
+	success := response.NewSuccessJson(stats, res)
 	success.SendOK()
 }
 
@@ -121,29 +123,4 @@ func (ds *DataStatsOpenTickets) countTableDataForArrayOfStrings(keys []string, t
 		}
 		ds.countTableDataForSimpleStrings(v, tableData)
 	}
-}
-
-func (ds *DataStatsOpenTickets) createPieChart(
-	name string,
-	chart []*response.PieChartEntry,
-	data map[string]*response.TableData,
-	counter int) *response.PieChartTable {
-
-	pc := response.NewPieChartTable(name, chart)
-	i := 0
-	maxValue := 0
-	maxItem := 0
-	for _, d := range data {
-		if d.Value > maxValue {
-			maxValue = d.Value
-			maxItem = i
-		}
-		chart[i] = response.NewPieChartEntry(d.Name, float64(d.Value) * 100.0 / float64(counter))
-		pc.DataTable = append(pc.DataTable, d)
-		i++
-	}
-	chart[maxItem].Sliced = true
-	chart[maxItem].Selected = true
-
-	return pc
 }
