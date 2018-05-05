@@ -42,6 +42,15 @@ class PieChartTableComp extends Component {
         return tableData;
     }
 
+    renderChild(id, data) {
+        return (
+            <div key={id + "-" + data.name} id={id + "-" + data.name}>
+                <ChartPie key={id + "-Chart-" + data.name} type={this.actualChartType} data={this.getPieChartData(data)}/>
+                <Table key={id + "-Table-" + data.name} type={this.actualChartType} data={this.getTableData(data)}/>
+            </div>
+        );
+    }
+
     render(){
         this.renderCounter++;
         if(this.renderCounter == 1){
@@ -54,14 +63,12 @@ class PieChartTableComp extends Component {
 
         return (
             <div key={id} id={id}>
-                <div key={id + "-" + data.priority.name} id={id + "-" + data.priority.name}>
-                    <ChartPie key={id + "-Chart-" + data.priority.name} type={this.actualChartType} data={this.getPieChartData(data.priority)}/>
-                    <Table key={id + "-Table-" + data.priority.name} type={this.actualChartType} data={this.getTableData(data.priority)}/>
-                </div>
-                <div key={id + "-" + data.status.name} id={id + "-" + data.status.name}>
-                    <ChartPie key={id + "-Chart-" + data.status.name} type={this.actualChartType} data={this.getPieChartData(data.status)}/>
-                    <Table key={id + "-Table-" + data.status.name} type={this.actualChartType} data={this.getTableData(data.status)}/>
-                </div>
+                {this.renderChild(id, data.priorities)}
+                {this.renderChild(id, data.status)}
+                {this.renderChild(id, data.issue_types)}
+                {this.renderChild(id, data.tech_debt)}
+                {this.renderChild(id, data.components)}
+                {this.renderChild(id, data.labels)}
             </div>
         );
     }
