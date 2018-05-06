@@ -48,3 +48,7 @@ func (s *Stats) setProjectName() bool {
 	s.ProjectName = project.Name
 	return true
 }
+
+func (s *Stats) AddSerie(serie *Serie) {
+	s.Series = append(s.Series, serie)
+}

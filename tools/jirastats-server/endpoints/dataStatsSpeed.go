@@ -126,7 +126,7 @@ func (ds *DataStatsSpeed) setStats(res http.ResponseWriter) bool {
 
 func (ds *DataStatsSpeed) addData(year int, week int, closedTickets int, newTickets int) {
 	ds.stats.Categories = append(ds.stats.Categories, fmt.Sprintf("%d/%d", year, week))
-	ds.series["closed"].Data = append(ds.series["closed"].Data, closedTickets)
-	ds.series["new"].Data = append(ds.series["new"].Data, newTickets)
-	ds.series["speed"].Data = append(ds.series["speed"].Data, closedTickets - newTickets)
+	ds.series["closed"].AddDataInt(closedTickets)
+	ds.series["new"].AddDataInt(newTickets)
+	ds.series["speed"].AddDataInt(closedTickets - newTickets)
 }

@@ -2,8 +2,9 @@ package response
 
 import (
 	"github.com/rebel-l/jirastats/packages/models"
-	"errors"
-	"fmt"
+	log "github.com/sirupsen/logrus"
+	"math"
+	"time"
 )
 
 type StatsForecast struct {
@@ -11,6 +12,8 @@ type StatsForecast struct {
 	Speed []*TableForecastRow `json:"speed"`
 	Summary *StatsForecastEnd `json:"summary"`
 	Chart *Stats `json:"chart"`
+	maxDaysForecast int
+	numberOfOpenTickets int
 }
 
 func NewStatsForecast(project *models.Project) *StatsForecast {
@@ -24,15 +27,29 @@ func NewStatsForecast(project *models.Project) *StatsForecast {
 
 func (sf *StatsForecast) Calculate(data []*models.Stats) {
 	count := len(data)
+	sf.numberOfOpenTickets = data[count - 1].Open
+
 	if count < 6 {
 		// default only
 		sf.calcDefaultSpeed(data)
 	} else if count < 32 {
 		// one month only
+		sf.calcSpeed("overall speed", data, 0)
 	} else if count < 94 {
 		// one month & 3 months
+		sf.calcSpeed("overall speed", data, 0)
+		sf.calcSpeed("last month speed", data, count - 31)
 	} else {
 		// one month, 3 months & all
+		sf.calcSpeed("overall speed", data, 0)
+		sf.calcSpeed("last 3 months speed", data, count - 93)
+		sf.calcSpeed("last month speed", data, count - 31)
+	}
+
+	sf.calcMaxDaysForecast()
+	sf.calcCategories()
+	for _, speed := range sf.Speed {
+		sf.calcSerie(speed)
 	}
 }
 
@@ -56,25 +73,81 @@ func (sf *StatsForecast) calcDefaultSpeed(data []*models.Stats) {
 	sf.addSpeed(speedWithoutNew)
 }
 
-func (sf *StatsForecast) calcSpeed(name string, data []*models.Stats, start int, offset int) (err error) {
+func (sf *StatsForecast) calcSpeed(name string, data []*models.Stats, start int) {
 	max := len(data)
 	if start >= max {
-		return errors.New(fmt.Sprintf("Start (%d) is higher then max. entries (%d)", start, max))
+		log.Errorf("Start (%d) is higher then max. entries (%d)", start, max)
+		return
 	}
 
 	if start < 0 {
 		start = 0
 	}
 
+	numberOfDays := max - start
+	numberOfNewTickets := 0
+	numberOfClosedTickets := 0
 	for i := start; i < max; i++ {
-		if i > offset {
-			break
-		}
-
-
+		numberOfNewTickets += data[i].New
+		numberOfClosedTickets += data[i].Closed
 	}
 
+	newTicketsPerDay := float32(numberOfNewTickets) / float32(numberOfDays)
+	closedTicketsPerDay := float32(numberOfClosedTickets) / float32(numberOfDays)
+
+	speedWithNew := NewTableForcastRow(name + " including new")
+	speedWithNew.SetAverageSpeedPerDay(closedTicketsPerDay - newTicketsPerDay)
+	sf.addSpeed(speedWithNew)
+
+	speedWithoutNew := NewTableForcastRow(name + " without new")
+	speedWithoutNew.SetAverageSpeedPerDay(closedTicketsPerDay)
+	sf.addSpeed(speedWithoutNew)
+
 	return
+}
+
+func (sf *StatsForecast) calcMaxDaysForecast() {
+	for _, speed := range sf.Speed {
+		if speed.AverageSpeedPerDay < 0 {
+			continue
+		}
+
+		maxDays := float32(sf.numberOfOpenTickets) / speed.AverageSpeedPerDay
+		maxDaysInt := int(math.Ceil(float64(maxDays))) + 1
+		if sf.maxDaysForecast < maxDaysInt {
+			sf.maxDaysForecast = maxDaysInt
+		}
+	}
+}
+
+func (sf *StatsForecast) calcCategories() {
+	day := time.Now()
+	for i := sf.maxDaysForecast; i > 0; {
+		if day.Weekday().String() == "Saturday" || day.Weekday().String() == "Sunday" {
+			day = day.AddDate(0, 0, 1)
+			continue
+		}
+
+		sf.Chart.AddCategory(day.Format(dateFormat))
+		day = day.AddDate(0, 0, 1)
+		i--
+	}
+}
+
+func (sf *StatsForecast) calcSerie(speed *TableForecastRow) {
+	remainingTickets := float32(sf.numberOfOpenTickets)
+	serie := new(Serie)
+	serie.Name = speed.Name
+	for i := 0; i < sf.maxDaysForecast; i++ {
+		serie.AddData(remainingTickets)
+
+		remainingTickets -= speed.AverageSpeedPerDay
+		if remainingTickets < 0 {
+			remainingTickets = 0
+		}
+	}
+
+	sf.Chart.AddSerie(serie)
 }
 
 /*

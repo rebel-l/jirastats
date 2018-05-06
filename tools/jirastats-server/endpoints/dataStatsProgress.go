@@ -81,9 +81,9 @@ func (ds *DataStatsProgress) setStats(res http.ResponseWriter) bool {
 
 	for _, v := range stats {
 		ds.stats.AddCategory(v.CreatedAt.Format(dateFormat))
-		openSeries.AddData(v.Open)
-		closedSeries.AddData(v.Closed)
-		newSeries.AddData(v.New)
+		openSeries.AddDataInt(v.Open)
+		closedSeries.AddDataInt(v.Closed)
+		newSeries.AddDataInt(v.New)
 	}
 
 	ds.stats.Series = append(ds.stats.Series, openSeries, closedSeries, newSeries)
