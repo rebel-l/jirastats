@@ -9,11 +9,13 @@ import ChartContainerAction from "./../actions/ChartContainer";
 // Components
 import ChartLineColumn from "./charts/LineColumn";
 import PieChartTable from "./charts/PieChartTable";
+import Forecast from "./charts/Forecast";
 
 // Constants
+import {CHARTTYPE_FORECAST} from "./../constants/ChartTypes";
+import {CHARTTYPE_OPENTICKETS} from "./../constants/ChartTypes";
 import {CHARTTYPE_PROGRESS} from "./../constants/ChartTypes";
 import {CHARTTYPE_SPEED} from "./../constants/ChartTypes";
-import {CHARTTYPE_OPENTICKETS} from "./../constants/ChartTypes";
 
 const mapStateToProps = state => {
     return {
@@ -76,6 +78,11 @@ class ChartContainerComp extends  Component {
                 break;
             case CHARTTYPE_OPENTICKETS:
                 child = (<PieChartTable key={key} type={chartType} project={project}/>);
+                break;
+            case CHARTTYPE_FORECAST:
+                child = (
+                    <Forecast key={key} type={chartType} project={project}/>
+                );
                 break;
             default:
                 child = (<p>"{chartType}" not implemented yet.</p>);
