@@ -5,6 +5,7 @@ import Highcharts from "highcharts";
 
 // Components
 import Table from "./../Table";
+import Summary from "./../Summary";
 
 const mapStateToProps = state => {
     return {
@@ -60,12 +61,23 @@ class ForecastComp extends Component {
         Highcharts.chart(this.chartId, options);
     }
 
-    getSummary(){
+    getSpeed(){
         return {
-            name: "Summary",
+            name: "Speed",
             header: ["Kind of Speed", "Tickets Per Day", "Tickets Per Week"],
             rows: this.getData().speed
         };
+    }
+
+    getSummary(){
+        let summary = this.getData().summary;
+        if (summary.days === -1 || summary.weeks === -1) {
+            summary.days = "infinite";
+            summary.weeks = "infinite";
+            summary.last_day = "n/a";
+            summary.last_week = "n/a";
+        }
+        return summary;
     }
 
     render(){
@@ -78,7 +90,8 @@ class ForecastComp extends Component {
         return (
             <div key={this.id} id={this.id}>
                 <div id={this.chartId}/>
-                <Table key={this.id + "-Table"} type={this.actualChartType} data={this.getSummary()}/>
+                <Table key={this.id + "-Table"} type={this.actualChartType} data={this.getSpeed()}/>
+                <Summary data={this.getSummary()}/>
             </div>
         );
     }

@@ -1,6 +1,7 @@
 package response
 
 import (
+	"fmt"
 	"github.com/rebel-l/jirastats/packages/models"
 	log "github.com/sirupsen/logrus"
 	"math"
@@ -8,12 +9,13 @@ import (
 )
 
 type StatsForecast struct {
-	Project *models.Project `json:"project"`
-	Speed []*TableForecastRow `json:"speed"`
-	Summary *StatsForecastEnd `json:"summary"`
-	Chart *Stats `json:"chart"`
+	Project *models.Project       `json:"project"`
+	Speed []*TableForecastRow     `json:"speed"`
+	Summary *StatsForecastSummary `json:"summary"`
+	Chart *Stats                  `json:"chart"`
 	maxDaysForecast int
 	numberOfOpenTickets int
+	slowestAverageSpeed *TableForecastRow
 }
 
 func NewStatsForecast(project *models.Project) *StatsForecast {
@@ -22,6 +24,7 @@ func NewStatsForecast(project *models.Project) *StatsForecast {
 	sf.Chart = new(Stats)
 	sf.Chart.ProjectId = project.Id
 	sf.Chart.ProjectName = project.Name
+	sf.Summary = NewStatsForecastSummary()
 	return sf
 }
 
@@ -51,6 +54,7 @@ func (sf *StatsForecast) Calculate(data []*models.Stats) {
 	for _, speed := range sf.Speed {
 		sf.calcSerie(speed)
 	}
+	sf.calcSummary()
 }
 
 func (sf *StatsForecast) addSpeed(speed *TableForecastRow) {
@@ -67,6 +71,7 @@ func (sf *StatsForecast) calcDefaultSpeed(data []*models.Stats) {
 	speedWithNew := NewTableForcastRow("default speed including new")
 	speedWithNew.SetAverageSpeedPerDay(sf.Project.KnownSpeed - newTicketsPerDay)
 	sf.addSpeed(speedWithNew)
+	sf.calcSlowestAverageSpeed(speedWithNew)
 
 	speedWithoutNew := NewTableForcastRow("default speed without new")
 	speedWithoutNew.SetAverageSpeedPerDay(sf.Project.KnownSpeed)
@@ -98,12 +103,33 @@ func (sf *StatsForecast) calcSpeed(name string, data []*models.Stats, start int)
 	speedWithNew := NewTableForcastRow(name + " including new")
 	speedWithNew.SetAverageSpeedPerDay(closedTicketsPerDay - newTicketsPerDay)
 	sf.addSpeed(speedWithNew)
+	sf.calcSlowestAverageSpeed(speedWithNew)
 
 	speedWithoutNew := NewTableForcastRow(name + " without new")
 	speedWithoutNew.SetAverageSpeedPerDay(closedTicketsPerDay)
 	sf.addSpeed(speedWithoutNew)
 
+	if speedWithNew.AverageSpeedPerDay < 0 {
+		speedAverage := NewTableForcastRow(name + " average")
+		speedAverage.SetAverageSpeedPerDay(speedWithNew.AverageSpeedPerDay + speedWithoutNew.AverageSpeedPerDay)
+		sf.addSpeed(speedAverage)
+		sf.calcSlowestAverageSpeed(speedAverage)
+	}
+
 	return
+}
+
+func (sf *StatsForecast) calcSlowestAverageSpeed(speed *TableForecastRow) {
+	if sf.slowestAverageSpeed == nil {
+		if speed.AverageSpeedPerDay > 0 {
+			sf.slowestAverageSpeed = speed
+		}
+		return
+	}
+
+	if speed.AverageSpeedPerDay < sf.slowestAverageSpeed.AverageSpeedPerDay {
+		sf.slowestAverageSpeed = speed
+	}
 }
 
 func (sf *StatsForecast) calcMaxDaysForecast() {
@@ -150,27 +176,25 @@ func (sf *StatsForecast) calcSerie(speed *TableForecastRow) {
 	sf.Chart.AddSerie(serie)
 }
 
-/*
-	Chart:
-		speed last month (no new) ==> defaultSpeed if less than one week
-		speed last month (with new) ==> defaultSpeed if less than one week
-		speed last 3 months (no new) ==> skip if less than one week
-		speed last 3 months (with new) ==> skip if less than one week
-		speed over all (no new) ==> skip if less than one week
-		speed over all (with new) ==> skip if less than one week
-	Table:
-		defaultSpeed with new if less than one week: daily / weekly
-		defaultSpeed without new if less than one week: daily / weekly
+func (sf *StatsForecast) calcSummary() {
+	if sf.slowestAverageSpeed == nil {
+		return
+	}
 
-		speed one month with new if more than one week: daily / weekly
-		speed one month without new if more than one week: daily / weekly
+	days := float64(sf.numberOfOpenTickets) / float64(sf.slowestAverageSpeed.AverageSpeedPerDay)
+	sf.Summary.SetDaysAndWeeks(int(math.Ceil(days)))
 
-		speed 3 months with new if more than one week: daily / weekly
-		speed 3 months without new if more than one week: daily / weekly
+	lastDay := time.Now()
+	for i := float32(sf.numberOfOpenTickets); i > 0; {
+		lastDay = lastDay.AddDate(0, 0, 1)
+		if lastDay.Weekday().String() == "Saturday" || lastDay.Weekday().String() == "Sunday" {
+			continue
+		}
 
-		speed over all with new if more than one week: daily / weekly
-		speed over all without new if more than one week: daily / weekly
-
-		guessed project end: days (date) / weeks (week/year)
-
- */
+		i -= sf.slowestAverageSpeed.AverageSpeedPerDay
+	}
+	lastDay = lastDay.AddDate(0, 0, 1)
+	sf.Summary.LastDay = lastDay.Format(dateFormat)
+	lastYear, lastWeek := lastDay.ISOWeek()
+	sf.Summary.LastWeek = fmt.Sprintf("%d/%d", lastWeek, lastYear)
+}
