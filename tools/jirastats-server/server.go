@@ -33,6 +33,7 @@ func main() {
 	// Init Endpoints
 	endpoints.NewDataTickets(db, router)
 	endpoints.NewProjects(db, router)
+	endpoints.NewDataStatsForecast(db, router)
 	endpoints.NewDataStatsProgress(db, router)
 	endpoints.NewDataStatsSpeed(db, router)
 	endpoints.NewDataStatsOpenTickets(db, router)
