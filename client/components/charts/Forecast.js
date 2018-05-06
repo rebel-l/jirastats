@@ -3,6 +3,9 @@ import React, {Component} from 'react';
 import { connect } from "react-redux";
 import Highcharts from "highcharts";
 
+// Components
+import Table from "./../Table";
+
 const mapStateToProps = state => {
     return {
         data: state.chartContainer
@@ -57,6 +60,14 @@ class ForecastComp extends Component {
         Highcharts.chart(this.chartId, options);
     }
 
+    getSummary(){
+        return {
+            name: "Summary",
+            header: ["Kind of Speed", "Tickets Per Day", "Tickets Per Week"],
+            rows: this.getData().speed
+        };
+    }
+
     render(){
         this.renderCounter++;
         if(this.renderCounter === 1){
@@ -67,6 +78,7 @@ class ForecastComp extends Component {
         return (
             <div key={this.id} id={this.id}>
                 <div id={this.chartId}/>
+                <Table key={this.id + "-Table"} type={this.actualChartType} data={this.getSummary()}/>
             </div>
         );
     }
