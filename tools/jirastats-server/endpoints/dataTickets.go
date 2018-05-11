@@ -2,39 +2,37 @@ package endpoints
 
 import (
 	"database/sql"
-	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rebel-l/jirastats/packages/database"
+	"github.com/rebel-l/jirastats/tools/jirastats-server/response"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
+const getTicketsPath = "/data/tickets"
+
 type DataTickets struct {
-	db *sql.DB
+	tm *database.TicketMapper
 }
 
 func NewDataTickets(db *sql.DB, router *mux.Router) {
 	dt := new(DataTickets)
-	dt.db = db
-	router.HandleFunc("/data/tickets", dt.Handler).Methods(http.MethodGet)
+	dt.tm = database.NewTicketMapper(db)
+	router.HandleFunc(getTicketsPath, dt.GetTickets).Methods(http.MethodGet)
 }
 
-func (dt *DataTickets) Handler(res http.ResponseWriter, req *http.Request) {
+func (dt *DataTickets) GetTickets(res http.ResponseWriter, req *http.Request) {
 	log.Debug("Get all data from tickets")
-	status := http.StatusOK
 
-	tm := database.NewTicketMapper(dt.db)
-	tickets, err := tm.Load()
+	tickets, err := dt.tm.Load()
 	if err != nil {
-		log.Errorf("Not able to load tickets: %s", err.Error())
+		msg := fmt.Sprintf("Not able to load tickets: %s", err.Error())
+		e := response.NewErrorJson(msg, res)
+		e.SendBadRequest()
 		return
 	}
 
-	res.Header().Set("Content-Type", "application/json")
-	res.WriteHeader(status)
-	err = json.NewEncoder(res).Encode(tickets)
-	if err != nil {
-		log.Errorf("Not able to convert tickets to json: %s", err.Error())
-		return
-	}
+	success := response.NewSuccessJson(tickets, res)
+	success.SendOK()
 }
