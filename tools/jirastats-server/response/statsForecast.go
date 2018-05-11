@@ -154,7 +154,7 @@ func (sf *StatsForecast) calcCategories() {
 			continue
 		}
 
-		sf.Chart.AddCategory(day.Format(dateFormat))
+		sf.Chart.AddCategory(day.Format(dateFormatDisplay))
 		day = day.AddDate(0, 0, 1)
 		i--
 	}
@@ -194,7 +194,7 @@ func (sf *StatsForecast) calcSummary() {
 		i -= sf.slowestAverageSpeed.AverageSpeedPerDay
 	}
 	lastDay = lastDay.AddDate(0, 0, 1)
-	sf.Summary.LastDay = lastDay.Format(dateFormat)
+	sf.Summary.LastDay = lastDay.Format(dateFormatDisplay)
 	lastYear, lastWeek := lastDay.ISOWeek()
 	sf.Summary.LastWeek = fmt.Sprintf("%d/%d", lastWeek, lastYear)
 }

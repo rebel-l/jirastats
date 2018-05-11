@@ -159,6 +159,40 @@ func (tm *TicketMapper) CountStatusClusteredFromDay(status string, day time.Time
 	return
 }
 
+func (tm *TicketMapper) getDistinctDataByProjectId(projectId int, field string) (data []time.Time, err error) {
+	rows, err := tm.table.SelectComplex(
+		"project_id = ?",
+		fmt.Sprintf("%s DESC", field),
+		fmt.Sprintf("distinct date(%s)", field),
+		"",
+		projectId)
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	for rows.Next() {
+		var date sql.NullString
+		err = rows.Scan(&date)
+		if err != nil {
+			log.Warnf("Not able to parse row: %s", err.Error())
+			continue
+		}
+
+		if date.Valid {
+			dateConverted, _ := time.Parse(dateFormat, date.String)
+			data = append(data, dateConverted)
+		}
+	}
+
+	return
+}
+
+func (tm *TicketMapper) GetDistinctCreatedAtByProjectId(projectId int) (data []time.Time, err error) {
+	data, err = tm.getDistinctDataByProjectId(projectId, "created_at")
+	return
+}
+
 func (tm *TicketMapper) mapRowToModel(rows *sql.Rows, t *models.Ticket) (err error) {
 	var components,
 		labels,
