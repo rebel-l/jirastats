@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import axios from "axios/index";
 
 // Components
+import ComparisonGroup from "./charts/ComparisonGroup";
 import DateSelector from "./DateSelector";
 
 const mapStateToProps = state => {
@@ -55,7 +56,7 @@ class ComparisonContainerComp extends Component {
                   <label>Dates to compare: </label>
                   {children}
               </div>
-              <div>Chart</div>
+              <ComparisonGroup key={this.id + "-group"} projectId={this.projectId}/>
           </div>
         );
     }
