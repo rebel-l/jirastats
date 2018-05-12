@@ -43,6 +43,18 @@ func (tm *TicketMapper) LoadNotExpired(projectId int) (collection []*models.Tick
 	return
 }
 
+func (tm *TicketMapper) LoadHistorical(projectId int, start time.Time, end time.Time) (collection []*models.Ticket, err error) {
+	where := "`project_id` = ? AND `created_at` >= ? AND (expired < ? OR `expired` IS NULL)"
+	rows, err := tm.table.Select(where, projectId, start.Format(dateFormat), end.Format(dateFormat))
+	defer rows.Close()
+	if err != nil {
+		return
+	}
+
+	collection = tm.mapRows(rows)
+	return
+}
+
 func (tm *TicketMapper) mapRows(rows *sql.Rows) (collection []*models.Ticket) {
 	for rows.Next() {
 		t := models.NewTicket()

@@ -2,7 +2,6 @@ package response
 
 import (
 	"github.com/rebel-l/jirastats/packages/models"
-	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -20,24 +19,18 @@ func NewStatsComparison(project *models.Project) *StatsComparison {
 	return sc
 }
 
-func (sc *StatsComparison) SetVersionLeft(value string) {
+func (sc *StatsComparison) SetVersionLeft(value time.Time) {
 	sc.setVersion("left", value)
 }
 
-func (sc *StatsComparison) SetVersionRight(value string) {
+func (sc *StatsComparison) SetVersionRight(value time.Time) {
 	sc.setVersion("right", value)
 }
 
-func (sc *StatsComparison) setVersion(version string, value string) {
-	date, err := time.Parse(dateFormatInternal, value)
-	if err != nil {
-		log.Warnf("Date couldn't be converted: %s", err.Error())
-		return
-	}
-
-	if date.IsZero() {
+func (sc *StatsComparison) setVersion(version string, value time.Time) {
+	if value.IsZero() {
 		sc.Version[version] = "actual"
 	} else {
-		sc.Version[version] = date.Format(dateFormatDisplay)
+		sc.Version[version] = value.Format(DateFormatDisplay)
 	}
 }

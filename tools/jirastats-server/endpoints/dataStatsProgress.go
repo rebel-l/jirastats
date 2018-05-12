@@ -12,7 +12,6 @@ import (
 )
 
 const dataStatsProgressPath = "/data/stats/progress/{projectId}"
-const dateFormat = "02.01.2006"
 
 type DataStatsProgress struct {
 	pm *database.ProjectMapper
@@ -80,7 +79,7 @@ func (ds *DataStatsProgress) setStats(res http.ResponseWriter) bool {
 	newSeries.Name = "New"
 
 	for _, v := range stats {
-		ds.stats.AddCategory(v.CreatedAt.Format(dateFormat))
+		ds.stats.AddCategory(v.CreatedAt.Format(response.DateFormatDisplay))
 		openSeries.AddDataInt(v.Open)
 		closedSeries.AddDataInt(v.Closed)
 		newSeries.AddDataInt(v.New)
