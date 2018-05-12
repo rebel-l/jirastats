@@ -7,11 +7,13 @@ import { connect } from "react-redux";
 import ChartContainerAction from "./../actions/ChartContainer";
 
 // Components
+import Comparison from "./charts/Comparison";
 import ChartLineColumn from "./charts/LineColumn";
 import PieChartTable from "./charts/PieChartTable";
 import Forecast from "./charts/Forecast";
 
 // Constants
+import {CHARTTYPE_COMPARISON} from "./../constants/ChartTypes";
 import {CHARTTYPE_FORECAST} from "./../constants/ChartTypes";
 import {CHARTTYPE_OPENTICKETS} from "./../constants/ChartTypes";
 import {CHARTTYPE_PROGRESS} from "./../constants/ChartTypes";
@@ -33,6 +35,10 @@ const mapDispatchToProps = dispatch => {
 class ChartContainerComp extends  Component {
     componentDidUpdate () {
         let chartType = this.getChartType();
+        if(chartType === CHARTTYPE_COMPARISON){
+            return
+        }
+
         let project = this.getProjectId();
         axios.get(`/data/stats/${chartType}/${project}`).then(res => {
             this.props.chartContainer(res.data);
@@ -82,6 +88,11 @@ class ChartContainerComp extends  Component {
             case CHARTTYPE_FORECAST:
                 child = (
                     <Forecast key={key} type={chartType} project={project}/>
+                );
+                break;
+            case CHARTTYPE_COMPARISON:
+                child = (
+                    <Comparison chartType={this.getChartType()} projectId={this.getProjectId()}/>
                 );
                 break;
             default:
