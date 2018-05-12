@@ -5,21 +5,14 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rebel-l/jirastats/packages/database"
-	"github.com/rebel-l/jirastats/packages/utils"
 	"github.com/rebel-l/jirastats/tools/jirastats-server/response"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
+	"github.com/rebel-l/jirastats/tools/jirastats-server/models"
 )
 
 const dataStatsOpenTicketsPath = "/data/stats/opentickets/{projectId}"
-const defaultKey = "N/A"
-const statsTypeNameComponents	= "components"
-const statsTypeNameIssueTypes	= "issue_types"
-const statsTypeNameLabels		= "labels"
-const statsTypeNamePriority		= "priorities"
-const statsTypeNameStatus		= "status"
-const statsTypeNameTechDebt		= "tech_debt"
 
 type DataStatsOpenTickets struct {
 	tm *database.TicketMapper
@@ -63,64 +56,12 @@ func (ds *DataStatsOpenTickets) GetStats(res http.ResponseWriter, req *http.Requ
 		return
 	}
 
-	tables := map[string]map[string]*response.TableData{
-		statsTypeNameComponents: make(map[string]*response.TableData),
-		statsTypeNameIssueTypes: make(map[string]*response.TableData),
-		statsTypeNameLabels: make(map[string]*response.TableData),
-		statsTypeNamePriority: make(map[string]*response.TableData),
-		statsTypeNameStatus: make(map[string]*response.TableData),
-		statsTypeNameTechDebt: make(map[string]*response.TableData),
-	}
-
-	for _, t := range tickets {
-		// Components
-		ds.countTableDataForArrayOfStrings(t.Components, tables[statsTypeNameComponents], "")
-
-		// Issue Types
-		ds.countTableDataForSimpleStrings(t.Issuetype, tables[statsTypeNameIssueTypes])
-
-		// Labels
-		ds.countTableDataForArrayOfStrings(t.Labels, tables[statsTypeNameLabels], "technicalDebt")
-
-		// Priority
-		ds.countTableDataForSimpleStrings(t.Priority, tables[statsTypeNamePriority])
-
-		// Status
-		ds.countTableDataForSimpleStrings(t.StatusByJira, tables[statsTypeNameStatus])
-
-		// TechDebt
-		if utils.IsValueInMap(t.Labels, "technicalDebt") {
-			ds.countTableDataForSimpleStrings("Technical Debt", tables[statsTypeNameTechDebt])
-		} else {
-			ds.countTableDataForSimpleStrings("Normal", tables[statsTypeNameTechDebt])
-		}
-		// TODO: parallize processing data
-	}
+	ticketCounter := models.NewTicketCounter()
+	ticketCounter.Count(tickets)
 
 	stats := response.NewStatsPiechartTable(project)
-	stats.GeneratePiechartTables(tables, len(tickets))
+	stats.GeneratePiechartTables(ticketCounter.Tables, len(tickets))
 
 	success := response.NewSuccessJson(stats, res)
 	success.SendOK()
-}
-
-func (ds *DataStatsOpenTickets) countTableDataForSimpleStrings(key string, tableData map[string]*response.TableData) {
-	if v, ok := tableData[key]; ok {
-		v.Value++
-	} else {
-		tableData[key] = response.NewTableData(key, 1)
-	}
-}
-
-func (ds *DataStatsOpenTickets) countTableDataForArrayOfStrings(keys []string, tableData map[string]*response.TableData, exclude string) {
-	for _, v := range keys {
-		if v == "" {
-			v = defaultKey
-		}
-
-		if v == exclude {
-			continue
-		}
-		ds.countTableDataForSimpleStrings(v, tableData)
-	}
 }
