@@ -50,34 +50,14 @@ func (dsc *DataStatsComparison) GetStats(res http.ResponseWriter, req *http.Requ
 	dsc.stats.SetVersionLeft(versionLeft)
 	dsc.stats.SetVersionRight(versionRight)
 
-	data := make(map[string][]*models.Ticket, 2)
-	data["left"], err = dsc.getData(versionLeft)
+	data, err := dsc.getData()
 	if err != nil {
-		msg := fmt.Sprintf(
-			"Could not find tickets for project with id %d and date %s",
-			projectId,
-			versionLeft.Format(response.DateFormatInternal))
-		e := response.NewErrorJson(msg, res)
+		e := response.NewErrorJson(err.Error(), res)
 		e.SendNotFound()
 		return
 	}
 
-	data["right"], err = dsc.getData(versionRight)
-	if err != nil {
-		msg := fmt.Sprintf(
-			"Could not find tickets for project with id %d and date %s",
-			projectId,
-			versionLeft.Format(response.DateFormatInternal))
-		e := response.NewErrorJson(msg, res)
-		e.SendNotFound()
-		return
-	}
-
-	for k, v := range data {
-		for _, t := range v {
-			log.Debugf("Version: %s, Ticket: %s", k, t.Key)
-		}
-	}
+	dsc.stats.SetStats(dsc.getCounters(data))
 
 	success := response.NewSuccessJson(dsc.stats, res)
 	success.SendOK()
@@ -107,7 +87,7 @@ func (dsc *DataStatsComparison) getParams(req *http.Request) (projectId int, ver
 	return
 }
 
-func (dsc *DataStatsComparison) getData(start time.Time) (data []*models.Ticket, err error) {
+func (dsc *DataStatsComparison) getDataForVersion(start time.Time) (data []*models.Ticket, err error) {
 	if start.IsZero() {
 		data, err = dsc.tm.LoadNotExpired(dsc.stats.Project.Id)
 		return
@@ -115,5 +95,31 @@ func (dsc *DataStatsComparison) getData(start time.Time) (data []*models.Ticket,
 
 	end := start.AddDate(0, 0, 1)
 	data, err = dsc.tm.LoadHistorical(dsc.stats.Project.Id, start, end)
+	return
+}
+
+func (dsc *DataStatsComparison) getData() (data map[string][]*models.Ticket, err error) {
+	data = make(map[string][]*models.Ticket, len(dsc.stats.Version))
+	for k, v := range dsc.stats.VersionOriginal {
+		data[k], err = dsc.getDataForVersion(v)
+		if err != nil {
+			msg := fmt.Sprintf(
+				"Could not find tickets for project with id %d and date %s",
+				dsc.stats.Project.Id,
+				v.Format(response.DateFormatInternal))
+			err = errors.New(msg)
+			return
+		}
+	}
+	return
+}
+
+func (dsc *DataStatsComparison) getCounters(data map[string][]*models.Ticket) (counters map[string]*response.TicketCounter) {
+	counters = make(map[string]*response.TicketCounter, 2)
+	for k, v := range data {
+		counter := response.NewTicketCounter()
+		counter.Count(v)
+		counters[k] = counter
+	}
 	return
 }

@@ -9,7 +9,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
-	"github.com/rebel-l/jirastats/tools/jirastats-server/models"
 )
 
 const dataStatsOpenTicketsPath = "/data/stats/opentickets/{projectId}"
@@ -56,7 +55,7 @@ func (ds *DataStatsOpenTickets) GetStats(res http.ResponseWriter, req *http.Requ
 		return
 	}
 
-	ticketCounter := models.NewTicketCounter()
+	ticketCounter := response.NewTicketCounter()
 	ticketCounter.Count(tickets)
 
 	stats := response.NewStatsPiechartTable(project)
