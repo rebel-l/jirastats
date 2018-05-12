@@ -100,7 +100,7 @@ func (dsc *DataStatsComparison) getDataForVersion(start time.Time) (data []*mode
 
 func (dsc *DataStatsComparison) getData() (data map[string][]*models.Ticket, err error) {
 	data = make(map[string][]*models.Ticket, len(dsc.stats.Version))
-	for k, v := range dsc.stats.VersionOriginal {
+	for k, v := range dsc.stats.GetVersionOriginal() {
 		data[k], err = dsc.getDataForVersion(v)
 		if err != nil {
 			msg := fmt.Sprintf(

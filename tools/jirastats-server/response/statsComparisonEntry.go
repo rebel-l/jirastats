@@ -3,7 +3,7 @@ package response
 type StatsComparisonEntry struct {
 	Left []*PieChartEntry `json:"left"`
 	Right []*PieChartEntry `json:"right"`
-	Diff []*TableData `json:"diff"`
+	Diff []*TableDiffEntry `json:"diff"`
 }
 
 func NewStatsComparisonEntry() *StatsComparisonEntry {

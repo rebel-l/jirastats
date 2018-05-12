@@ -15,6 +15,7 @@ const statsTypeNameTechDebt		= "tech_debt"
 
 type TicketCounter struct {
 	Tables map[string]map[string]*TableData
+	NumTickets int
 }
 
 func NewTicketCounter() *TicketCounter {
@@ -31,6 +32,7 @@ func NewTicketCounter() *TicketCounter {
 }
 
 func (tc *TicketCounter) Count(tickets []*models.Ticket) {
+	tc.NumTickets = len(tickets)
 	for _, ticket := range tickets {
 		// Components
 		tc.countTableDataForArrayOfStrings(ticket.Components, tc.Tables[statsTypeNameComponents], "")
