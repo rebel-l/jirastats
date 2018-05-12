@@ -49,7 +49,7 @@ func (ds *DataStatsOpenTickets) GetStats(res http.ResponseWriter, req *http.Requ
 	if err != nil {
 		msg := fmt.Sprintf("Project with id %d could not be found", projectId)
 		e := response.NewErrorJson(msg, res)
-		e.SendBadRequest()
+		e.SendNotFound()
 		return
 	}
 
@@ -59,7 +59,7 @@ func (ds *DataStatsOpenTickets) GetStats(res http.ResponseWriter, req *http.Requ
 	if err != nil {
 		msg := fmt.Sprintf("Stats could not be loaded: %s", err.Error())
 		e := response.NewErrorJson(msg, res)
-		e.SendBadRequest()
+		e.SendNotFound()
 		return
 	}
 
