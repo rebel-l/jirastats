@@ -4,7 +4,7 @@ import React, {Component} from 'react';
 import { connect } from "react-redux";
 
 // Actions
-import Project from "../actions/Project"
+import Project from "../actions/Project";
 
 const mapDispatchToProps = dispatch => {
     return {
@@ -53,4 +53,4 @@ class ProjectSelectComponent extends Component {
 
 const ProjectSelect = connect(null, mapDispatchToProps)(ProjectSelectComponent);
 
-export default ProjectSelect
+export default ProjectSelect;
