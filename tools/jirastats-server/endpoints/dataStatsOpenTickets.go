@@ -71,7 +71,7 @@ func (ds *DataStatsOpenTickets) GetStats(res http.ResponseWriter, req *http.Requ
 		statsTypeNameStatus: make(map[string]*response.TableData),
 		statsTypeNameTechDebt: make(map[string]*response.TableData),
 	}
-	countTickets := len(tickets)
+
 	for _, t := range tickets {
 		// Components
 		ds.countTableDataForArrayOfStrings(t.Components, tables[statsTypeNameComponents], "")
@@ -98,7 +98,7 @@ func (ds *DataStatsOpenTickets) GetStats(res http.ResponseWriter, req *http.Requ
 	}
 
 	stats := response.NewStatsPiechartTable(project)
-	stats.GeneratePiechartTables(tables, countTickets)
+	stats.GeneratePiechartTables(tables, len(tickets))
 
 	success := response.NewSuccessJson(stats, res)
 	success.SendOK()
