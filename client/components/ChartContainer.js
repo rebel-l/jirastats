@@ -7,7 +7,7 @@ import { connect } from "react-redux";
 import ChartContainerAction from "./../actions/ChartContainer";
 
 // Components
-import Comparison from "./charts/Comparison";
+import ComparisonContainer from "./ComparisonContainer";
 import ChartLineColumn from "./charts/LineColumn";
 import PieChartTable from "./charts/PieChartTable";
 import Forecast from "./charts/Forecast";
@@ -92,7 +92,7 @@ class ChartContainerComp extends  Component {
                 break;
             case CHARTTYPE_COMPARISON:
                 child = (
-                    <Comparison chartType={this.getChartType()} projectId={this.getProjectId()}/>
+                    <ComparisonContainer chartType={this.getChartType()} projectId={this.getProjectId()}/>
                 );
                 break;
             default:

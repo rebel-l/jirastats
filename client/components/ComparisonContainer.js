@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import axios from "axios/index";
 
 // Components
-import DateSelector from "./../DateSelector";
+import DateSelector from "./DateSelector";
 
 const mapStateToProps = state => {
     return {
@@ -12,7 +12,7 @@ const mapStateToProps = state => {
     };
 };
 
-class ComparisonComp extends Component {
+class ComparisonContainerComp extends Component {
     constructor(props){
         super(props);
         this.id = "comparison-container";
@@ -31,7 +31,7 @@ class ComparisonComp extends Component {
         });
     }
 
-    getDateSelector(version, data){
+    static getDateSelector(version, data){
         let selectorId = "date-selector";
         return (
             <DateSelector key={selectorId + "-" + version} id={selectorId + "-" + version} version={version} data={data}/>
@@ -42,10 +42,10 @@ class ComparisonComp extends Component {
         let children = [];
         if(this.state.dates.length > 0){
             children.push((
-                this.getDateSelector("left", this.state.dates)
+                ComparisonContainerComp.getDateSelector("left", this.state.dates)
             ));
             children.push((
-                this.getDateSelector("right", this.state.dates)
+                ComparisonContainerComp.getDateSelector("right", this.state.dates)
             ));
         }
 
@@ -61,5 +61,5 @@ class ComparisonComp extends Component {
     }
 }
 
-const Comparison = connect(mapStateToProps)(ComparisonComp);
-export default Comparison;
+const ComparisonContainer = connect(mapStateToProps)(ComparisonContainerComp);
+export default ComparisonContainer;
