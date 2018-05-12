@@ -1,6 +1,7 @@
 // Framework
 import React, {Component} from 'react';
 import { connect } from "react-redux";
+import axios from "axios/index";
 
 const mapStateToProps = state => {
     return {
@@ -22,7 +23,10 @@ class ComparisonGroupComp extends Component{
             return;
         }
 
-        // TODO: do ajax call (but endpoint is needed first)
+        axios.get(`/data/stats/comparison/${this.state.projectId}/${dates.left}/${dates.right}`).then(res => {
+            // TODO: send data to chart compnent
+            console.log(res.data);
+        });
     }
 
     getComparisonSelectorDates(){
