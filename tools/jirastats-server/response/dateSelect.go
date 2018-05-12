@@ -11,6 +11,7 @@ func NewDateSelect(data time.Time) *DateSelect {
 	ds := new(DateSelect)
 	if data.IsZero() {
 		ds.Name = "actual"
+		ds.Value = data.Format(dateFormatInternal)
 	} else {
 		ds.Name = data.Format(dateFormatDisplay)
 		ds.Value = data.Format(dateFormatInternal)
