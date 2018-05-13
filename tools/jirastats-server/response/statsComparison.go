@@ -66,7 +66,7 @@ func (sc *StatsComparison) SetStats(counters map[string]*TicketCounter) {
 		chDiff := make(chan []*TableDiffEntry)
 		go sc.processDiff(vl, vr, chDiff)
 
-		entry := NewStatsComparisonEntry()
+		entry := NewStatsComparisonEntry(k)
 		entry.Left = <- chLeft
 		entry.Right = <- chRight
 		entry.Diff = <- chDiff
