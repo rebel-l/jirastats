@@ -56,7 +56,7 @@ class ComparisonContainerComp extends Component {
                   <label>Dates to compare: </label>
                   {children}
               </div>
-              <ComparisonGroup key={this.id + "-group"} projectId={this.projectId}/>
+              <ComparisonGroup key={this.id + "-group"} id={this.id + "-group"} projectId={this.projectId}/>
           </div>
         );
     }
