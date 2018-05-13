@@ -17,8 +17,8 @@ class ComparisonContainerComp extends Component {
     constructor(props){
         super(props);
         this.id = "comparison-container";
-        this.chartType = props.chartType;
-        this.projectId = props.projectId;
+        this.chartType = props.type;
+        this.projectId = props.project;
         this.state = {
             dates: []
         };
