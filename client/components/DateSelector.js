@@ -18,14 +18,6 @@ class DateSelectorComp extends Component {
         this.data = props.data;
         this.version = props.version;
         this.handleSelect = this.handleSelect.bind(this);
-        /*
-        this.state = {
-            comparisonSelector: {
-                version: this.version,
-                value: null
-            }
-        }
-        */
     }
 
     getOption(date){
