@@ -6,10 +6,17 @@ import axios from "axios/index";
 // Components
 import ChartPie from "./Pie";
 import Table from "./../Table";
+import ComparisonSelector from "../../actions/ComparisonSelector";
 
 const mapStateToProps = state => {
     return {
         dates: state.comparisonSelector
+    };
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        comparisonSelector: comparisonSelector => dispatch(ComparisonSelector(comparisonSelector))
     };
 };
 
@@ -22,6 +29,17 @@ class ComparisonGroupComp extends Component{
             projectId: props.projectId,
             data: null
         };
+
+        // reset event data
+        this.props.comparisonSelector({
+            version: "left",
+            value: ""
+        });
+
+        this.props.comparisonSelector({
+            version: "right",
+            value: ""
+        });
     }
 
     shouldComponentUpdate(nextProps){
@@ -109,5 +127,5 @@ class ComparisonGroupComp extends Component{
     }
 }
 
-const ComparisonGroup = connect(mapStateToProps)(ComparisonGroupComp);
+const ComparisonGroup = connect(mapStateToProps, mapDispatchToProps)(ComparisonGroupComp);
 export default ComparisonGroup;
