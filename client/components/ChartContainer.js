@@ -92,7 +92,7 @@ class ChartContainerComp extends  Component {
                 break;
             case CHARTTYPE_COMPARISON:
                 child = (
-                    <ComparisonContainer chartType={this.getChartType()} projectId={this.getProjectId()}/>
+                    <ComparisonContainer chartType={this.getChartType()} projectId={project}/>
                 );
                 break;
             default:
