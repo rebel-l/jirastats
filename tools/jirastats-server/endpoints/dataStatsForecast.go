@@ -55,7 +55,9 @@ func (dsf *DataStatsForecast) GetStats(res http.ResponseWriter, req *http.Reques
 
 	stats := response.NewStatsForecast(project)
 	stats.Calculate(statsData)
+	log.Debugf("Data on forecast stats for project: %d processed!", projectId)
 
 	success := response.NewSuccessJson(stats, res)
 	success.SendOK()
+	log.Debugf("Response on forecast stats for project: %d finished!", projectId)
 }

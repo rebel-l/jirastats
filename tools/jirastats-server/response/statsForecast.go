@@ -144,6 +144,7 @@ func (sf *StatsForecast) calcMaxDaysForecast() {
 			sf.maxDaysForecast = maxDaysInt
 		}
 	}
+	log.Debugf("MaxDays to calculate: %d", sf.maxDaysForecast)
 }
 
 func (sf *StatsForecast) calcCategories() {
@@ -158,6 +159,7 @@ func (sf *StatsForecast) calcCategories() {
 		day = day.AddDate(0, 0, 1)
 		i--
 	}
+	log.Debugf("Categories calculated: %d", len(sf.Chart.Categories))
 }
 
 func (sf *StatsForecast) calcSerie(speed *TableForecastRow) {
@@ -174,10 +176,11 @@ func (sf *StatsForecast) calcSerie(speed *TableForecastRow) {
 	}
 
 	sf.Chart.AddSerie(serie)
+	log.Debugf("Series calculated: %d", len(sf.Chart.Series))
 }
 
 func (sf *StatsForecast) calcSummary() {
-	if sf.slowestAverageSpeed == nil {
+	if sf.slowestAverageSpeed == nil || sf.slowestAverageSpeed.AverageSpeedPerDay <= 0 {
 		return
 	}
 
@@ -197,4 +200,5 @@ func (sf *StatsForecast) calcSummary() {
 	sf.Summary.LastDay = lastDay.Format(DateFormatDisplay)
 	lastYear, lastWeek := lastDay.ISOWeek()
 	sf.Summary.LastWeek = fmt.Sprintf("%d/%d", lastWeek, lastYear)
+	log.Debug("Summary calculated")
 }
