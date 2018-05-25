@@ -45,8 +45,11 @@ func (spt *StatsPiechartTable) createPieChart(
 		pct.DataTable = append(pct.DataTable, d)
 		i++
 	}
-	chart[maxItem].Sliced = true
-	chart[maxItem].Selected = true
+
+	if len(chart) > 0 {
+		chart[maxItem].Sliced = true
+		chart[maxItem].Selected = true
+	}
 
 	return pct
 }

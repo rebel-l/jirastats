@@ -41,6 +41,10 @@ class PieChartTableComp extends Component {
     }
 
     renderChild(id, name, data) {
+        if(data.data_chart.length === 0 && data.data_table === null){
+            return null;
+        }
+
         return (
             <div key={id + "-" + data.name} id={id + "-" + data.name}>
                 <ChartPie key={id + "-Chart-" + data.name} type={this.actualChartType} data={this.getPieChartData(name, data)}/>

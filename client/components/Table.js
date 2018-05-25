@@ -16,7 +16,7 @@ class Table extends Component {
         }
 
         let rows = [];
-        if (this.data.rows !== undefined){
+        if (this.data.rows !== undefined && this.data.rows !== null){
             for(let i = 0; i < this.data.rows.length; i++){
                 let cells = [];
                 let j = 0;
