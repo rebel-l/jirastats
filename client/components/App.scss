@@ -1,0 +1,11 @@
+@import "./../base";
+
+.chartSelector {
+  margin-top: $marginMedium;
+  margin-bottom: $marginDefault;
+}
+
+.chartSelector > label {
+  font-weight: bold;
+  margin: $marginSmall;
+}

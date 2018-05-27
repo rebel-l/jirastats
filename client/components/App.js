@@ -2,7 +2,7 @@
 import React, {Component} from "react";
 
 // Style
-import style from "./../base.scss";
+import style from "./App.scss";
 
 // Components
 import ChartContainer from "./ChartContainer";
@@ -24,8 +24,9 @@ class App extends Component {
         return (
             <div key={appId} id={appId} className={style.spacer}>
                 <ProjectSelect/>
-                <div key={chartTypeSelectorId} id={chartTypeSelectorId}>
-                    <ChartButton name="Progress" chartType={CHARTTYPE_PROGRESS}/>
+                <div key={chartTypeSelectorId} id={chartTypeSelectorId} className={style.chartSelector}>
+                    <label>Select Chart:</label>
+                    <ChartButton name="Progress" chartType={CHARTTYPE_PROGRESS} first={true}/>
                     <ChartButton name="Speed" chartType={CHARTTYPE_SPEED}/>
                     <ChartButton name="Forecast" chartType={CHARTTYPE_FORECAST}/>
                     <ChartButton name="Open Tickets" chartType={CHARTTYPE_OPENTICKETS}/>

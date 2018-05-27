@@ -23,6 +23,13 @@ class ChartButtonComp extends Component {
         super(props);
         this.name = props.name;
         this.chartType = props.chartType;
+
+        if(props.first === true){
+            this.isFirst = " " + style.isFirst;
+        } else {
+            this.isFirst = "";
+        }
+
         this.handleClick = this.handleClick.bind(this)
     }
 
@@ -36,8 +43,9 @@ class ChartButtonComp extends Component {
         if (last === this.chartType) {
             isActive = " " + style.isActive;
         }
+
         return (
-            <button onClick={this.handleClick} className={style.chartButton + isActive}>{this.name}</button>
+            <button onClick={this.handleClick} className={style.chartButton + this.isFirst + isActive}>{this.name}</button>
         )
     }
 }

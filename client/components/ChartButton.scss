@@ -1,12 +1,29 @@
 @import "./../variables";
 
 .chartButton {
+  background-color: $buttonColorDefault;
   border: none;
   border-radius: $radiusDefault;
   margin-right: $marginSmall;
+  outline: none;
   padding: $paddingMedium;
 }
 
+.chartButton:hover {
+  background-color: $buttonColorHover;
+}
+
+.chartButton:active{
+  background-color: $buttonColorPress;
+  transform: translateY(4px);
+}
+
 .isActive {
+  background-color: $buttonColorActive;
   font-weight: bold;
+  box-shadow: 0 3px $buttonColorShadow;
+}
+
+.isFirst {
+  margin-left: 11px;
 }
