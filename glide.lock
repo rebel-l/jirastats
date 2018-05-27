@@ -1,5 +1,5 @@
-hash: b4a74cd0e5fb3ca40ccb21d88b4d3f5d8d6feff2af3b31ead22b0ff3c0ccb53d
-updated: 2018-03-14T18:11:54.461891266+01:00
+hash: d84b21a084e8e7b10eab2fd15a941a9746b0a92b2d1b0104b16c2905d66ca91b
+updated: 2018-05-27T16:11:43.2039562+02:00
 imports:
 - name: github.com/andygrunwald/go-jira
   version: acbc88d59582a4885dbd82fd775caa7c15245171
@@ -9,8 +9,14 @@ imports:
   version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
   subpackages:
   - query
+- name: github.com/gorilla/context
+  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
+- name: github.com/gorilla/mux
+  version: e3702bed27f0d39777b0b37b664b6280e8ef8fbf
 - name: github.com/mattn/go-sqlite3
-  version: 6c771bb9887719704b210e87e934f08be014bdb1
+  version: 323a32be5a2421b8c7087225079c6c900ec397cd
+- name: github.com/pkg/errors
+  version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/sirupsen/logrus
   version: c155da19408a8799da419ed3eeb0cb5db0ad5dbc
 - name: github.com/trivago/tgo
