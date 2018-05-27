@@ -1,0 +1,12 @@
+@import "./../variables";
+
+.chartButton {
+  border: none;
+  border-radius: $radiusDefault;
+  margin-right: $marginSmall;
+  padding: $paddingMedium;
+}
+
+.isActive {
+  font-weight: bold;
+}

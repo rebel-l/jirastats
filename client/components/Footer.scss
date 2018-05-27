@@ -1,4 +1,8 @@
+@import "./../variables";
+
 .footer {
-  font-size: small;
+  color: $unimportantColor;
+  font-family: $fontFamily;
+  font-size: $fontSizeSmall;
   text-align: center;
 }

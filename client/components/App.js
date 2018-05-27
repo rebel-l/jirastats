@@ -1,6 +1,9 @@
 // Framework
 import React, {Component} from "react";
 
+// Style
+import style from "./../base.scss";
+
 // Components
 import ChartContainer from "./ChartContainer";
 import ChartButton from "./ChartButton";
@@ -19,7 +22,7 @@ class App extends Component {
         let appId = 'Application';
         let chartTypeSelectorId = 'ChartTypeSelector';
         return (
-            <div key={appId} id={appId}>
+            <div key={appId} id={appId} className={style.spacer}>
                 <ProjectSelect/>
                 <div key={chartTypeSelectorId} id={chartTypeSelectorId}>
                     <ChartButton name="Progress" chartType={CHARTTYPE_PROGRESS}/>

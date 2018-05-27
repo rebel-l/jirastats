@@ -3,6 +3,9 @@ import axios from 'axios';
 import React, {Component} from 'react';
 import { connect } from "react-redux";
 
+// Style
+import style from "./ProjectSelect.scss";
+
 // Actions
 import Project from "../actions/Project";
 
@@ -38,7 +41,7 @@ class ProjectSelectComponent extends Component {
     render() {
         let id = 'ProjectSelector';
         return (
-            <div key={id} id={id}>
+            <div key={id} id={id} className={style.projectSelector}>
                 <label>Select Project: </label>
                 <select onChange={this.handleSelect} value={this.state.value}>
                     <option key={0} value={0}>... select project ...</option>

@@ -2,6 +2,9 @@
 import React, {Component} from 'react';
 import { connect } from "react-redux";
 
+// Style
+import style from "./ChartButton.scss";
+
 // Actions
 import ChartButtonAction from "../actions/ChartButton";
 
@@ -29,12 +32,12 @@ class ChartButtonComp extends Component {
 
     render() {
         let last = this.props.buttonClicked[this.props.buttonClicked.length - 1];
-        let className = "";
+        let isActive = "";
         if (last === this.chartType) {
-            className = "isActive";
+            isActive = " " + style.isActive;
         }
         return (
-            <button onClick={this.handleClick} className={className}>{this.name}</button>
+            <button onClick={this.handleClick} className={style.chartButton + isActive}>{this.name}</button>
         )
     }
 }

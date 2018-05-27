@@ -1,0 +1,15 @@
+@import "./../variables";
+
+.projectSelector {
+  margin: $marginSmall;
+}
+
+.projectSelector > label {
+  font-weight: bold;
+}
+
+.projectSelector > select {
+  background-color: $backGroundDefault;
+  border-radius: $radiusDefault;
+  padding: $paddingDefault;
+}

@@ -6,6 +6,7 @@ import store from "./store";
 
 // Style
 import "normalize-css";
+import "./base.scss";
 
 // Components
 import App from './components/App';

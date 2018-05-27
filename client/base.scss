@@ -1,0 +1,12 @@
+@import "./variables";
+@import "./mixins";
+
+body {
+  background-color: $backGroundDefault;
+  font-family: $fontFamily;
+  font-size: $fontSizeMedium;
+}
+
+.spacer {
+  @include marginOverall($marginDefault);
+}
