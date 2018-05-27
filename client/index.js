@@ -4,6 +4,9 @@ import ReactDOM from 'react-dom';
 import { Provider } from "react-redux";
 import store from "./store";
 
+// Style
+import "normalize-css";
+
 // Components
 import App from './components/App';
 
