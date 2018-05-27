@@ -2,9 +2,10 @@
 import React, {Component} from "react";
 
 // Components
-import ProjectSelect from "./ProjectSelect";
 import ChartContainer from "./ChartContainer";
 import ChartButton from "./ChartButton";
+import Footer from "./Footer";
+import ProjectSelect from "./ProjectSelect";
 
 // Constants
 import {CHARTTYPE_PROGRESS} from "./../constants/ChartTypes";
@@ -28,6 +29,7 @@ class App extends Component {
                     <ChartButton name="Comparison" chartType={CHARTTYPE_COMPARISON}/>
                 </div>
                 <ChartContainer/>
+                <Footer/>
             </div>
         );
     }
