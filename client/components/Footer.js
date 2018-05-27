@@ -23,14 +23,14 @@ class Footer extends Component {
 
     render(){
         return(
-            <div key={"footer"} id={"footer"} className={style.footer}>
+            <footer key={"footer"} id={"footer"} className={style.footer}>
                 <p>
                     Copyright © {Footer.getYear()} by <a href={this.profileLink}>Lars Gaubisch</a>
                 </p>
                 <p>
                     Licensed under <a href={this.licenseLink}>GNU GPL.3.0</a>
                 </p>
-            </div>
+            </footer>
         );
     }
 }

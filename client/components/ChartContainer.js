@@ -101,9 +101,9 @@ class ChartContainerComp extends  Component {
         }
 
         return(
-            <div key={id} id={id}>
+            <main key={id} id={id}>
                 {child}
-            </div>
+            </main>
         );
     }
 }

@@ -7,6 +7,7 @@ import style from "./App.scss";
 // Components
 import ChartContainer from "./ChartContainer";
 import ChartButton from "./ChartButton";
+import Header from "./Header";
 import Footer from "./Footer";
 import ProjectSelect from "./ProjectSelect";
 
@@ -23,15 +24,18 @@ class App extends Component {
         let chartTypeSelectorId = 'ChartTypeSelector';
         return (
             <div key={appId} id={appId} className={style.spacer}>
-                <ProjectSelect/>
-                <div key={chartTypeSelectorId} id={chartTypeSelectorId} className={style.chartSelector}>
-                    <label>Select Chart:</label>
-                    <ChartButton name="Progress" chartType={CHARTTYPE_PROGRESS} first={true}/>
-                    <ChartButton name="Speed" chartType={CHARTTYPE_SPEED}/>
-                    <ChartButton name="Forecast" chartType={CHARTTYPE_FORECAST}/>
-                    <ChartButton name="Open Tickets" chartType={CHARTTYPE_OPENTICKETS}/>
-                    <ChartButton name="Comparison" chartType={CHARTTYPE_COMPARISON}/>
-                </div>
+                <Header/>
+                <nav>
+                    <ProjectSelect/>
+                    <div key={chartTypeSelectorId} id={chartTypeSelectorId} className={style.chartSelector}>
+                        <label>Select Chart:</label>
+                        <ChartButton name="Progress" chartType={CHARTTYPE_PROGRESS} first={true}/>
+                        <ChartButton name="Speed" chartType={CHARTTYPE_SPEED}/>
+                        <ChartButton name="Forecast" chartType={CHARTTYPE_FORECAST}/>
+                        <ChartButton name="Open Tickets" chartType={CHARTTYPE_OPENTICKETS}/>
+                        <ChartButton name="Comparison" chartType={CHARTTYPE_COMPARISON}/>
+                    </div>
+                </nav>
                 <ChartContainer/>
                 <Footer/>
             </div>
