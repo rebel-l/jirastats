@@ -2,6 +2,9 @@
 import React, {Component} from 'react';
 import { connect } from "react-redux";
 
+// Style
+import style from "./PieChartTable.scss";
+
 // Components
 import ChartPie from "./Pie";
 import Table from "./../Table";
@@ -46,7 +49,7 @@ class PieChartTableComp extends Component {
         }
 
         return (
-            <div key={id + "-" + data.name} id={id + "-" + data.name}>
+            <div key={id + "-" + data.name} id={id + "-" + data.name} className={style.pieChartTableChild}>
                 <ChartPie key={id + "-Chart-" + data.name} type={this.actualChartType} data={this.getPieChartData(name, data)}/>
                 <Table key={id + "-Table-" + data.name} type={this.actualChartType} data={this.getTableData(data)}/>
             </div>

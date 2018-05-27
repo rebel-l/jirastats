@@ -4,6 +4,7 @@
   background-color: $buttonColorDefault;
   border: none;
   border-radius: $radiusDefault;
+  color: $buttonColorFontDefault;
   margin-right: $marginSmall;
   outline: none;
   padding: $paddingMedium;
@@ -21,7 +22,6 @@
 .isActive {
   background-color: $buttonColorActive;
   font-weight: bold;
-  box-shadow: 0 3px $buttonColorShadow;
 }
 
 .isFirst {

@@ -1,0 +1,11 @@
+@import "./../variables";
+
+.table {
+  border-width: 2px;
+  border-style: solid;
+}
+
+.table > thead {
+  font-weight: bold;
+  background-color: #ddd;
+}

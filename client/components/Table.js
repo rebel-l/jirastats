@@ -1,6 +1,9 @@
 // Framework
 import React, {Component} from 'react';
 
+// Style
+import style from "./Table.scss";
+
 class Table extends Component {
     constructor(props){
         super(props);
@@ -32,7 +35,7 @@ class Table extends Component {
         }
 
         return (
-            <table key={this.id}>
+            <table key={this.id} className={style.table}>
                 <thead key={this.id + '-thead'}>
                 <tr key={this.id + '-header'}>
                     {header}
