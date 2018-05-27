@@ -2,7 +2,7 @@
 import React, {Component} from "react";
 
 // Style
-import style from "./Footer.css";
+import style from "./Footer.scss";
 
 class Footer extends Component {
     constructor(props){
