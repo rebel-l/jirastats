@@ -1,5 +1,11 @@
 @import "./../variables";
 
+$buttonColorFontDefault: $fontColorLight;
+$buttonColorDefault: $colorDefault;
+$buttonColorActive: $colorDark;
+$buttonColorHover: $colorMediumDark;
+$buttonColorPress: $colorMedium;
+
 .chartButton {
   background-color: $buttonColorDefault;
   border: none;
