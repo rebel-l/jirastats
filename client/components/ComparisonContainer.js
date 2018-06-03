@@ -3,6 +3,9 @@ import React, {Component} from 'react';
 import { connect } from "react-redux";
 import axios from "axios/index";
 
+// Style
+import style from "./ComparisonContainer.scss";
+
 // Components
 import ComparisonGroup from "./charts/ComparisonGroup";
 import DateSelector from "./DateSelector";
@@ -52,7 +55,7 @@ class ComparisonContainerComp extends Component {
 
         return (
           <div key={this.id} id={this.id}>
-              <div>
+              <div className={style.dateSelector}>
                   <label>Dates to compare: </label>
                   {children}
               </div>

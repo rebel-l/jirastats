@@ -3,6 +3,9 @@ import axios from "axios/index";
 import React, {Component} from 'react';
 import { connect } from "react-redux";
 
+// Style
+import style from "./ChartContainer.scss";
+
 // Actions
 import ChartContainerAction from "./../actions/ChartContainer";
 
@@ -101,7 +104,7 @@ class ChartContainerComp extends  Component {
         }
 
         return(
-            <main key={id} id={id}>
+            <main key={id} id={id} className={style.chartContainer}>
                 {child}
             </main>
         );

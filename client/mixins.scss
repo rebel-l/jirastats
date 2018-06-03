@@ -1,3 +1,13 @@
 @mixin marginOverall($value){
   margin: $value;
 }
+
+@mixin fontBold($size){
+  font-size: $size;
+  font-weight: bold;
+}
+
+@mixin paddingTopBottom($padding){
+  padding-top: $padding;
+  padding-bottom: $padding;
+}

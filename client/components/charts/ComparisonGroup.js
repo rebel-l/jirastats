@@ -3,9 +3,6 @@ import React, {Component} from 'react';
 import { connect } from "react-redux";
 import axios from "axios/index";
 
-// Style
-import style from "./ComparisonGroup.scss";
-
 // Components
 import ChartPie from "./Pie";
 import Table from "./../Table";
@@ -90,7 +87,7 @@ class ComparisonGroupComp extends Component{
 
     static getChild(id, title, versions, stats){
         return (
-            <div key={id} className={style.comparisonGroupChild}>
+            <div key={id}>
                 <ChartPie type={versions.left} data={ComparisonGroupComp.getPieData(title + " - " + versions.left, stats.name, stats.left)}/>
                 <ChartPie type={versions.right} data={ComparisonGroupComp.getPieData(title + " - " + versions.right, stats.name, stats.right)}/>
                 <Table type={"comparison"} data={ComparisonGroupComp.getTableData(versions, stats.diff)}/>

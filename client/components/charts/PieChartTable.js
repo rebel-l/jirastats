@@ -2,9 +2,6 @@
 import React, {Component} from 'react';
 import { connect } from "react-redux";
 
-// Style
-import style from "./PieChartTable.scss";
-
 // Components
 import ChartPie from "./Pie";
 import Table from "./../Table";
@@ -27,7 +24,7 @@ class PieChartTableComp extends Component {
         return this.props.data[this.props.data.length -1];
     };
 
-    getPieChartData(title, data){
+    static getPieChartData(title, data){
         return {
             title: title,
             subtitle: data.name,
@@ -35,7 +32,7 @@ class PieChartTableComp extends Component {
         };
     }
 
-    getTableData(data){
+    static getTableData(data){
         return {
             name: data.name,
             header: [data.name, "Count"],
@@ -49,9 +46,9 @@ class PieChartTableComp extends Component {
         }
 
         return (
-            <div key={id + "-" + data.name} id={id + "-" + data.name} className={style.pieChartTableChild}>
-                <ChartPie key={id + "-Chart-" + data.name} type={this.actualChartType} data={this.getPieChartData(name, data)}/>
-                <Table key={id + "-Table-" + data.name} type={this.actualChartType} data={this.getTableData(data)}/>
+            <div key={id + "-" + data.name} id={id + "-" + data.name}>
+                <ChartPie key={id + "-Chart-" + data.name} type={this.actualChartType} data={PieChartTableComp.getPieChartData(name, data)}/>
+                <Table key={id + "-Table-" + data.name} type={this.actualChartType} data={PieChartTableComp.getTableData(data)}/>
             </div>
         );
     }

@@ -1,0 +1,15 @@
+@import "./../variables";
+@import "./../mixins";
+
+.dateSelector {
+  @include fontBold($fontSizeSmall);
+  @include marginOverall($marginSmallest);
+  text-align: center;
+
+  select {
+    //background-color: $backgroundColorDefault;
+    border-radius: $radiusDefault;
+    @include marginOverall($marginSmallest);
+    padding: $paddingDefault;
+  }
+}

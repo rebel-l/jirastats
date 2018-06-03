@@ -1,0 +1,7 @@
+@import "./../variables";
+@import "./../mixins";
+
+.chartContainer {
+  background-color: $backgroundColorLight;
+  @include paddingTopBottom($paddingBig);
+}
