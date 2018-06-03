@@ -4,4 +4,8 @@
 .chartContainer {
   background-color: $backgroundColorLight;
   @include paddingTopBottom($paddingBig);
+
+  p, h2 {
+    @include marginLeftRight($marginDefault);
+  }
 }

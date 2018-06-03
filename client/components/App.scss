@@ -1,5 +1,9 @@
 @import "./../base";
 
+.nav {
+  @include marginLeftRight($marginDefault);
+}
+
 .chartSelector {
   margin-top: $marginMedium;
   margin-bottom: $marginDefault;

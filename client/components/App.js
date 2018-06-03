@@ -23,9 +23,9 @@ class App extends Component {
         let appId = 'Application';
         let chartTypeSelectorId = 'ChartTypeSelector';
         return (
-            <div key={appId} id={appId} className={style.spacer}>
+            <div key={appId} id={appId}>
                 <Header/>
-                <nav>
+                <nav className={style.nav}>
                     <ProjectSelect/>
                     <div key={chartTypeSelectorId} id={chartTypeSelectorId} className={style.chartSelector}>
                         <label>Select Chart:</label>
