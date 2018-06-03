@@ -1,11 +1,29 @@
 @import "./../variables";
+@import "./../mixins";
 
 .table {
-  border-width: 2px;
-  border-style: solid;
+  border: $colorDark 2px solid;
+  border-collapse: separate;
+  border-radius: $radiusDefault;
+  //border-spacing: 0px;
+  margin-bottom: $marginDefault;
+  margin-left: auto;
+  margin-right: auto;
+
+  thead {
+    color: $fontColorLight;
+    background-color: $colorDark;
+  }
+
+  td {
+    padding: $paddingMedium $paddingBig;
+  }
 }
 
-.table > thead {
-  font-weight: bold;
-  background-color: #ddd;
+td.border {
+  border: $colorDark 1px solid;
+}
+
+td.number {
+  text-align: right;
 }

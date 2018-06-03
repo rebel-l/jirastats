@@ -12,6 +12,11 @@
   margin-right: $margin;
 }
 
+@mixin paddingLeftRight($padding){
+  padding-left: $padding;
+  padding-right: $padding;
+}
+
 @mixin paddingTopBottom($padding){
   padding-top: $padding;
   padding-bottom: $padding;

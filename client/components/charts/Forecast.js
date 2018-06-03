@@ -87,10 +87,14 @@ class ForecastComp extends Component {
             return null;
         }
 
+        let options = {
+            formatFloat: 2
+        };
+
         return (
             <div key={this.id} id={this.id}>
                 <div id={this.chartId}/>
-                <Table key={this.id + "-Table"} type={this.actualChartType} data={this.getSpeed()}/>
+                <Table key={this.id + "-Table"} type={this.actualChartType} data={this.getSpeed()} options={options}/>
                 <Summary data={this.getSummary()}/>
             </div>
         );

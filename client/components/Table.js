@@ -10,6 +10,22 @@ class Table extends Component {
         this.data = props.data;
         this.chartType = props.type;
         this.id = "Table-" + this.chartType + "-" + this.data.name;
+        this.options = {
+            formatFloat: 0
+        };
+        this.options = Object.assign(this.options, props.options);
+    }
+
+    getCell(cellId, value) {
+        let className = style.border;
+        if(typeof value === "number"){
+            className += " " + style.number;
+            value = value.toFixed(this.options.formatFloat);
+        }
+
+        return (
+            <td key={cellId} className={className}>{value}</td>
+        );
     }
 
     render(){
@@ -26,7 +42,7 @@ class Table extends Component {
                 for(let key in this.data.rows[i]){
                     let cellId = `${this.id}-cell-${i}-${j}`;
                     if(this.data.rows[i].hasOwnProperty(key)) {
-                        cells.push(<td key={cellId}>{this.data.rows[i][key]}</td>);
+                        cells.push(this.getCell(cellId, this.data.rows[i][key]));
                     }
                     j++;
                 }
@@ -42,7 +58,7 @@ class Table extends Component {
                 </tr>
                 </thead>
                 <tbody key={this.id + '-tbody'}>
-                {rows}
+                    {rows}
                 </tbody>
             </table>
         )
