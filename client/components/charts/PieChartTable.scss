@@ -1,0 +1,16 @@
+@import "./../../variables";
+@import "./../../mixins";
+
+.pieChartTable {
+  display: flex;
+  justify-content: center;
+  @include paddingTopBottom($paddingBigger);
+
+  div {
+    min-height: 400px;
+    width: 600px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
