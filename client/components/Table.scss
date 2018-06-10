@@ -2,10 +2,7 @@
 @import "./../mixins";
 
 .table {
-  border: $colorDark 2px solid;
-  border-collapse: separate;
-  border-radius: $radiusDefault;
-  //border-spacing: 0px;
+  @include border($borderDefaultSize);
   margin-bottom: $marginDefault;
   margin-left: auto;
   margin-right: auto;

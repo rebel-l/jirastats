@@ -1,0 +1,11 @@
+@import "./../mixins";
+
+.summary {
+  @include border($borderDefaultSize);
+  margin-bottom: $marginDefault;
+  margin-left: $marginBig;
+
+  h2 {
+    text-align: center;
+  }
+}

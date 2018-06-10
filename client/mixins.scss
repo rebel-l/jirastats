@@ -1,3 +1,5 @@
+@import "./variables";
+
 @mixin marginOverall($value){
   margin: $value;
 }
@@ -20,4 +22,10 @@
 @mixin paddingTopBottom($padding){
   padding-top: $padding;
   padding-bottom: $padding;
+}
+
+@mixin border($size){
+  border: $size solid $colorDark;
+  border-collapse: separate;
+  border-radius: $radiusDefault;
 }

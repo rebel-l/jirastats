@@ -3,6 +3,9 @@ import React, {Component} from 'react';
 import { connect } from "react-redux";
 import Highcharts from "highcharts";
 
+// Style
+import style from "./Forecast.scss";
+
 // Components
 import Table from "./../Table";
 import Summary from "./../Summary";
@@ -92,9 +95,11 @@ class ForecastComp extends Component {
         };
 
         return (
-            <div key={this.id} id={this.id}>
-                <div id={this.chartId}/>
-                <Table key={this.id + "-Table"} type={this.actualChartType} data={this.getSpeed()} options={options}/>
+            <div key={this.id} id={this.id} className={style.forecast}>
+                <div id={this.chartId} className={style.chart}/>
+                <div>
+                    <Table key={this.id + "-Table"} type={this.actualChartType} data={this.getSpeed()} options={options}/>
+                </div>
                 <Summary data={this.getSummary()}/>
             </div>
         );
