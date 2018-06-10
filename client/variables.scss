@@ -7,6 +7,9 @@ $fontSizeSmall: 0.8rem;
 // Border
 $borderDefaultSize: 2px;
 
+// Box Sizes
+$boxMinHeight: 400px;
+
 // Colors
 $backgroundColorDefault: #fcfcfc;
 $backgroundColorLight: #fff;
@@ -19,8 +22,8 @@ $colorDark : #39536C;
 $fontColorLight: #fff;
 
 // Margins
-$marginBig: 20px;
 $marginDefault: 15px;
+$marginBig: 3 * $marginDefault;
 $marginMedium: 10px;
 $marginSmall: 5px;
 $marginSmallest: 2px;

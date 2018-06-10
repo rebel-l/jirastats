@@ -7,8 +7,7 @@
   @include paddingTopBottom($paddingBigger);
 
   div {
-    min-height: 400px;
-    width: 600px;
+    min-height: $boxMinHeight;
     display: flex;
     flex-direction: column;
     justify-content: center;

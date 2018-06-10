@@ -1,0 +1,18 @@
+@import "./../../variables";
+
+.comparisonGroup {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  div {
+    min-height: $boxMinHeight;
+  }
+}
+
+
+.table {
+  margin-bottom: $marginBig;
+  min-height: 0 !important;
+  width: 100%;
+}
