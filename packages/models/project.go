@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-const projectDefaultJql = "project in (%s)"
+const projectDefaultJql = "project in (%s) AND type != Epic"
 const projectDefaultKnownSpeed = 1.0
 const projectDefaultMapOpen = "\"Open\", \"In Progress\", \"Reopened\""
 const projectDefaultMapClosed = "\"Closed\", \"Resolved\""
