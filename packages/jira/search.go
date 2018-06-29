@@ -46,9 +46,11 @@ func (s *Search) Do() (result []jira.Issue, err error) {
 				return result, err
 			}
 		} else if err != nil {
-			resStr, _ := utils.IoRCTS(res.Body)
 			log.Error(fmt.Sprintf("Unrecoverable error connecting Jira: %s", err))
-			log.Debug(fmt.Sprintf("Unrecoverable Error - Debug Respose: %s", resStr))
+			if res != nil {
+				resStr, _ := utils.IoRCTS(res.Body)
+				log.Debug(fmt.Sprintf("Unrecoverable Error - Debug Respose: %s", resStr))
+			}
 			return result, err
 		}
 
