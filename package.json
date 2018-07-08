@@ -4,8 +4,8 @@
   "description": "A tool for collecting and presenting some statistcs about your Jira project.",
   "main": "client/index.js",
   "scripts": {
-    "build-dev": "./node_modules/.bin/webpack --mode development --config webpack.dev.js",
-    "build": "./node_modules/webpack/bin/webpack.js --mode production --config webpack.prod.js",
+    "build-dev": "node ./node_modules/.bin/webpack --mode development --config webpack.dev.js",
+    "build": "node ./node_modules/webpack/bin/webpack.js --mode production --config webpack.prod.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
