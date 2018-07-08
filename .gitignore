@@ -1,4 +1,5 @@
 .idea
+.vagrant
 backup
 node_modules
 vendor
