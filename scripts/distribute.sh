@@ -144,7 +144,7 @@ case "$OS" in
     linux)
         packageLinux
         ;;
-    mac)
+    macOS)
         packageMac
         ;;
 esac
