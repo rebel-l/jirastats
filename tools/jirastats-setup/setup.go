@@ -43,7 +43,6 @@ func main() {
 		createDatabaseStructure(db)
 		configureApplication(db)
 		configureProjects(db)
-		createDemoData("")
 	}
 
 	log.Info("Setup finished successful ... Goodbye!")
