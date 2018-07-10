@@ -14,6 +14,7 @@ func main() {
 	verbose := utils.GetVerboseFlag()
 	resetStats := flag.Bool("r", false, "To reset all stats. !Be careful, there is no recovery!")
 	confProject := flag.Bool("p", false, "Creates a new project only")
+	createDemo := flag.String("demo", "", "Creates demo data. You need to specify a value like 3d (3 days), 1w (1 week) or 2m (2 months)")
 	flag.Parse()
 
 	// init log level
@@ -29,8 +30,9 @@ func main() {
 		db, err := database.GetDbConnection()
 		defer db.Close()
 		utils.HandleUnrecoverableError(err)
-
 		configureProjects(db)
+	} else if *createDemo != "" {
+		createDemoData(*createDemo)
 	} else {
 		createDatabaseFile()
 
@@ -41,6 +43,7 @@ func main() {
 		createDatabaseStructure(db)
 		configureApplication(db)
 		configureProjects(db)
+		createDemoData("")
 	}
 
 	log.Info("Setup finished successful ... Goodbye!")
@@ -83,5 +86,12 @@ func configureProjects(db *sql.DB) {
 	log.Info("Configure Projects")
 	cp := commands.NewConfigureProjects(db)
 	err := cp.Execute()
+	utils.HandleUnrecoverableError(err)
+}
+
+func createDemoData(period string) {
+	log.Info("Create Demo")
+	cd := commands.NewCreateDemoData(period)
+	err := cd.Execute()
 	utils.HandleUnrecoverableError(err)
 }
