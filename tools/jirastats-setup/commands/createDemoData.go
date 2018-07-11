@@ -10,6 +10,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"database/sql"
+	"github.com/rebel-l/jirastats/packages/models"
+	"github.com/rebel-l/jirastats/packages/database"
+	"github.com/rebel-l/jirastats/packages/jira"
+	"github.com/rebel-l/jirastats/packages/process"
+	"github.com/rebel-l/jirastats/packages/utils/random"
 )
 
 const periodRegex = "[0-9]+[wWdDmM]{1}"
@@ -22,11 +28,13 @@ type CreateDemoData struct {
 	periodUnit string
 	stopDate time.Time
 	reader *bufio.Reader
+	db *sql.DB
 }
 
-func NewCreateDemoData(period string) *CreateDemoData {
+func NewCreateDemoData(period string, db *sql.DB) *CreateDemoData {
 	c := new(CreateDemoData)
 	c.setPeriod(period)
+	c.db = db
 	c.stopDate = time.Now()
 	c.reader = bufio.NewReader(os.Stdin)
 	return c
@@ -64,11 +72,39 @@ func (c * CreateDemoData) Execute() error {
 	9. Long Term Project III/I (Top of Iceberg)
 	10. Long Term Project III/II (Bottom of Iceberg)
 	 */
+
+	 p := models.NewProject()
+	 p.Name = "Backlog I (Ideal)"
+	 p.Keys = "MyProject"
+	 pm := database.NewProjectMapper(c.db)
+	 err := pm.Save(p)
+	 if err != nil {
+	 	return err
+	 }
+
 	 actualDate := c.getStartDate()
 	 for c.stopDate.After(actualDate) {
 	 	weekday := actualDate.Weekday().String()
-	 	if weekday != "Saturday" && weekday != "Sunday" {
+		switch weekday {
+		case "Saturday":
+			log.Debug("Ignore Saturday")
+			break
+		case "Sunday":
+			log.Debug("Ignore Sunday")
+			break
+		default:
 			log.Debugf("Actual date: %s", actualDate.Format("02.01.2006"))
+			created := random.DateTimeBefore(actualDate, 0, 100)
+			updated := random.TimeBefore(actualDate)
+			components := make([]string, 1)
+			components[0] = "OrderService"
+			lables := make([]string, 1)
+			lables[0] = "TechDebt"
+			cs := new(jira.ClientStub)
+			cs.AddIssue("KEY-1", "Summary", "Open", "Major", "Story", components, lables, created, updated) // TODO: build an issue generator
+			pp := process.NewProject(p, cs, c.db, 1) // TODO: deal with actual date of run
+			pp.Process()
+			break
 		}
 	 	actualDate = actualDate.AddDate(0, 0, 1)
 	 }

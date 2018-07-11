@@ -90,7 +90,14 @@ func configureProjects(db *sql.DB) {
 
 func createDemoData(period string) {
 	log.Info("Create Demo")
-	cd := commands.NewCreateDemoData(period)
-	err := cd.Execute()
+
+	createDatabaseFile()
+	db, err := database.GetDbConnection()
+	utils.HandleUnrecoverableError(err)
+	defer db.Close()
+	createDatabaseStructure(db)
+
+	cd := commands.NewCreateDemoData(period, db)
+	err = cd.Execute()
 	utils.HandleUnrecoverableError(err)
 }
