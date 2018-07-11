@@ -15,7 +15,7 @@ import (
 
 type Project struct {
 	db *sql.DB
-	jc *jira.Client
+	jc jp.Client
 	project *models.Project
 	start time.Time
 	actualRun time.Time
@@ -24,7 +24,7 @@ type Project struct {
 	sm *database.StatsMapper
 }
 
-func NewProject(project *models.Project, jc *jira.Client, db *sql.DB, interval int) *Project {
+func NewProject(project *models.Project, jc jp.Client, db *sql.DB, interval int) *Project {
 	p := new(Project)
 	p.start = time.Now()
 	p.actualRun = p.start.AddDate(0, 0, -interval)

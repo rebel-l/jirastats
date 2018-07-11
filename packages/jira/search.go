@@ -16,12 +16,12 @@ const retryMax = 3
 const retryWait = 200
 
 type Search struct {
-	client  *jira.Client
+	client  Client
 	Request *search.Request
 	total   int
 }
 
-func NewSearch(client *jira.Client, jql string) *Search {
+func NewSearch(client Client, jql string) *Search {
 	s := new(Search)
 	s.client = client
 	s.Request = search.NewRequest(jql)
