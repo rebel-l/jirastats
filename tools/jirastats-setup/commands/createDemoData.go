@@ -2,33 +2,34 @@ package commands
 
 import (
 	"bufio"
+	"database/sql"
 	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
-	"database/sql"
-	"github.com/rebel-l/jirastats/packages/models"
+
 	"github.com/rebel-l/jirastats/packages/database"
 	"github.com/rebel-l/jirastats/packages/jira"
+	"github.com/rebel-l/jirastats/packages/models"
 	"github.com/rebel-l/jirastats/packages/process"
 	"github.com/rebel-l/jirastats/packages/utils/random"
+	log "github.com/sirupsen/logrus"
 )
 
 const periodRegex = "[0-9]+[wWdDmM]{1}"
-const periodUnitDay  = "d"
+const periodUnitDay = "d"
 const periodUnitWeek = "w"
 const periodUnitMonth = "m"
 
 type CreateDemoData struct {
 	periodValue int
-	periodUnit string
-	stopDate time.Time
-	reader *bufio.Reader
-	db *sql.DB
+	periodUnit  string
+	stopDate    time.Time
+	reader      *bufio.Reader
+	db          *sql.DB
 }
 
 func NewCreateDemoData(period string, db *sql.DB) *CreateDemoData {
@@ -40,7 +41,7 @@ func NewCreateDemoData(period string, db *sql.DB) *CreateDemoData {
 	return c
 }
 
-func (c * CreateDemoData) Execute() error {
+func (c *CreateDemoData) Execute() error {
 	if c.validate() == false {
 		fmt.Println("")
 		fmt.Println("")
@@ -71,20 +72,20 @@ func (c * CreateDemoData) Execute() error {
 	8. Long Term Project II (Endless Story)
 	9. Long Term Project III/I (Top of Iceberg)
 	10. Long Term Project III/II (Bottom of Iceberg)
-	 */
+	*/
 
-	 p := models.NewProject()
-	 p.Name = "Backlog I (Ideal)"
-	 p.Keys = "MyProject"
-	 pm := database.NewProjectMapper(c.db)
-	 err := pm.Save(p)
-	 if err != nil {
-	 	return err
-	 }
+	p := models.NewProject()
+	p.Name = "Backlog I (Ideal)"
+	p.Keys = "MyProject"
+	pm := database.NewProjectMapper(c.db)
+	err := pm.Save(p)
+	if err != nil {
+		return err
+	}
 
-	 actualDate := c.getStartDate()
-	 for c.stopDate.After(actualDate) {
-	 	weekday := actualDate.Weekday().String()
+	actualDate := c.getStartDate()
+	for c.stopDate.After(actualDate) {
+		weekday := actualDate.Weekday().String()
 		switch weekday {
 		case "Saturday":
 			log.Debug("Ignore Saturday")
@@ -102,12 +103,12 @@ func (c * CreateDemoData) Execute() error {
 			lables[0] = "TechDebt"
 			cs := new(jira.ClientStub)
 			cs.AddIssue("KEY-1", "Summary", "Open", "Major", "Story", components, lables, created, updated) // TODO: build an issue generator
-			pp := process.NewProject(p, cs, c.db, 1) // TODO: deal with actual date of run
+			pp := process.NewProject(p, cs, c.db, 1)                                                        // TODO: deal with actual date of run
 			pp.Process()
 			break
 		}
-	 	actualDate = actualDate.AddDate(0, 0, 1)
-	 }
+		actualDate = actualDate.AddDate(0, 0, 1)
+	}
 
 	return nil
 }
@@ -135,8 +136,8 @@ func (c *CreateDemoData) setPeriod(period string) {
 		return
 	}
 
-	c.periodUnit = strings.ToLower(period[len(period) - 1:])
-	c.periodValue, _ = strconv.Atoi(period[:len(period) - 1])
+	c.periodUnit = strings.ToLower(period[len(period)-1:])
+	c.periodValue, _ = strconv.Atoi(period[:len(period)-1])
 }
 
 func (c *CreateDemoData) getPeriodUnitHr(puShort string) string {
@@ -162,7 +163,7 @@ func (c *CreateDemoData) getStartDate() time.Time {
 		startDate = startDate.AddDate(0, 0, -c.periodValue)
 		break
 	case periodUnitWeek:
-		startDate = startDate.AddDate(0, 0, -c.periodValue * 7)
+		startDate = startDate.AddDate(0, 0, -c.periodValue*7)
 		break
 	case periodUnitMonth:
 		startDate = startDate.AddDate(0, -c.periodValue, 0)

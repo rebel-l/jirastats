@@ -20,7 +20,7 @@ func DateTimeBefore(orig time.Time, minDays int, maxDays int) time.Time {
 		h, m, s = getTime(23, 59, 59)
 	}
 
-	rTime, _ = time.Parse(dateTimeFormat, fmt.Sprintf("%sT%d:%d:%dZ", rTime.Format(dateFormat), h, m, s))
+	rTime, _ = time.Parse(dateTimeFormat, fmt.Sprintf("%sT%02d:%02d:%02dZ", rTime.Format(dateFormat), h, m, s))
 
 	return rTime
 }
@@ -29,7 +29,7 @@ func TimeBefore(orig time.Time) time.Time {
 	rand.Seed(time.Now().UnixNano())
 	h, m, s := getTime(orig.Hour(), orig.Minute(), orig.Second())
 
-	rTime, _ := time.Parse(dateTimeFormat, fmt.Sprintf("%sT%d:%d:%dZ", orig.Format(dateFormat), h, m, s))
+	rTime, _ := time.Parse(dateTimeFormat, fmt.Sprintf("%sT%02d:%02d:%02dZ", orig.Format(dateFormat), h, m, s))
 
 	return rTime
 }

@@ -1,11 +1,12 @@
 package jira
 
 import (
-	"github.com/andygrunwald/go-jira"
-	"net/http"
-	"github.com/rebel-l/jirastats/packages/jira/search"
 	"errors"
+	"net/http"
 	"time"
+
+	"github.com/andygrunwald/go-jira"
+	"github.com/rebel-l/jirastats/packages/jira/search"
 )
 
 type ClientStub struct {
