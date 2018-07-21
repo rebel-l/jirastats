@@ -7,33 +7,62 @@ import (
 
 	"github.com/andygrunwald/go-jira"
 	"github.com/rebel-l/jirastats/packages/jira/search"
+	"github.com/rebel-l/jirastats/packages/utils/io"
+	log "github.com/sirupsen/logrus"
 )
 
+// ClientStub is a stub to simulate the API of Jira.
 type ClientStub struct {
 	issues []jira.Issue // TODO: split by Request (jql)
 }
 
+// NewRequest returns a new request
 func (cs *ClientStub) NewRequest(method, urlStr string, body interface{}) (*http.Request, error) {
-	return new(http.Request), nil
+	c, err := jira.NewClient(new(http.Client), "")
+	if err != nil {
+		return nil, err
+	}
+
+	r, err := c.NewRequest(method, urlStr, body)
+	if err != nil {
+		return nil, err
+	}
+
+	return r, nil
 }
 
-func (cs *ClientStub) Do(req *http.Request, v interface{}) (*jira.Response, error) {
-	jRes := new(jira.Response)
+// Do simulates a request against the Jira API and returns a response depending on the request
+func (cs *ClientStub) Do(req *http.Request, v interface{}) (jRes *jira.Response, err error) {
+	body, err := io.ReadCloserToByte(req.Body)
+	if err != nil {
+		return
+	}
+
+	sReq, err := search.NewRequestFromJson(body)
+	if err != nil {
+		return
+	}
+	log.Debugf("Body: %s", sReq.Jql)
+
+	jRes = new(jira.Response)
 	value, ok := v.(*search.Response)
 	if ok == false {
-		return nil, errors.New("not a search response injected")
+		err = errors.New("not a search response injected")
+		return
 	}
 
 	if len(cs.issues) < 1 {
-		return nil, errors.New("no data injected")
+		err = errors.New("no data injected")
+		return
 	}
 
 	value.Total = len(cs.issues)
 	value.Issues = cs.issues
 
-	return jRes, nil
+	return
 }
 
+// AddIssue add Jira issues to a simulated response
 func (cs *ClientStub) AddIssue(key string, summary string, status string, priority string, iType string, components []string, labels []string, created time.Time, updated time.Time) {
 	jPriority := new(jira.Priority)
 	jPriority.Name = priority
