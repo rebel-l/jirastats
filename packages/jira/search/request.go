@@ -1,10 +1,12 @@
 package search
 
+import "encoding/json"
+
 type Request struct {
-	Jql string `json:"jql"`
-	StartAt int `json:"startAt"`
-	MaxResults int `json:"maxResults"`
-	Fields []string `json:"fields"`
+	Jql        string   `json:"jql"`
+	StartAt    int      `json:"startAt"`
+	MaxResults int      `json:"maxResults"`
+	Fields     []string `json:"fields"`
 }
 
 func NewRequest(jql string) *Request {
@@ -23,9 +25,15 @@ func NewRequest(jql string) *Request {
 	fields[6] = "updated"
 	fields[7] = "created"
 	req.Fields = fields
-	return  req
+	return req
 }
 
 func (r *Request) Next() {
 	r.StartAt += r.MaxResults
+}
+
+func NewRequestFromJson(data []byte) (req *Request, err error) {
+	req = new(Request)
+	err = json.Unmarshal(data, req)
+	return
 }
