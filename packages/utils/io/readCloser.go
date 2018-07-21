@@ -27,6 +27,10 @@ func ReadCloserToByte(rc io.ReadCloser) (res []byte, err error) {
 
 func readCloserToBuffer(rc io.ReadCloser) (buf *bytes.Buffer, err error) {
 	buf = new(bytes.Buffer)
+	if rc == nil {
+		return
+	}
+
 	_, err = buf.ReadFrom(rc)
 	defer rc.Close()
 	return

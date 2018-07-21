@@ -13,7 +13,14 @@ import (
 
 // ClientStub is a stub to simulate the API of Jira.
 type ClientStub struct {
-	issues []jira.Issue // TODO: split by Request (jql)
+	issues map[string][]jira.Issue
+}
+
+// NewClientStub return a new client stub struct
+func NewClientStub() *ClientStub {
+	cs := new(ClientStub)
+	cs.issues = make(map[string][]jira.Issue)
+	return cs
 }
 
 // NewRequest returns a new request
@@ -42,28 +49,47 @@ func (cs *ClientStub) Do(req *http.Request, v interface{}) (jRes *jira.Response,
 	if err != nil {
 		return
 	}
-	log.Debugf("Body: %s", sReq.Jql)
 
 	jRes = new(jira.Response)
+	jRes.Response = new(http.Response)
 	value, ok := v.(*search.Response)
 	if ok == false {
 		err = errors.New("not a search response injected")
+		jRes.Response.StatusCode = 404
 		return
 	}
 
-	if len(cs.issues) < 1 {
+	is, ok := cs.issues[sReq.Jql]
+	if ok == false || len(is) < 1 {
 		err = errors.New("no data injected")
+		log.Errorf("jRes: %#v", jRes)
+		jRes.Response.StatusCode = 404
 		return
 	}
 
-	value.Total = len(cs.issues)
-	value.Issues = cs.issues
+	value.Total = len(is)
+	end := sReq.StartAt + sReq.MaxResults
+	if end > value.Total {
+		end = value.Total
+	}
+	value.Issues = is[sReq.StartAt:end]
 
 	return
 }
 
 // AddIssue add Jira issues to a simulated response
-func (cs *ClientStub) AddIssue(key string, summary string, status string, priority string, iType string, components []string, labels []string, created time.Time, updated time.Time) {
+func (cs *ClientStub) AddIssue(
+	key string,
+	summary string,
+	status string,
+	priority string,
+	iType string,
+	components []string,
+	labels []string,
+	created time.Time,
+	updated time.Time,
+	jql string) {
+
 	jPriority := new(jira.Priority)
 	jPriority.Name = priority
 
@@ -81,7 +107,11 @@ func (cs *ClientStub) AddIssue(key string, summary string, status string, priori
 	issueFields.Updated = updated.Format(JiraDateTimeFormat)
 
 	issue := jira.Issue{ID: key, Key: key, Fields: issueFields}
-	cs.issues = append(cs.issues, issue)
+	_, ok := cs.issues[jql]
+	if ok == false {
+		cs.issues[jql] = make([]jira.Issue, 0)
+	}
+	cs.issues[jql] = append(cs.issues[jql], issue)
 }
 
 func (cs *ClientStub) createComponents(components []string) []*jira.Component {

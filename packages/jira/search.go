@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"math/rand"
 	"time"
-	"github.com/rebel-l/jirastats/packages/utils"
+	"github.com/rebel-l/jirastats/packages/utils/io"
 )
 
 const method = "POST"
@@ -48,7 +48,7 @@ func (s *Search) Do() (result []jira.Issue, err error) {
 		} else if err != nil {
 			log.Error(fmt.Sprintf("Unrecoverable error connecting Jira: %s", err))
 			if res != nil {
-				resStr, _ := utils.IoRCTS(res.Body)
+				resStr, _ := io.ReadCloserToString(res.Body)
 				log.Debug(fmt.Sprintf("Unrecoverable Error - Debug Respose: %s", resStr))
 			}
 			return result, err

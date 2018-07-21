@@ -24,6 +24,7 @@ const periodUnitDay = "d"
 const periodUnitWeek = "w"
 const periodUnitMonth = "m"
 
+// CreateDemoData to manage the creation of demo data
 type CreateDemoData struct {
 	periodValue int
 	periodUnit  string
@@ -32,6 +33,7 @@ type CreateDemoData struct {
 	db          *sql.DB
 }
 
+// NewCreateDemoData returns a new CreateDemoData struct
 func NewCreateDemoData(period string, db *sql.DB) *CreateDemoData {
 	c := new(CreateDemoData)
 	c.setPeriod(period)
@@ -41,6 +43,7 @@ func NewCreateDemoData(period string, db *sql.DB) *CreateDemoData {
 	return c
 }
 
+// Execute creates the demo data
 func (c *CreateDemoData) Execute() error {
 	if c.validate() == false {
 		fmt.Println("")
@@ -101,9 +104,13 @@ func (c *CreateDemoData) Execute() error {
 			components[0] = "OrderService"
 			lables := make([]string, 1)
 			lables[0] = "TechDebt"
-			cs := new(jira.ClientStub)
-			cs.AddIssue("KEY-1", "Summary", "Open", "Major", "Story", components, lables, created, updated) // TODO: build an issue generator
-			pp := process.NewProject(p, cs, c.db, 1)                                                        // TODO: deal with actual date of run
+			cs := jira.NewClientStub()
+			pp := process.NewProject(p, cs, c.db, 1) // TODO: deal with actual date of run
+
+			// TODO: build an issue generator
+			cs.AddIssue("KEY-1", "Summary", "Closed", "Major", "Story", components, lables, created, updated, pp.GetJqlForClosedTickets())
+			cs.AddIssue("KEY-2", "Summary", "Open", "Major", "Story", components, lables, created, updated, pp.GetJqlForOpenTickets())
+
 			pp.Process()
 			break
 		}

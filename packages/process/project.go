@@ -3,27 +3,30 @@ package process
 import (
 	"database/sql"
 	"fmt"
-	"github.com/andygrunwald/go-jira"
-	"github.com/rebel-l/jirastats/packages/database"
-	"github.com/rebel-l/jirastats/packages/models"
-	"github.com/rebel-l/jirastats/packages/utils"
-	jp "github.com/rebel-l/jirastats/packages/jira"
-	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
+
+	"github.com/andygrunwald/go-jira"
+	"github.com/rebel-l/jirastats/packages/database"
+	jp "github.com/rebel-l/jirastats/packages/jira"
+	"github.com/rebel-l/jirastats/packages/models"
+	"github.com/rebel-l/jirastats/packages/utils"
+	log "github.com/sirupsen/logrus"
 )
 
+// Project is a struct to process projects
 type Project struct {
-	db *sql.DB
-	jc jp.Client
-	project *models.Project
-	start time.Time
+	db        *sql.DB
+	jc        jp.Client
+	project   *models.Project
+	start     time.Time
 	actualRun time.Time
-	stats *models.Stats
-	pm *database.ProjectMapper
-	sm *database.StatsMapper
+	stats     *models.Stats
+	pm        *database.ProjectMapper
+	sm        *database.StatsMapper
 }
 
+// NewProject returns a new project struct
 func NewProject(project *models.Project, jc jp.Client, db *sql.DB, interval int) *Project {
 	p := new(Project)
 	p.start = time.Now()
@@ -36,6 +39,7 @@ func NewProject(project *models.Project, jc jp.Client, db *sql.DB, interval int)
 	return p
 }
 
+// Process loads tickets from Jira API and process them by storing the tickests histroically and calculate stats
 func (p *Project) Process() {
 	log.Infof("Process project ... Id: %d, Name: %s", p.project.Id, p.project.Name)
 
@@ -59,14 +63,14 @@ func (p *Project) initStats() (err error) {
 	p.stats.CreatedAt = p.actualRun
 
 	// 1. load closed, cluster closed ones, expire and don't process stats
-	search := jp.NewSearch(p.jc, p.getJqlForClosedTickets())
+	search := jp.NewSearch(p.jc, p.GetJqlForClosedTickets())
 	err = p.processTickets(search)
 	if err != nil {
 		return
 	}
 
 	// 2. load open ones, cluster open ones and count only open
-	search = jp.NewSearch(p.jc, p.getJqlForOpenTickets())
+	search = jp.NewSearch(p.jc, p.GetJqlForOpenTickets())
 	err = p.processTickets(search)
 	if err != nil {
 		return
@@ -77,11 +81,11 @@ func (p *Project) initStats() (err error) {
 	return
 }
 
-func (p *Project) updateStats() (err error){
+func (p *Project) updateStats() (err error) {
 	log.Infof("Update project stats: %d (%s)", p.project.Id, p.project.Name)
 	p.stats = models.NewStats(p.project.Id)
 	p.stats.CreatedAt = p.actualRun
-	search := jp.NewSearch(p.jc, p.getJqlForUpdatedTickets())
+	search := jp.NewSearch(p.jc, p.GetJqlForUpdatedTickets())
 	err = p.processTickets(search)
 	if err != nil {
 		return
@@ -145,7 +149,7 @@ func (p *Project) processAllStats() (err error) {
 	return
 }
 
-func (p *Project) processOnlyOpenStats()  (err error) {
+func (p *Project) processOnlyOpenStats() (err error) {
 	// reset new & closed
 	p.stats.New = 0
 	p.stats.Closed = 0
@@ -209,7 +213,7 @@ func (p *Project) processRemoved() (err error) {
 
 	cProcessed := 0
 	for x := 0; x < i; x++ {
-		cProcessed += <- ccp
+		cProcessed += <-ccp
 	}
 
 	cKept, err := p.expireRemoved(tickets, tm)
@@ -221,7 +225,7 @@ func (p *Project) processRemoved() (err error) {
 	return
 }
 
-func (p *Project) markTicketsToKeep(jiraTickets []jira.Issue, tickets []*models.Ticket, ccp chan int) () {
+func (p *Project) markTicketsToKeep(jiraTickets []jira.Issue, tickets []*models.Ticket, ccp chan int) {
 	cProcessed := 0
 	for _, jt := range jiraTickets {
 		cProcessed++
@@ -252,7 +256,8 @@ func (p *Project) expireRemoved(tickets []*models.Ticket, tm *database.TicketMap
 	return
 }
 
-func (p *Project) getJqlForUpdatedTickets() string {
+// GetJqlForUpdatedTickets returns the jql to get all updated tickets from Jira API
+func (p *Project) GetJqlForUpdatedTickets() string {
 	startDate := p.actualRun.Format(jp.JiraJqlDateFormat)
 	endDate := p.start.Format(jp.JiraJqlDateFormat)
 
@@ -274,13 +279,15 @@ func (p *Project) getStatusMapForJql(statusMap string) string {
 	return strings.Join(status, ",")
 }
 
-func (p *Project) getJqlForOpenTickets() string {
+// GetJqlForOpenTickets returns the jql to get all open tickets from Jira API
+func (p *Project) GetJqlForOpenTickets() string {
 	jql := p.project.GetJql() + fmt.Sprintf(" AND status in (%s)", p.getStatusMapForJql(p.project.MapOpenStatus))
 	log.Debugf("JQL for open tickets: %s", jql)
 	return jql
 }
 
-func (p *Project) getJqlForClosedTickets() string {
+// GetJqlForClosedTickets returns the jql to get all closed tickets from Jira API
+func (p *Project) GetJqlForClosedTickets() string {
 	jql := p.project.GetJql() + fmt.Sprintf(" AND status in (%s)", p.getStatusMapForJql(p.project.MapClosedStatus))
 	log.Debugf("JQL for closed tickets: %s", jql)
 	return jql
