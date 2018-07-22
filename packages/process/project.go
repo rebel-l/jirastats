@@ -30,7 +30,7 @@ type Project struct {
 func NewProject(project *models.Project, jc jp.Client, db *sql.DB, interval int) *Project {
 	p := new(Project)
 	p.start = time.Now()
-	p.actualRun = p.start.AddDate(0, 0, -interval)
+	p.actualRun = time.Now().AddDate(0, 0, -interval)
 	p.project = project
 	p.jc = jc
 	p.pm = database.NewProjectMapper(db)
@@ -259,7 +259,7 @@ func (p *Project) expireRemoved(tickets []*models.Ticket, tm *database.TicketMap
 // GetJqlForUpdatedTickets returns the jql to get all updated tickets from Jira API
 func (p *Project) GetJqlForUpdatedTickets() string {
 	startDate := p.actualRun.Format(jp.JiraJqlDateFormat)
-	endDate := p.start.Format(jp.JiraJqlDateFormat)
+	endDate := time.Now().Format(jp.JiraJqlDateFormat)
 
 	jql := p.project.GetJql() +
 		fmt.Sprintf(" AND (updated >= %s AND updated < %s OR created >= %s AND created < %s)", startDate, endDate, startDate, endDate)

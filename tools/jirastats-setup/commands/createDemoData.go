@@ -97,7 +97,10 @@ func (c *CreateDemoData) Execute() error {
 			log.Debug("Ignore Sunday")
 			break
 		default:
-			log.Debugf("Actual date: %s", actualDate.Format("02.01.2006"))
+			diff := time.Now().Sub(actualDate)
+			interval := diff.Hours() / 24.0
+			log.Debugf("Actual date: %s, Now: %s, Duration: %s, Days: %d", actualDate.Format("02.01.2006"), time.Now().Format("02.01.2006"), diff.String(), int(interval))
+
 			created := random.DateTimeBefore(actualDate, 0, 100)
 			updated := random.TimeBefore(actualDate)
 			components := make([]string, 1)
@@ -105,7 +108,7 @@ func (c *CreateDemoData) Execute() error {
 			lables := make([]string, 1)
 			lables[0] = "TechDebt"
 			cs := jira.NewClientStub()
-			pp := process.NewProject(p, cs, c.db, 1) // TODO: deal with actual date of run
+			pp := process.NewProject(p, cs, c.db, int(interval)) // TODO: deal with actual date of run
 
 			// TODO: build an issue generator
 			cs.AddIssue("KEY-1", "Summary", "Closed", "Major", "Story", components, lables, created, updated, pp.GetJqlForClosedTickets())
