@@ -11,11 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rebel-l/jirastats/packages/database"
-	"github.com/rebel-l/jirastats/packages/jira"
-	"github.com/rebel-l/jirastats/packages/models"
-	"github.com/rebel-l/jirastats/packages/process"
-	"github.com/rebel-l/jirastats/packages/utils/random"
+	"github.com/rebel-l/jirastats/tools/jirastats-setup/commands/demoData"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -77,11 +73,9 @@ func (c *CreateDemoData) Execute() error {
 	10. Long Term Project III/II (Bottom of Iceberg)
 	*/
 
-	p := models.NewProject()
-	p.Name = "Backlog I (Ideal)"
-	p.Keys = "MyProject"
-	pm := database.NewProjectMapper(c.db)
-	err := pm.Save(p)
+	// Case 1
+	genBacklogIdeal := demoData.NewGenerator(c.db)
+	err := genBacklogIdeal.CreateProject("Backlog I (Ideal)", "MYP")
 	if err != nil {
 		return err
 	}
@@ -97,25 +91,7 @@ func (c *CreateDemoData) Execute() error {
 			log.Debug("Ignore Sunday")
 			break
 		default:
-			diff := time.Now().Sub(actualDate)
-			interval := diff.Hours() / 24.0
-			log.Debugf("Actual date: %s, Now: %s, Duration: %s, Days: %d", actualDate.Format("02.01.2006"), time.Now().Format("02.01.2006"), diff.String(), int(interval))
-
-			created := random.DateTimeBefore(actualDate, 0, 100)
-			updated := random.TimeBefore(actualDate)
-			components := make([]string, 1)
-			components[0] = "OrderService"
-			lables := make([]string, 1)
-			lables[0] = "TechDebt"
-			cs := jira.NewClientStub()
-			log.Debugf("Iterval: %d", int(interval))
-			pp := process.NewProject(p, cs, c.db, int(interval))
-
-			// TODO: build an issue generator
-			cs.AddIssue("KEY-1", "Summary", "Closed", "Major", "Story", components, lables, created, updated, pp.GetJqlForClosedTickets())
-			cs.AddIssue("KEY-2", "Summary", "Open", "Major", "Story", components, lables, created, updated, pp.GetJqlForOpenTickets())
-
-			pp.Process()
+			genBacklogIdeal.GenerateDay(actualDate)
 			break
 		}
 		actualDate = actualDate.AddDate(0, 0, 1)

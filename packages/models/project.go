@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"strings"
 )
 
 const projectDefaultJql = "project in (%s) AND type != Epic"
@@ -34,4 +35,12 @@ func NewProject() *Project {
 // GetJql return a JQL query based on project settings
 func (p *Project) GetJql() string {
 	return fmt.Sprintf(p.Jql, p.Keys)
+}
+
+func (p *Project) GetKeys() []string {
+	keys := strings.Split(p.Keys, ",")
+	for i := 0; i < len(keys); i++ {
+		keys[i] = strings.TrimSpace(keys[i])
+	}
+	return keys
 }

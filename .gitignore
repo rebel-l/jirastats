@@ -3,4 +3,5 @@
 .vscode
 backup
 node_modules
+sandbox.go
 vendor
