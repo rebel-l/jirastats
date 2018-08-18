@@ -108,7 +108,8 @@ func (c *CreateDemoData) Execute() error {
 			lables := make([]string, 1)
 			lables[0] = "TechDebt"
 			cs := jira.NewClientStub()
-			pp := process.NewProject(p, cs, c.db, int(interval)) // TODO: deal with actual date of run
+			log.Debugf("Iterval: %d", int(interval))
+			pp := process.NewProject(p, cs, c.db, int(interval))
 
 			// TODO: build an issue generator
 			cs.AddIssue("KEY-1", "Summary", "Closed", "Major", "Story", components, lables, created, updated, pp.GetJqlForClosedTickets())

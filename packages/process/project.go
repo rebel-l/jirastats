@@ -114,7 +114,7 @@ func (p *Project) processTickets(search *jp.Search) (err error) {
 		for _, t := range tickets {
 			pCounter++
 			tm := database.NewTicketMapper(p.db)
-			tp := NewTicket(p.project.Id, t, tm, mapOpenStatus, mapClosedStatus)
+			tp := NewTicket(p.project.Id, t, tm, mapOpenStatus, mapClosedStatus, p.actualRun)
 			tp.Process()
 			if tp.IsNew {
 				p.stats.New++
@@ -248,7 +248,7 @@ func (p *Project) expireRemoved(tickets []*models.Ticket, tm *database.TicketMap
 			continue
 		}
 
-		t.ExpireNow()
+		t.ExpireNow(p.actualRun)
 		t.Removed = true
 		err = tm.Save(t)
 		return

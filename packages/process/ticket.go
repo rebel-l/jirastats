@@ -18,9 +18,10 @@ type Ticket struct {
 	tm *database.TicketMapper
 	IsNew bool
 	statusMap map[string][]string
+	actualRun time.Time
 }
 
-func NewTicket(projectId int, issue jira.Issue, tm *database.TicketMapper, openStatusMap []string, closedStatus []string) *Ticket {
+func NewTicket(projectId int, issue jira.Issue, tm *database.TicketMapper, openStatusMap []string, closedStatus []string, actualRun time.Time) *Ticket {
 	t := new(Ticket)
 	t.projectId = projectId
 	t.issue = issue
@@ -28,6 +29,7 @@ func NewTicket(projectId int, issue jira.Issue, tm *database.TicketMapper, openS
 	t.statusMap = make(map[string][]string, 2)
 	t.statusMap[models.TicketStatusClusteredOpen] = openStatusMap
 	t.statusMap[models.TicketStatusClusteredClosed] = closedStatus
+	t.actualRun = actualRun
 	return t
 }
 
@@ -51,7 +53,7 @@ func (t *Ticket) Process() {
 		log.Debugf("Project %d: Changes found for ticket: %d (%s)", t.projectId, prevTicket.Id, prevTicket.Key)
 		if prevTicket.Expired.IsZero() {
 			// not expired
-			prevTicket.ExpireEndOfDayBefore() // needs to be actual run at 23:59:59
+			prevTicket.ExpireEndOfDayBefore(t.actualRun) // needs to be actual run at 23:59:59
 			err = t.tm.Save(prevTicket)
 			if err != nil {
 				log.Errorf("Project %d: Old ticket could not be expired: %d (%s), error: %s", t.projectId, prevTicket.Id, prevTicket.Key, err.Error())
@@ -119,6 +121,7 @@ func (t *Ticket) getNewTicket() *models.Ticket {
 	newTicket.ProjectId = t.projectId
 	newTicket.Summary = t.issue.Fields.Summary
 	newTicket.StatusByJira = t.issue.Fields.Status.Name
+	newTicket.SetCreatedAt(t.actualRun)
 
 	for _, component := range t.issue.Fields.Components {
 		newTicket.Components = append(newTicket.Components, component.Name)
@@ -126,7 +129,7 @@ func (t *Ticket) getNewTicket() *models.Ticket {
 
 	for clusteredStatus, statusMap := range t.statusMap {
 		if utils.IsValueInMap(statusMap, newTicket.StatusByJira) {
-			newTicket.SetStatusClustered(clusteredStatus)
+			newTicket.SetStatusClustered(clusteredStatus, t.actualRun)
 			break
 		}
 	}
