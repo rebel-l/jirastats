@@ -9,6 +9,8 @@ import (
 const dateTimeFormat = "2006-01-02T15:04:05Z"
 const dateFormat = "2006-01-02"
 
+var seedSet bool = false
+
 func DateTimeBefore(orig time.Time, minDays int, maxDays int) time.Time {
 	var h, m, s int
 	rDays := Int(minDays, maxDays)
@@ -26,7 +28,11 @@ func DateTimeBefore(orig time.Time, minDays int, maxDays int) time.Time {
 }
 
 func TimeBefore(orig time.Time) time.Time {
-	rand.Seed(time.Now().UnixNano())
+	if seedSet == false {
+		rand.Seed(time.Now().UnixNano())
+		seedSet = true
+	}
+	
 	h, m, s := getTime(orig.Hour(), orig.Minute(), orig.Second())
 
 	rTime, _ := time.Parse(dateTimeFormat, fmt.Sprintf("%sT%02d:%02d:%02dZ", orig.Format(dateFormat), h, m, s))
@@ -50,6 +56,10 @@ func getTime(maxHour int, maxMin int, maxSec int) (hour int, min int, sec int) {
 }
 
 func Int(min int, max int) int {
-	rand.Seed(time.Now().UnixNano())
+	if seedSet == false {
+		rand.Seed(time.Now().UnixNano())
+		seedSet = true
+	}
+
 	return min + rand.Intn(max-min)
 }
